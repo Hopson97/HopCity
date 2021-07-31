@@ -1,8 +1,6 @@
 # HopCity
 
-## Building and Running
-
-## Building and Running
+Isometric defo not sim city building game
 
 ### Linux
 
