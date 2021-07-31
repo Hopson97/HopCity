@@ -1,0 +1,23 @@
+# Linux
+/bin
+HopCity
+build/
+
+# Windows
+*.dll
+*.exe
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.vs
+.vscode
+Debug/
+Release/
+
+# Misc
+*.zip
+*.temp
+*.srctrlprj
+*.srctrldb
+*.srctrlbm
