@@ -15,6 +15,7 @@ class ScreenGame final : public Screen {
     ScreenGame(ScreenManager* screens);
 
     void onGUI() override;
+    void onInput(const sf::RenderWindow& window);
     void onEvent(const sf::Event& e) override;
     void onUpdate(const sf::Time& dt) override;
     void onRender(sf::RenderWindow* window) override;
@@ -32,4 +33,5 @@ class ScreenGame final : public Screen {
     sf::Image m_tileCorners;
 
     std::vector<sf::Vertex> m_grid;
+    sf::Vector2i m_mouse;
 };

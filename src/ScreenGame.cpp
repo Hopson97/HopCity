@@ -19,25 +19,48 @@ ScreenGame::ScreenGame(ScreenManager* stack)
         // west-north grid lines
         auto startPos = tileToScreenPosition(0, i);
         auto endPos = tileToScreenPosition(WORLD_SIZE, i);
-        startPos.x += TILE_WIDTH/ 2;
-        endPos.x += TILE_WIDTH/ 2;
+        startPos.x += TILE_WIDTH / 2;
+        endPos.x += TILE_WIDTH / 2;
         m_grid.emplace_back(startPos, sf::Color::Black);
         m_grid.emplace_back(endPos, sf::Color::Black);
 
         // east-west grid lines
         startPos = tileToScreenPosition(i, -1);
         endPos = tileToScreenPosition(i, WORLD_SIZE - 1);
-        startPos.y += TILE_HEIGHT/ 2;
+        startPos.y += TILE_HEIGHT / 2;
         endPos.y += TILE_HEIGHT / 2;
         m_grid.emplace_back(startPos, sf::Color::Black);
         m_grid.emplace_back(endPos, sf::Color::Black);
+    }
+}
 
+void ScreenGame::onInput(const sf::RenderWindow& window) {
+
+    // Move the view if it is on the edge of the screen
+    constexpr int GAP = 100;
+    auto mousePosition = sf::Mouse::getPosition(window);
+    if (mousePosition.x < GAP) {
+        m_view.move(-10, 0);
+    }
+    if (mousePosition.x > window.getSize().x - GAP) {
+        m_view.move(10, 0);
+    }
+    if (mousePosition.y < GAP) {
+        m_view.move(0, -10);
+    }
+    if (mousePosition.y > window.getSize().y - GAP) {
+        m_view.move(0, 10);
     }
 }
 
 void ScreenGame::onGUI() {}
 
-void ScreenGame::onEvent(const sf::Event& e) {}
+void ScreenGame::onEvent(const sf::Event& e)
+{
+    if (e.type == sf::Event::MouseMoved) {
+        m_mouse = {e.mouseButton.x, e.mouseButton.y};
+    }
+}
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
