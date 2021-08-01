@@ -20,10 +20,14 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
+    sf::Vector2f tileToScreenPosition(int x, int y);
+
     sf::View m_view;
     Menu m_activeMenu = Menu::MainMenu;
 
     sf::RectangleShape m_sprite;
+    sf::Vector2f m_originOffset{WORLD_SIZE * TILE_WIDTH, WORLD_SIZE* TILE_WIDTH};
 
     sf::Texture m_tileTexture;
+    sf::Image m_tileCorners;
 };
