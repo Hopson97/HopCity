@@ -9,7 +9,7 @@
 int main()
 {
     // Set up window and gui
-    sf::RenderWindow window({1280, 720}, "SFML");
+    sf::RenderWindow window({1600, 900}, "SFML");
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);

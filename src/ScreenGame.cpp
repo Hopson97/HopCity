@@ -12,7 +12,27 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_sprite.setTexture(&m_tileTexture);
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
-    m_view.setSize({1280, 720});
+    m_view.setCenter(tileToScreenPosition(0, 0));
+    m_view.setSize({1600, 900});
+
+    for (int i = 0; i < WORLD_SIZE + 1; i++) {
+        // west-north grid lines
+        auto startPos = tileToScreenPosition(0, i);
+        auto endPos = tileToScreenPosition(WORLD_SIZE, i);
+        startPos.x += TILE_WIDTH/ 2;
+        endPos.x += TILE_WIDTH/ 2;
+        m_grid.emplace_back(startPos, sf::Color::Black);
+        m_grid.emplace_back(endPos, sf::Color::Black);
+
+        // east-west grid lines
+        startPos = tileToScreenPosition(i, -1);
+        endPos = tileToScreenPosition(i, WORLD_SIZE - 1);
+        startPos.y += TILE_HEIGHT/ 2;
+        endPos.y += TILE_HEIGHT / 2;
+        m_grid.emplace_back(startPos, sf::Color::Black);
+        m_grid.emplace_back(endPos, sf::Color::Black);
+
+    }
 }
 
 void ScreenGame::onGUI() {}
@@ -45,8 +65,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                            (int)worldPos.y % (int)TILE_HEIGHT};
 
     sf::Vector2i selected = {
-        (cell.y - m_originOffset.y) + (cell.x - m_originOffset.x),
-        (cell.y - m_originOffset.y) - (cell.x - m_originOffset.x),
+        (cell.y - (int)m_originOffset.y) + (cell.x - (int)m_originOffset.x),
+        (cell.y - (int)m_originOffset.y) - (cell.x - (int)m_originOffset.x),
     };
 
     sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
@@ -81,4 +101,6 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         ImGui::Text("Tile: %d %d", selected.x, selected.y);
     }
     ImGui::End();
+
+    window->draw(m_grid.data(), m_grid.size(), sf::Lines);
 }

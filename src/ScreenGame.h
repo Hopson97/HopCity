@@ -30,4 +30,6 @@ class ScreenGame final : public Screen {
 
     sf::Texture m_tileTexture;
     sf::Image m_tileCorners;
+
+    std::vector<sf::Vertex> m_grid;
 };
