@@ -5,10 +5,12 @@
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
+    , m_tiles(WORLD_SIZE * WORLD_SIZE)
 {
     m_sprite.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileTexture.loadFromFile("Data/Tiles/Grass.png");
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
+    m_roadTexture.loadFromFile("Data/Tiles/TestRoad.png");
     m_sprite.setTexture(&m_tileTexture);
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
@@ -67,11 +69,68 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         m_view.move(0, -4);
     }
 
+    sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
+
+    sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
+                         (int)worldPos.y / (int)TILE_HEIGHT};
+    sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
+                           (int)worldPos.y % (int)TILE_HEIGHT};
+
+    m_selectedTile = {
+        (cell.y - (int)m_originOffset.y) + (cell.x - (int)m_originOffset.x),
+        (cell.y - (int)m_originOffset.y) - (cell.x - (int)m_originOffset.x),
+    };
+
+    sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
+    if (colour == sf::Color::Red)
+        m_selectedTile.x--;
+    else if (colour == sf::Color::Green)
+        m_selectedTile.y++;
+    else if (colour == sf::Color::Blue)
+        m_selectedTile.y--;
+    else if (colour == sf::Color::White)
+        m_selectedTile.x++;
 }
 
 void ScreenGame::onGUI() {}
 
-void ScreenGame::onEvent(const sf::Event& e) {}
+Tile* ScreenGame::getTile(const sf::Vector2i& position)
+{
+    return &m_tiles.at(position.y * WORLD_SIZE + position.x);
+}
+
+void ScreenGame::updateTileVarient([[maybe_unused]] const sf::Vector2i& position) {}
+
+void ScreenGame::onEvent(const sf::Event& e)
+{
+    if (e.type == sf::Event::MouseButtonReleased) {
+        Tile* tile = &m_tiles.at(m_selectedTile.y * WORLD_SIZE + m_selectedTile.x);
+        tile->varient = 0;
+        if (tile->type == TileType::Grass) {
+            tile->type = TileType::Road;
+            sf::Vector2i offsets[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+
+            // Update the road tiles to be the correct varient 
+            // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+            for (int i = 0; i < 4; i++) {
+                Tile* t = getTile(m_selectedTile + offsets[i]);
+                if (t->type == tile->type) {
+                    tile->varient += std::pow(2, i);
+                    t->varient = 0;
+
+                    // Also update neighbour road varient
+                    for (int j = 0; j < 4; j++) {
+                        t->varient += std::pow(2, j) * (getTile(m_selectedTile + offsets[i] + offsets[j])->type == tile->type);
+                    }
+                }
+
+            }
+        }
+        else if (tile->type == TileType::Road) {
+            tile->type = TileType::Grass;
+        }
+    }
+}
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
@@ -84,30 +143,22 @@ sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
     window->setView(m_view);
-    sf::Vector2f worldPos = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
-
-    sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
-                         (int)worldPos.y / (int)TILE_HEIGHT};
-    sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
-                           (int)worldPos.y % (int)TILE_HEIGHT};
-
-    sf::Vector2i selected = {
-        (cell.y - (int)m_originOffset.y) + (cell.x - (int)m_originOffset.x),
-        (cell.y - (int)m_originOffset.y) - (cell.x - (int)m_originOffset.x),
-    };
-
-    sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
-    if (colour == sf::Color::Red)
-        selected.x--;
-    else if (colour == sf::Color::Green)
-        selected.y++;
-    else if (colour == sf::Color::Blue)
-        selected.y--;
-    else if (colour == sf::Color::White)
-        selected.x++;
 
     for (int y = 0; y < WORLD_SIZE; y++) {
         for (int x = 0; x < WORLD_SIZE; x++) {
+            const Tile& tile = m_tiles[y * WORLD_SIZE + x];
+            m_sprite.setTextureRect(sf::IntRect{tile.varient * (int)TILE_WIDTH, 0,
+                                                (int)TILE_WIDTH, (int)TILE_HEIGHT});
+            switch (tile.type) {
+                case TileType::Grass:
+                    m_sprite.setTexture(&m_tileTexture);
+                    break;
+
+                case TileType::Road:
+                    m_sprite.setTexture(&m_roadTexture);
+                    break;
+            }
+
             auto pos = tileToScreenPosition(x, y);
             m_sprite.setPosition(pos);
 
@@ -115,17 +166,15 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         }
     }
 
-    m_sprite.setPosition(tileToScreenPosition(selected.x, selected.y));
+    m_sprite.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));
     m_sprite.setFillColor(sf::Color::Red);
     window->draw(m_sprite);
     m_sprite.setFillColor(sf::Color::White);
 
+    window->draw(m_grid.data(), m_grid.size(), sf::Lines);
+
     if (ImGui::Begin("Info")) {
-        ImGui::Text("Mouse: %f %f", worldPos.x, worldPos.y);
-        ImGui::Text("Cell: %d %d", cell.x, cell.y);
-        ImGui::Text("Tile: %d %d", selected.x, selected.y);
+        ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
     }
     ImGui::End();
-
-    window->draw(m_grid.data(), m_grid.size(), sf::Lines);
 }
