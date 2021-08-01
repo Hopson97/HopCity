@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Keyboard.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <stack>
@@ -43,7 +44,10 @@ class Screen {
 
     virtual void onGUI() {}
     virtual void onEvent([[maybe_unused]] const sf::Event& e) {}
-    virtual void onInput([[maybe_unused]] const sf::RenderWindow& window) {}
+    virtual void onInput([[maybe_unused]] const Keyboard& keyboard,
+                         [[maybe_unused]] const sf::RenderWindow& window)
+    {
+    }
     virtual void onUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onFixedUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onRender(sf::RenderWindow* window) = 0;

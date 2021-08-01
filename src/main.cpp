@@ -60,7 +60,7 @@ int main()
         lag += elapsed;
 
         // Real time stuff
-        screen->onInput(window);
+        screen->onInput(keyboard, window);
         screen->onUpdate(dt);
         ImGui::SFML::Update(window, dt);
 

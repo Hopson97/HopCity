@@ -15,7 +15,7 @@ class ScreenGame final : public Screen {
     ScreenGame(ScreenManager* screens);
 
     void onGUI() override;
-    void onInput(const sf::RenderWindow& window);
+    void onInput(const Keyboard& keyboard, const sf::RenderWindow& window) override;
     void onEvent(const sf::Event& e) override;
     void onUpdate(const sf::Time& dt) override;
     void onRender(sf::RenderWindow* window) override;
@@ -27,11 +27,10 @@ class ScreenGame final : public Screen {
     Menu m_activeMenu = Menu::MainMenu;
 
     sf::RectangleShape m_sprite;
-    sf::Vector2f m_originOffset{WORLD_SIZE * TILE_WIDTH, WORLD_SIZE* TILE_WIDTH};
+    sf::Vector2f m_originOffset{WORLD_SIZE * 4, WORLD_SIZE* 4};
 
     sf::Texture m_tileTexture;
     sf::Image m_tileCorners;
 
     std::vector<sf::Vertex> m_grid;
-    sf::Vector2i m_mouse;
 };

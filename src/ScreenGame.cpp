@@ -34,45 +34,49 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     }
 }
 
-void ScreenGame::onInput(const sf::RenderWindow& window) {
+void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
+{
 
     // Move the view if it is on the edge of the screen
     constexpr int GAP = 100;
     auto mousePosition = sf::Mouse::getPosition(window);
     if (mousePosition.x < GAP) {
-        m_view.move(-10, 0);
+        m_view.move(-5, 0);
     }
-    if (mousePosition.x > window.getSize().x - GAP) {
-        m_view.move(10, 0);
+    else if (mousePosition.x > (int)window.getSize().x - GAP) {
+        m_view.move(5, 0);
     }
     if (mousePosition.y < GAP) {
-        m_view.move(0, -10);
+        m_view.move(0, -5);
     }
-    if (mousePosition.y > window.getSize().y - GAP) {
-        m_view.move(0, 10);
+    else if (mousePosition.y > (int)window.getSize().y - GAP) {
+        m_view.move(0, 5);
     }
+
+    if (keyboard.isKeyDown(sf::Keyboard::A)) {
+        m_view.move(-4, 0);
+    }
+    else if (keyboard.isKeyDown(sf::Keyboard::D)) {
+        m_view.move(4, 0);
+    }
+
+    if (keyboard.isKeyDown(sf::Keyboard::S)) {
+        m_view.move(0, 4);
+    }
+    else if (keyboard.isKeyDown(sf::Keyboard::W)) {
+        m_view.move(0, -4);
+    }
+
 }
 
 void ScreenGame::onGUI() {}
 
-void ScreenGame::onEvent(const sf::Event& e)
-{
-    if (e.type == sf::Event::MouseMoved) {
-        m_mouse = {e.mouseButton.x, e.mouseButton.y};
-    }
-}
+void ScreenGame::onEvent(const sf::Event& e) {}
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
 sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
 {
-    static bool o = false;
-    if (!o) {
-        std::printf("x %f y %f",
-                    (m_originOffset.x * TILE_WIDTH) + (x - y) * (TILE_WIDTH / 2.0f),
-                    (m_originOffset.y * TILE_HEIGHT) + (x + y) * (TILE_HEIGHT / 2.0f));
-        o = true;
-    }
     return {(m_originOffset.x * TILE_WIDTH) + (x - y) * (TILE_WIDTH / 2.0f),
             (m_originOffset.y * TILE_HEIGHT) + (x + y) * (TILE_HEIGHT / 2.0f)};
 }
@@ -112,11 +116,9 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     }
 
     m_sprite.setPosition(tileToScreenPosition(selected.x, selected.y));
-    m_sprite.setOutlineThickness(1);
-    m_sprite.setFillColor(sf::Color::Blue);
+    m_sprite.setFillColor(sf::Color::Red);
     window->draw(m_sprite);
     m_sprite.setFillColor(sf::Color::White);
-    m_sprite.setOutlineThickness(0);
 
     if (ImGui::Begin("Info")) {
         ImGui::Text("Mouse: %f %f", worldPos.x, worldPos.y);
