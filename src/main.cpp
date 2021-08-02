@@ -3,33 +3,33 @@
 #include "ScreenMainMenu.h"
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include "Game/World.h"
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
-#include "Game/World.h"
 
 int main()
 {
-    //sf::Image grass;
-    //sf::Image path;
-    //sf::Image target;
-//
-    //grass.loadFromFile("Data/Tiles/Grass.png");
-    //path.loadFromFile("Data/Tiles/Path.png");
-    //target.create(800, 600, sf::Color::Magenta);
-//
-    //for(int y = 0; y < TILE_HEIGHT; y++) {
+    // sf::Image grass;
+    // sf::Image path;
+    // sf::Image target;
+    //
+    // grass.loadFromFile("Data/Tiles/Grass.png");
+    // path.loadFromFile("Data/Tiles/Path.png");
+    // target.create(800, 600, sf::Color::Magenta);
+    //
+    // for(int y = 0; y < TILE_HEIGHT; y++) {
     //    for(int x = 0; x < TILE_WIDTH; x++) {
     //        target.setPixel(x, y, grass.getPixel(x, y));
     //    }
     //}
-//
-    //for(int y = 0; y < TILE_HEIGHT; y++) {
+    //
+    // for(int y = 0; y < TILE_HEIGHT; y++) {
     //    for(int x = 0; x < TILE_WIDTH * 16; x++) {
     //        target.setPixel(x, y + TILE_HEIGHT, path.getPixel(x, y));
     //    }
     //}
-//
-    //target.saveToFile("Data/Tiles.png");
+    //
+    // target.saveToFile("Data/Tiles.png");
 
     // Set up window and gui
     sf::RenderWindow window({1600, 900}, "SFML");

@@ -10,7 +10,6 @@ enum class TileType { Grass, Road };
 struct Tile {
     TileType type = TileType::Grass;
     int varient = 0;
-    
 };
 
 class ScreenGame final : public Screen {
@@ -31,13 +30,17 @@ class ScreenGame final : public Screen {
 
     sf::RectangleShape m_tileRect;
     sf::Texture m_tilemap;
-    sf::Vector2f m_originOffset{WORLD_SIZE * 4, WORLD_SIZE * 4};
+    sf::Vector2f m_originOffset{WORLD_SIZE, WORLD_SIZE};
 
     sf::Image m_tileCorners;
 
     std::vector<Tile> m_tiles;
     std::vector<sf::Vertex> m_grid;
 
-
     sf::Vector2i m_selectedTile;
+    sf::Vector2i m_lastTile;
+    bool m_mousedown = false;
+    sf::Mouse::Button m_buttonPressed;
+
+    bool drawGrid = true;
 };
