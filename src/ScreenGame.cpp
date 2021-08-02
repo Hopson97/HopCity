@@ -10,7 +10,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_sprite.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileTexture.loadFromFile("Data/Tiles/Grass.png");
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
-    m_roadTexture.loadFromFile("Data/Tiles/TestRoad.png");
+    m_roadTexture.loadFromFile("Data/Tiles/Path.png");
     m_sprite.setTexture(&m_tileTexture);
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
@@ -110,24 +110,41 @@ void ScreenGame::onEvent(const sf::Event& e)
             tile->type = TileType::Road;
             sf::Vector2i offsets[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
-            // Update the road tiles to be the correct varient 
+            // Update the road tiles to be the correct varient
             // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
             for (int i = 0; i < 4; i++) {
-                Tile* t = getTile(m_selectedTile + offsets[i]);
-                if (t->type == tile->type) {
+                Tile* neighbour = getTile(m_selectedTile + offsets[i]);
+                if (neighbour->type == tile->type) {
+
+                    // Cycle through 1, 2, 4, 8 or 2^0, 2^1, 2^2, 2^3
                     tile->varient += std::pow(2, i);
-                    t->varient = 0;
 
                     // Also update neighbour road varient
+                    neighbour->varient = 0;
                     for (int j = 0; j < 4; j++) {
-                        t->varient += std::pow(2, j) * (getTile(m_selectedTile + offsets[i] + offsets[j])->type == tile->type);
+                        neighbour->varient +=
+                            std::pow(2, j) *
+                            (getTile(m_selectedTile + offsets[i] + offsets[j])->type ==
+                             tile->type);
                     }
                 }
-
             }
         }
         else if (tile->type == TileType::Road) {
             tile->type = TileType::Grass;
+            sf::Vector2i offsets[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+            for (int i = 0; i < 4; i++) {
+                Tile* neighbour = getTile(m_selectedTile + offsets[i]);
+                if (neighbour->type == TileType::Road) {
+                    neighbour->varient = 0;
+                    for (int j = 0; j < 4; j++) {
+                        neighbour->varient +=
+                            std::pow(2, j) *
+                            (getTile(m_selectedTile + offsets[i] + offsets[j])->type ==
+                             neighbour->type);
+                    }
+                }
+            }
         }
     }
 }
