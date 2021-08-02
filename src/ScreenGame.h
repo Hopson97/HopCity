@@ -38,7 +38,6 @@ class ScreenGame final : public Screen {
     std::vector<sf::Vertex> m_grid;
 
     sf::Vector2i m_selectedTile;
-    sf::Vector2i m_lastTile;
     bool m_mousedown = false;
     sf::Mouse::Button m_buttonPressed;
 

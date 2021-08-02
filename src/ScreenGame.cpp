@@ -106,17 +106,15 @@ Tile* ScreenGame::getTile(const sf::Vector2i& position)
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
-    bool firstEvent = false;
     if (e.type == sf::Event::MouseButtonPressed) {
         m_mousedown = true;
-        firstEvent = true;
         m_buttonPressed = e.mouseButton.button;
     }
     else if (e.type == sf::Event::MouseButtonReleased) {
         m_mousedown = false;
     }
 
-    if (m_mousedown && (m_selectedTile != m_lastTile || firstEvent)) {
+    if (m_mousedown) {
         Tile* tile = &m_tiles.at(m_selectedTile.y * WORLD_SIZE + m_selectedTile.x);
         if (!tile) {
             return;
@@ -162,7 +160,6 @@ void ScreenGame::onEvent(const sf::Event& e)
                 }
             }
         }
-        m_lastTile = m_selectedTile;
     }
 }
 
