@@ -3,15 +3,16 @@
 #include <cmath>
 #include <imgui_sfml/imgui.h>
 
+const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
 {
-    m_sprite.setSize({TILE_WIDTH, TILE_HEIGHT});
-    m_tileTexture.loadFromFile("Data/Tiles/Grass.png");
+    m_tilemap.loadFromFile("Data/Tiles.png");
+    m_tileRect.setTexture(&m_tilemap);
+    m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
-    m_roadTexture.loadFromFile("Data/Tiles/Path.png");
-    m_sprite.setTexture(&m_tileTexture);
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setCenter(tileToScreenPosition(0, 0));
@@ -99,8 +100,6 @@ Tile* ScreenGame::getTile(const sf::Vector2i& position)
     return &m_tiles.at(position.y * WORLD_SIZE + position.x);
 }
 
-void ScreenGame::updateTileVarient([[maybe_unused]] const sf::Vector2i& position) {}
-
 void ScreenGame::onEvent(const sf::Event& e)
 {
     if (e.type == sf::Event::MouseButtonReleased) {
@@ -108,12 +107,11 @@ void ScreenGame::onEvent(const sf::Event& e)
         tile->varient = 0;
         if (tile->type == TileType::Grass) {
             tile->type = TileType::Road;
-            sf::Vector2i offsets[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
             // Update the road tiles to be the correct varient
             // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
             for (int i = 0; i < 4; i++) {
-                Tile* neighbour = getTile(m_selectedTile + offsets[i]);
+                Tile* neighbour = getTile(m_selectedTile + TILE_OFFSETS[i]);
                 if (neighbour->type == tile->type) {
 
                     // Cycle through 1, 2, 4, 8 or 2^0, 2^1, 2^2, 2^3
@@ -124,24 +122,23 @@ void ScreenGame::onEvent(const sf::Event& e)
                     for (int j = 0; j < 4; j++) {
                         neighbour->varient +=
                             std::pow(2, j) *
-                            (getTile(m_selectedTile + offsets[i] + offsets[j])->type ==
-                             tile->type);
+                            (getTile(m_selectedTile + TILE_OFFSETS[i] + TILE_OFFSETS[j])
+                                 ->type == tile->type);
                     }
                 }
             }
         }
         else if (tile->type == TileType::Road) {
             tile->type = TileType::Grass;
-            sf::Vector2i offsets[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
             for (int i = 0; i < 4; i++) {
-                Tile* neighbour = getTile(m_selectedTile + offsets[i]);
+                Tile* neighbour = getTile(m_selectedTile + TILE_OFFSETS[i]);
                 if (neighbour->type == TileType::Road) {
                     neighbour->varient = 0;
                     for (int j = 0; j < 4; j++) {
                         neighbour->varient +=
                             std::pow(2, j) *
-                            (getTile(m_selectedTile + offsets[i] + offsets[j])->type ==
-                             neighbour->type);
+                            (getTile(m_selectedTile + TILE_OFFSETS[i] + TILE_OFFSETS[j])
+                                 ->type == neighbour->type);
                     }
                 }
             }
@@ -163,30 +160,22 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     for (int y = 0; y < WORLD_SIZE; y++) {
         for (int x = 0; x < WORLD_SIZE; x++) {
-            const Tile& tile = m_tiles[y * WORLD_SIZE + x];
-            m_sprite.setTextureRect(sf::IntRect{tile.varient * (int)TILE_WIDTH, 0,
-                                                (int)TILE_WIDTH, (int)TILE_HEIGHT});
-            switch (tile.type) {
-                case TileType::Grass:
-                    m_sprite.setTexture(&m_tileTexture);
-                    break;
-
-                case TileType::Road:
-                    m_sprite.setTexture(&m_roadTexture);
-                    break;
-            }
-
+            const Tile* tile = getTile({x, y});
             auto pos = tileToScreenPosition(x, y);
-            m_sprite.setPosition(pos);
 
-            window->draw(m_sprite);
+            auto textureY = tile->type == TileType::Grass ? 0 : TILE_HEIGHT;
+            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH, textureY,
+                                                  (int)TILE_WIDTH, (int)TILE_HEIGHT});
+            m_tileRect.setPosition(pos);
+
+            window->draw(m_tileRect);
         }
     }
 
-    m_sprite.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));
-    m_sprite.setFillColor(sf::Color::Red);
-    window->draw(m_sprite);
-    m_sprite.setFillColor(sf::Color::White);
+    m_tileRect.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));
+    m_tileRect.setFillColor(sf::Color::Red);
+    window->draw(m_tileRect);
+    m_tileRect.setFillColor(sf::Color::White);
 
     window->draw(m_grid.data(), m_grid.size(), sf::Lines);
 
