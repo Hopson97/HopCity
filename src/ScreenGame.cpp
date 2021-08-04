@@ -9,7 +9,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
 {
-    m_tilemap.loadFromFile("Data/Tiles.png");
+    m_tilemap.loadFromFile("Data/Tiles/Tiles.png");
     m_tileRect.setTexture(&m_tilemap);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
@@ -17,6 +17,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setCenter(tileToScreenPosition(0, 0));
     m_view.setSize({1600, 900});
+    m_view.zoom(0.25);
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
