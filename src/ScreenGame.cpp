@@ -9,7 +9,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
 {
-    m_tilemap.loadFromFile("Data/Tiles/Tiles.png");
+    m_tilemap.loadFromFile("Data/Tiles/Tiles3.png");
     m_tileRect.setTexture(&m_tilemap);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
@@ -177,7 +177,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 {
     window->setView(m_view);
 
-    for (int y = 0; y < WORLD_SIZE; y++) {
+    for (int y = WORLD_SIZE - 1; y >= 0; y--) {
         for (int x = 0; x < WORLD_SIZE; x++) {
             const Tile* tile = getTile({x, y});
             auto pos = tileToScreenPosition(x, y);

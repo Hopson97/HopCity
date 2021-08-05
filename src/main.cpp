@@ -9,27 +9,26 @@
 
 int main()
 {
-    // sf::Image grass;
-    // sf::Image path;
-    // sf::Image target;
-    //
-    // grass.loadFromFile("Data/Tiles/Grass.png");
-    // path.loadFromFile("Data/Tiles/Path.png");
-    // target.create(800, 600, sf::Color::Magenta);
-    //
-    // for(int y = 0; y < TILE_HEIGHT; y++) {
-    //    for(int x = 0; x < TILE_WIDTH; x++) {
-    //        target.setPixel(x, y, grass.getPixel(x, y));
-    //    }
-    //}
-    //
+     sf::Image grass;
+     sf::Image path;
+     sf::Image target;
+    
+     grass.loadFromFile("Data/Tiles/road3.png");
+     target.create(512, 128, sf::Color::Magenta);
+    
+     for(int y = 0; y < TILE_HEIGHT; y++) {
+        for(int x = 0; x < TILE_WIDTH; x++) {
+            target.setPixel(x, y, grass.getPixel(x, y));
+        }
+    }
+    
     // for(int y = 0; y < TILE_HEIGHT; y++) {
     //    for(int x = 0; x < TILE_WIDTH * 16; x++) {
     //        target.setPixel(x, y + TILE_HEIGHT, path.getPixel(x, y));
     //    }
     //}
-    //
-    // target.saveToFile("Data/Tiles.png");
+    
+     target.saveToFile("Data/Tiles/Tiles3.png");
 
     // Set up window and gui
     sf::RenderWindow window({1600, 900}, "SFML");
