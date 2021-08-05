@@ -17,7 +17,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setCenter(tileToScreenPosition(0, 0));
     m_view.setSize({1600, 900});
-    m_view.zoom(0.25);
+    m_view.zoom(0.1);
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
@@ -45,16 +45,16 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
     constexpr int GAP = 100;
     auto mousePosition = sf::Mouse::getPosition(window);
     if (mousePosition.x < GAP) {
-        m_view.move(-5, 0);
+    //    m_view.move(-5, 0);
     }
     else if (mousePosition.x > (int)window.getSize().x - GAP) {
-        m_view.move(5, 0);
+     //   m_view.move(5, 0);
     }
     if (mousePosition.y < GAP) {
-        m_view.move(0, -5);
+   //     m_view.move(0, -5);
     }
     else if (mousePosition.y > (int)window.getSize().y - GAP) {
-        m_view.move(0, 5);
+  //      m_view.move(0, 5);
     }
 
     if (keyboard.isKeyDown(sf::Keyboard::A)) {
@@ -163,7 +163,6 @@ void ScreenGame::onEvent(const sf::Event& e)
         }
     }
 }
-
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
