@@ -5,7 +5,7 @@
 
 #include "Game/World.h"
 
-enum class TileType { Grass, Road };
+enum class TileType { Grass, Road, Water };
 
 struct Tile {
     TileType type = TileType::Grass;
@@ -42,4 +42,7 @@ class ScreenGame final : public Screen {
     sf::Mouse::Button m_buttonPressed;
 
     bool drawGrid = true;
+
+    Animation m_wateranim;
+    sf::Texture m_waterAnimationTexture;
 };

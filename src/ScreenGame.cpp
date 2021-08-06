@@ -2,22 +2,26 @@
 #include "ScreenMainMenu.h"
 #include <cmath>
 #include <imgui_sfml/imgui.h>
+#include <iostream>
 
 const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
+    , m_wateranim(TILE_WIDTH, TILE_HEIGHT)
 {
     m_tilemap.loadFromFile("Data/Tiles/Tiles3.png");
     m_tileRect.setTexture(&m_tilemap);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
 
+    m_waterAnimationTexture.loadFromFile("Data/Tiles/WaterAnim.png");
+
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setCenter(tileToScreenPosition(0, 0));
     m_view.setSize({1600, 900});
-    m_view.zoom(0.1);
+    m_view.zoom(0.5);
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
@@ -35,6 +39,12 @@ ScreenGame::ScreenGame(ScreenManager* stack)
         endPos.y += TILE_HEIGHT / 2;
         m_grid.emplace_back(startPos, sf::Color::Black);
         m_grid.emplace_back(endPos, sf::Color::Black);
+
+        m_wateranim.addFrame(0, 0, sf::milliseconds(220));
+        m_wateranim.addFrame(0, 1, sf::milliseconds(220));
+        m_wateranim.addFrame(0, 2, sf::milliseconds(220));
+        m_wateranim.addFrame(0, 3, sf::milliseconds(220));
+        m_wateranim.addFrame(0, 4, sf::milliseconds(220));
     }
 }
 
@@ -45,16 +55,16 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
     constexpr int GAP = 100;
     auto mousePosition = sf::Mouse::getPosition(window);
     if (mousePosition.x < GAP) {
-    //    m_view.move(-5, 0);
+        //    m_view.move(-5, 0);
     }
     else if (mousePosition.x > (int)window.getSize().x - GAP) {
-     //   m_view.move(5, 0);
+        //   m_view.move(5, 0);
     }
     if (mousePosition.y < GAP) {
-   //     m_view.move(0, -5);
+        //     m_view.move(0, -5);
     }
     else if (mousePosition.y > (int)window.getSize().y - GAP) {
-  //      m_view.move(0, 5);
+        //      m_view.move(0, 5);
     }
 
     if (keyboard.isKeyDown(sf::Keyboard::A)) {
@@ -114,6 +124,9 @@ void ScreenGame::onEvent(const sf::Event& e)
     else if (e.type == sf::Event::MouseButtonReleased) {
         m_mousedown = false;
     }
+    else if (e.type == sf::Event::MouseWheelScrolled) {
+        std::cout << e.mouseWheel.x << std::endl;
+    }
 
     if (m_mousedown) {
         Tile* tile = &m_tiles.at(m_selectedTile.y * WORLD_SIZE + m_selectedTile.x);
@@ -122,7 +135,12 @@ void ScreenGame::onEvent(const sf::Event& e)
         }
         tile->varient = 0;
         if (m_buttonPressed == sf::Mouse::Left) {
-            tile->type = TileType::Road;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+                tile->type = TileType::Water;
+            }
+            else {
+                tile->type = TileType::Road;
+            }
 
             // Update the road tiles to be the correct varient
             // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
@@ -149,7 +167,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             tile->type = TileType::Grass;
             for (int i = 0; i < 4; i++) {
                 Tile* neighbour = getTile(m_selectedTile + TILE_OFFSETS[i]);
-                if (neighbour && neighbour->type == TileType::Road) {
+                if (neighbour && neighbour->type != TileType::Grass) {
                     neighbour->varient = 0;
                     for (int j = 0; j < 4; j++) {
                         Tile* subNeighbour =
@@ -179,14 +197,27 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     for (int y = WORLD_SIZE - 1; y >= 0; y--) {
         for (int x = 0; x < WORLD_SIZE; x++) {
             const Tile* tile = getTile({x, y});
-            auto pos = tileToScreenPosition(x, y);
+            m_tileRect.setPosition(tileToScreenPosition(x, y));
+            if (tile->type == TileType::Grass) {
+                m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
+                                                      0, (int)TILE_WIDTH,
+                                                      (int)TILE_HEIGHT});
+            }
+            else if (tile->type == TileType::Road) {
+                m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
+                                                      (int)TILE_HEIGHT,
+                                                      (int)TILE_WIDTH, (int)TILE_HEIGHT});
+            }
+            else if (tile->type == TileType::Water) {
+                m_tileRect.setTexture(&m_waterAnimationTexture);
+                m_tileRect.setTextureRect(m_wateranim.getFrame());
+                window->draw(m_tileRect);
 
-            auto textureY = tile->type == TileType::Grass ? 0 : TILE_HEIGHT;
-            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
-                                                  textureY, (int)TILE_WIDTH,
-                                                  (int)TILE_HEIGHT});
-            m_tileRect.setPosition(pos);
-
+                m_tileRect.setTexture(&m_tilemap);
+                m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
+                                                      (int)TILE_HEIGHT * 5,
+                                                      (int)TILE_WIDTH, (int)TILE_HEIGHT});
+            }
             window->draw(m_tileRect);
         }
     }
