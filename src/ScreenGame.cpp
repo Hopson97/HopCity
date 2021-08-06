@@ -125,7 +125,7 @@ void ScreenGame::onEvent(const sf::Event& e)
         m_mousedown = false;
     }
     else if (e.type == sf::Event::MouseWheelScrolled) {
-        std::cout << e.mouseWheel.x << std::endl;
+        m_view.zoom(1 - e.mouseWheelScroll.delta / 10);
     }
 
     if (m_mousedown) {
@@ -199,14 +199,13 @@ void ScreenGame::onRender(sf::RenderWindow* window)
             const Tile* tile = getTile({x, y});
             m_tileRect.setPosition(tileToScreenPosition(x, y));
             if (tile->type == TileType::Grass) {
-                m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
-                                                      0, (int)TILE_WIDTH,
-                                                      (int)TILE_HEIGHT});
+                m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH, 0,
+                                                      (int)TILE_WIDTH, (int)TILE_HEIGHT});
             }
             else if (tile->type == TileType::Road) {
                 m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
-                                                      (int)TILE_HEIGHT,
-                                                      (int)TILE_WIDTH, (int)TILE_HEIGHT});
+                                                      (int)TILE_HEIGHT, (int)TILE_WIDTH,
+                                                      (int)TILE_HEIGHT});
             }
             else if (tile->type == TileType::Water) {
                 m_tileRect.setTexture(&m_waterAnimationTexture);
@@ -215,7 +214,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
                 m_tileRect.setTexture(&m_tilemap);
                 m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
-                                                      (int)TILE_HEIGHT * 5,
+                                                      (int)TILE_HEIGHT * 2,
                                                       (int)TILE_WIDTH, (int)TILE_HEIGHT});
             }
             window->draw(m_tileRect);
