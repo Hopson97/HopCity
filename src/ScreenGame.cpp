@@ -12,12 +12,12 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     , m_wateranim(TILE_WIDTH, TILE_HEIGHT)
 {
     m_tilemap.loadFromFile("Data/Tiles/Tiles3.png");
+    m_selectionTexture.loadFromFile("Data/Tiles/Selection.png");
     m_tileRect.setTexture(&m_tilemap);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
-    m_view.setCenter(tileToScreenPosition(0, 0));
     m_view.setSize({1600, 900});
     m_view.zoom(m_currentZoom);
 
@@ -44,28 +44,33 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_wateranim.addFrame(0, 3, sf::milliseconds(220));
     m_wateranim.addFrame(0, 4, sf::milliseconds(220));
 
-    for (int i = 0; i < 10; i++) {
-        int x = (float)(rand() % WORLD_SIZE / 8) * WORLD_SIZE / 6;
-        int y = (float)(rand() % WORLD_SIZE / 8) * WORLD_SIZE / 6;
+    // Generate """islands"""
+    for (int y = 25; y < WORLD_SIZE - 25; y++) {
+        for (int x = 25; x < WORLD_SIZE - 25; x++) {
+            if (rand() % 1000 > 998) {
+                getTile({x, y})->type = TileType::Grass;
 
-        getTile({x, y})->type == TileType::Grass;
-    }
-
-    for (int y = WORLD_SIZE - 1; y >= 0; y--) {
-        for (int x = 0; x < WORLD_SIZE; x++) {
-            for (int i = 0; i < 4; i++) {
-                Tile* neighbour = getTile(sf::Vector2i{x, y} + TILE_OFFSETS[i]);
-                if (neighbour && neighbour->type != TileType::Grass) {
-                    neighbour->varient = 0;
-                    for (int j = 0; j < 4; j++) {
-                        Tile* subNeighbour = getTile(sf::Vector2i{x, y} +
-                                                     TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                        if (subNeighbour && subNeighbour->type == neighbour->type) {
-                            neighbour->varient += std::pow(2, j);
-                        }
+                int w = rand() % 10;
+                for (int iy = 0; iy < w; iy++) {
+                    for (int ix = 0; ix < w; ix++) {
+                        getTile({x + ix, y + iy})->type = TileType::Grass;
                     }
                 }
             }
+        }
+    }
+
+    // "Auto tile" the tilemap
+    for (int y = WORLD_SIZE - 1; y >= 0; y--) {
+        for (int x = 0; x < WORLD_SIZE; x++) {
+            Tile* tile = getTile(sf::Vector2i{x, y});
+            if (tile->type != TileType::Grass)
+                for (int i = 0; i < 4; i++) {
+                    Tile* neighbour = getTile(sf::Vector2i{x, y} + TILE_OFFSETS[i]);
+                    if (neighbour && neighbour->type == tile->type) {
+                        tile->varient += std::pow(2, i);
+                    }
+                }
         }
     }
 }
@@ -224,13 +229,30 @@ sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
     window->setView(m_view);
+    m_tileRect.setTexture(&m_tilemap);
+
+    int count = 0;
 
     for (int y = WORLD_SIZE - 1; y >= 0; y--) {
         for (int x = 0; x < WORLD_SIZE; x++) {
-            auto screenPosition = tileToScreenPosition(x, y);
+            sf::Vector2f screenPosition = tileToScreenPosition(x, y);
 
+            // Cull tiles not in the current viewport
+            sf::Vector2f windowPosition = {
+                screenPosition.x - m_originOffset.x * TILE_WIDTH,
+                screenPosition.x - m_originOffset.y * TILE_HEIGHT};
+            if (screenPosition.x <
+                    m_view.getCenter().x - m_view.getSize().x / 2 - TILE_WIDTH ||
+                screenPosition.x > m_view.getCenter().x + m_view.getSize().x / 2 ||
+                screenPosition.y <
+                    m_view.getCenter().y - m_view.getSize().y / 2 - TILE_HEIGHT ||
+                screenPosition.y > m_view.getCenter().y + m_view.getSize().y / 2) {
+                continue;
+            }
+            count++;
             m_tileRect.setPosition(screenPosition);
 
+            // Set the tile texture
             const Tile* tile = getTile({x, y});
             if (tile->type == TileType::Grass) {
                 m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH, 0,
@@ -242,31 +264,30 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                                                       (int)TILE_HEIGHT});
             }
             else if (tile->type == TileType::Water) {
-
-                auto frame = m_wateranim.getFrame();
-                m_tileRect.setTextureRect(sf::IntRect{frame.left, (int)TILE_HEIGHT * 3,
+                m_tileRect.setTextureRect(sf::IntRect{m_wateranim.getFrame().left,
+                                                      (int)TILE_HEIGHT * 3,
                                                       (int)TILE_WIDTH, (int)TILE_HEIGHT});
                 window->draw(m_tileRect);
-
-                m_tileRect.setTexture(&m_tilemap);
                 m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
                                                       (int)TILE_HEIGHT * 2,
                                                       (int)TILE_WIDTH, (int)TILE_HEIGHT});
             }
+
+            // Render the tile
             window->draw(m_tileRect);
         }
     }
-
+    m_tileRect.setTextureRect(sf::IntRect{0, 0, (int)TILE_WIDTH, (int)TILE_HEIGHT});
+    m_tileRect.setTexture(&m_selectionTexture);
     m_tileRect.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));
-    m_tileRect.setFillColor(sf::Color::Red);
     window->draw(m_tileRect);
-    m_tileRect.setFillColor(sf::Color::White);
 
     if (drawGrid) {
         window->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
+        ImGui::Text("Drawn: %d / %d", count, (int)m_tiles.size());
         ImGui::Checkbox("Draw Grid", &drawGrid);
     }
     ImGui::End();

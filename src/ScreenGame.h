@@ -8,7 +8,7 @@
 enum class TileType { Grass, Road, Water };
 
 struct Tile {
-    TileType type = TileType::Grass;
+    TileType type = TileType::Water;
     int varient = 0;
 };
 
@@ -30,6 +30,7 @@ class ScreenGame final : public Screen {
 
     sf::RectangleShape m_tileRect;
     sf::Texture m_tilemap;
+    sf::Texture m_selectionTexture;
     sf::Vector2f m_originOffset{WORLD_SIZE, WORLD_SIZE};
 
     sf::Image m_tileCorners;
