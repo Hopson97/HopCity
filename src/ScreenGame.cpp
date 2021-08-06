@@ -148,10 +148,15 @@ void ScreenGame::onEvent(const sf::Event& e)
         m_mousedown = false;
     }
     else if (e.type == sf::Event::MouseWheelScrolled) {
-        // m_view.zoom(1 - e.mouseWheelScroll.delta / 10);
-        m_view.zoom(e.mouseWheelScroll.delta > 0 ? 0.5 : 2);
-        m_currentZoom *= e.mouseWheelScroll.delta > 0 ? 0.5 : 2;
-        std::cout << (int)(m_currentZoom * 1000) << std::endl;
+        if (e.mouseWheelScroll.delta > 0 && m_currentZoom > 0.065) {
+            m_view.zoom(0.5f);
+            m_currentZoom *= 0.5f;
+        }
+        else if (e.mouseWheelScroll.delta < 0 && m_currentZoom < 1.99) {
+            m_view.zoom(2.0f);
+            m_currentZoom *= 2.0f;
+        }
+        std::cout << m_currentZoom << std::endl;
     }
 
     if (m_mousedown) {
