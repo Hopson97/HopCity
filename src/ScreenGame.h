@@ -43,6 +43,6 @@ class ScreenGame final : public Screen {
 
     bool drawGrid = true;
 
+    float m_currentZoom = 0.25;
     Animation m_wateranim;
-    sf::Texture m_waterAnimationTexture;
 };

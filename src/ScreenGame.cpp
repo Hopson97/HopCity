@@ -16,12 +16,10 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
     m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
 
-    m_waterAnimationTexture.loadFromFile("Data/Tiles/WaterAnim.png");
-
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setCenter(tileToScreenPosition(0, 0));
     m_view.setSize({1600, 900});
-    m_view.zoom(0.5);
+    m_view.zoom(m_currentZoom);
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
@@ -39,12 +37,36 @@ ScreenGame::ScreenGame(ScreenManager* stack)
         endPos.y += TILE_HEIGHT / 2;
         m_grid.emplace_back(startPos, sf::Color::Black);
         m_grid.emplace_back(endPos, sf::Color::Black);
+    }
+    m_wateranim.addFrame(0, 0, sf::milliseconds(220));
+    m_wateranim.addFrame(0, 1, sf::milliseconds(220));
+    m_wateranim.addFrame(0, 2, sf::milliseconds(220));
+    m_wateranim.addFrame(0, 3, sf::milliseconds(220));
+    m_wateranim.addFrame(0, 4, sf::milliseconds(220));
 
-        m_wateranim.addFrame(0, 0, sf::milliseconds(220));
-        m_wateranim.addFrame(0, 1, sf::milliseconds(220));
-        m_wateranim.addFrame(0, 2, sf::milliseconds(220));
-        m_wateranim.addFrame(0, 3, sf::milliseconds(220));
-        m_wateranim.addFrame(0, 4, sf::milliseconds(220));
+    for (int i = 0; i < 10; i++) {
+        int x = (float)(rand() % WORLD_SIZE / 8) * WORLD_SIZE / 6;
+        int y = (float)(rand() % WORLD_SIZE / 8) * WORLD_SIZE / 6;
+
+        getTile({x, y})->type == TileType::Grass;
+    }
+
+    for (int y = WORLD_SIZE - 1; y >= 0; y--) {
+        for (int x = 0; x < WORLD_SIZE; x++) {
+            for (int i = 0; i < 4; i++) {
+                Tile* neighbour = getTile(sf::Vector2i{x, y} + TILE_OFFSETS[i]);
+                if (neighbour && neighbour->type != TileType::Grass) {
+                    neighbour->varient = 0;
+                    for (int j = 0; j < 4; j++) {
+                        Tile* subNeighbour = getTile(sf::Vector2i{x, y} +
+                                                     TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                        if (subNeighbour && subNeighbour->type == neighbour->type) {
+                            neighbour->varient += std::pow(2, j);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -108,9 +130,10 @@ void ScreenGame::onGUI() {}
 
 Tile* ScreenGame::getTile(const sf::Vector2i& position)
 {
+    static Tile e;
     if (position.y < 0 || position.y >= WORLD_SIZE || position.x < 0 ||
         position.x >= WORLD_SIZE) {
-        return nullptr;
+        return &e;
     }
     return &m_tiles.at(position.y * WORLD_SIZE + position.x);
 }
@@ -125,7 +148,10 @@ void ScreenGame::onEvent(const sf::Event& e)
         m_mousedown = false;
     }
     else if (e.type == sf::Event::MouseWheelScrolled) {
-        m_view.zoom(1 - e.mouseWheelScroll.delta / 10);
+        // m_view.zoom(1 - e.mouseWheelScroll.delta / 10);
+        m_view.zoom(e.mouseWheelScroll.delta > 0 ? 0.5 : 2);
+        m_currentZoom *= e.mouseWheelScroll.delta > 0 ? 0.5 : 2;
+        std::cout << (int)(m_currentZoom * 1000) << std::endl;
     }
 
     if (m_mousedown) {
@@ -196,8 +222,11 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     for (int y = WORLD_SIZE - 1; y >= 0; y--) {
         for (int x = 0; x < WORLD_SIZE; x++) {
+            auto screenPosition = tileToScreenPosition(x, y);
+
+            m_tileRect.setPosition(screenPosition);
+
             const Tile* tile = getTile({x, y});
-            m_tileRect.setPosition(tileToScreenPosition(x, y));
             if (tile->type == TileType::Grass) {
                 m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH, 0,
                                                       (int)TILE_WIDTH, (int)TILE_HEIGHT});
@@ -208,8 +237,10 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                                                       (int)TILE_HEIGHT});
             }
             else if (tile->type == TileType::Water) {
-                m_tileRect.setTexture(&m_waterAnimationTexture);
-                m_tileRect.setTextureRect(m_wateranim.getFrame());
+
+                auto frame = m_wateranim.getFrame();
+                m_tileRect.setTextureRect(sf::IntRect{frame.left, (int)TILE_HEIGHT * 3,
+                                                      (int)TILE_WIDTH, (int)TILE_HEIGHT});
                 window->draw(m_tileRect);
 
                 m_tileRect.setTexture(&m_tilemap);
