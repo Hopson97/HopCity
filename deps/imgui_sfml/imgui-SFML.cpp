@@ -15,6 +15,7 @@
 #include <SFML/Window/Touch.hpp>
 #include <SFML/Window/Window.hpp>
 
+
 #include <cassert>
 #include <cmath> // abs
 #include <cstddef> // offsetof, NULL
