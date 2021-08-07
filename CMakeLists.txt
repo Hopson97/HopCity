@@ -9,6 +9,7 @@ IF (WIN32)
     set(SFML_STATIC_LIBRARIES TRUE)
     set(SFML_DIR "${CMAKE_CURRENT_LIST_DIR}/libs/SFML-2.5.1/lib/cmake/SFML")
     file(COPY libs/SFML-2.5.1/bin/openal32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY "Data"  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 ELSE ()
     # set stuff for other systems
     include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
