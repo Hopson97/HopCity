@@ -4,17 +4,7 @@
 #include "../Screen.h"
 #include "World.h"
 #include "Camera.h"
-
-enum class TileType : uint8_t {
-    Grass,
-    Road,
-    Water,
-};
-
-struct Tile {
-    TileType type = TileType::Grass;
-    uint8_t varient = 0;
-};
+#include "TileMap.h"
 
 class ScreenGame final : public Screen {
   public:
@@ -27,21 +17,15 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
-    Tile* getTile(const sf::Vector2i& position);
-    void updateTileTextureCoords(const sf::Vector2i& position);
-    void autoTile(const sf::Vector2i& position);
 
-    sf::RectangleShape m_tileRect;
-    sf::Texture m_tilemap;
+
+    sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
     
 
     sf::Image m_tileCorners;
 
-    std::vector<Tile> m_tiles;
-    std::vector<sf::Vertex> m_grid;
-    std::vector<sf::Vertex> m_tileVerts;
-    std::vector<sf::Vertex> m_waterAnimationVerts;
+
 
     sf::Vector2i m_selectedTile;
     bool m_mousedown = false;
@@ -51,6 +35,7 @@ class ScreenGame final : public Screen {
 
     Camera m_camera;
 
+    TileMap m_map;
+
     
-    Animation m_wateranim;
 };
