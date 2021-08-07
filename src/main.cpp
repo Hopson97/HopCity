@@ -7,6 +7,8 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
+#define GLOBAL_FONT_SCALE 1.0f
+
 int main()
 {
     sf::Image grass;
@@ -35,6 +37,9 @@ int main()
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
+    auto& io = ImGui::GetIO();
+    io.FontGlobalScale = ((window.getSize().x)/1000.f)*GLOBAL_FONT_SCALE;
+
 
     // Set up screen system
     ScreenManager screens;
