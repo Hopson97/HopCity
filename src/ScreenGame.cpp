@@ -11,7 +11,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
     , m_wateranim(TILE_WIDTH, TILE_HEIGHT)
 {
-    m_tilemap.loadFromFile("Data/Tiles/Tiles3.png");
+    m_tilemap.loadFromFile("Data/Tiles/Tilemap.png");
     m_selectionTexture.loadFromFile("Data/Tiles/Selection.png");
     m_tileRect.setTexture(&m_selectionTexture);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
