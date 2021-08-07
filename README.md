@@ -15,8 +15,10 @@ conan remote update bincrafters https://api.bintray.com/conan/bincrafters/public
 To build, at the root of the project:
 
 ```sh
-sh scripts/build.sh
+sh scripts/build.sh install
 ```
+
+The install argument is only needed for the first time compilation as this is what grabs the libraries from Conan
 
 To run, at the root of the project:
 
