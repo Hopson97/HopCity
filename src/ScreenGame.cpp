@@ -21,7 +21,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_view.setSize({1600, 900});
     m_view.zoom(m_currentZoom);
 
-
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
         auto startPos = tileToScreenPosition(0, i);
@@ -62,25 +61,56 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     }
 
     // "Auto tile" the tilemap
-    for (int y = WORLD_SIZE - 1; y >= 0; y--) {
+    for (int y = 0; y < WORLD_SIZE; y++) {
         for (int x = 0; x < WORLD_SIZE; x++) {
             auto pos = tileToScreenPosition(x, y);
 
-            m_tileVerts.emplace_back(pos, sf::Vector2f{0, 0});
-            m_tileVerts.emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT}, sf::Vector2f{0, TILE_HEIGHT});
-            m_tileVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT}, sf::Vector2f{TILE_WIDTH, TILE_HEIGHT});
-            m_tileVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y}, sf::Vector2f{TILE_WIDTH, 0});
-
+            m_tileVerts.emplace_back(pos);
+            m_tileVerts.emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
+            m_tileVerts.emplace_back(
+                sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
+            m_tileVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
 
             Tile* tile = getTile(sf::Vector2i{x, y});
             if (tile->type != TileType::Grass)
                 for (int i = 0; i < 4; i++) {
                     Tile* neighbour = getTile(sf::Vector2i{x, y} + TILE_OFFSETS[i]);
                     if (neighbour && neighbour->type == tile->type) {
-                     //   tile->varient += std::pow(2, i);
+                        tile->varient += std::pow(2, i);
                     }
                 }
+
+            updateTileTextureCoords({x, y});
         }
+    }
+}
+
+void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
+{
+    sf::Vertex* v = &m_tileVerts[(position.y * WORLD_SIZE + position.x) * 4];
+    const Tile* tile = getTile(position);
+
+    if (tile->type == TileType::Grass) {
+        v[0].texCoords = {0, 0};
+        v[1].texCoords = {0, TILE_HEIGHT};
+        v[2].texCoords = {TILE_WIDTH, TILE_HEIGHT};
+        v[3].texCoords = {TILE_WIDTH, 0};
+    }
+    else if (tile->type == TileType::Road) {
+        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT};
+        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2};
+        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
+
+        m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
+                                              (int)TILE_HEIGHT, (int)TILE_WIDTH,
+                                              (int)TILE_HEIGHT});
+    }
+    else if (tile->type == TileType::Water) {
+        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2};
+        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 3};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3};
+        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2};
     }
 }
 
@@ -163,8 +193,8 @@ void ScreenGame::onEvent(const sf::Event& e)
     }
     else if (e.type == sf::Event::MouseWheelScrolled) {
         if (e.mouseWheelScroll.delta > 0 && m_currentZoom == 8) {
-            m_view.zoom(1.0f/8.0f);
-            m_currentZoom *= 1.0f/8.0f;
+            m_view.zoom(1.0f / 8.0f);
+            m_currentZoom *= 1.0f / 8.0f;
         }
         else if (e.mouseWheelScroll.delta > 0 && m_currentZoom > 0.065) {
             m_view.zoom(0.5f);
@@ -233,6 +263,11 @@ void ScreenGame::onEvent(const sf::Event& e)
                 }
             }
         }
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                updateTileTextureCoords(m_selectedTile + sf::Vector2i{i, j});
+            }
+        }
     }
 }
 
@@ -251,10 +286,10 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     int count = 0;
 
-    //for (int y = WORLD_SIZE - 1; y >= 0; y--) {
+    // for (int y = WORLD_SIZE - 1; y >= 0; y--) {
     //    for (int x = 0; x < WORLD_SIZE; x++) {
     //        sf::Vector2f screenPosition = tileToScreenPosition(x, y);
-//
+    //
     //        // Cull tiles not in the current viewport
     //        sf::Vector2f windowPosition = {
     //            screenPosition.x - m_originOffset.x * TILE_WIDTH,
@@ -269,12 +304,14 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     //        }
     //        count++;
     //        m_tileRect.setPosition(screenPosition);
-//
+    //
     //        // Set the tile texture
     //        const Tile* tile = getTile({x, y});
     //        if (tile->type == TileType::Grass) {
-    //            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH, 0,
-    //                                                  (int)TILE_WIDTH, (int)TILE_HEIGHT});
+    //            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
+    //            0,
+    //                                                  (int)TILE_WIDTH,
+    //                                                  (int)TILE_HEIGHT});
     //        }
     //        else if (tile->type == TileType::Road) {
     //            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
@@ -284,13 +321,15 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     //        else if (tile->type == TileType::Water) {
     //            m_tileRect.setTextureRect(sf::IntRect{m_wateranim.getFrame().left,
     //                                                  (int)TILE_HEIGHT * 3,
-    //                                                  (int)TILE_WIDTH, (int)TILE_HEIGHT});
+    //                                                  (int)TILE_WIDTH,
+    //                                                  (int)TILE_HEIGHT});
     //            window->draw(m_tileRect);
     //            m_tileRect.setTextureRect(sf::IntRect{tile->varient * (int)TILE_WIDTH,
     //                                                  (int)TILE_HEIGHT * 2,
-    //                                                  (int)TILE_WIDTH, (int)TILE_HEIGHT});
+    //                                                  (int)TILE_WIDTH,
+    //                                                  (int)TILE_HEIGHT});
     //        }
-//
+    //
     //        // Render the tile
     //        window->draw(m_tileRect);
     //    }
@@ -315,5 +354,4 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     }
     ImGui::End();
     ImGui::ShowMetricsWindow(nullptr);
-
 }
