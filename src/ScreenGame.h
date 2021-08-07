@@ -24,6 +24,7 @@ class ScreenGame final : public Screen {
 
   private:
     Tile* getTile(const sf::Vector2i& position);
+    void updateTileTextureCoords(const sf::Vector2i& position);
     sf::Vector2f tileToScreenPosition(int x, int y);
 
     sf::View m_view;
