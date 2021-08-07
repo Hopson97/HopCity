@@ -6,5 +6,10 @@ add_library(imgui_sfml
     imgui_widgets.cpp
 )
 
-
-target_link_libraries(imgui_sfml sfml-audio sfml-graphics sfml-window sfml-system sfml-network ${OPENGL_LIBRARIES} )
+if(WIN32)
+    target_link_libraries(imgui_sfml sfml-audio sfml-graphics sfml-window sfml-system sfml-network ${OPENGL_LIBRARIES} )
+else()
+    target_link_libraries(imgui_sfml
+            ${CONAN_LIBS}
+            )
+endif()
