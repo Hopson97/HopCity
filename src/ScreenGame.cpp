@@ -72,21 +72,13 @@ ScreenGame::ScreenGame(ScreenManager* stack)
                 sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
             m_tileVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
 
-                        m_waterAnimationVerts.emplace_back(pos);
+            m_waterAnimationVerts.emplace_back(pos);
             m_waterAnimationVerts.emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
             m_waterAnimationVerts.emplace_back(
                 sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
             m_waterAnimationVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
 
-            Tile* tile = getTile(sf::Vector2i{x, y});
-            if (tile->type != TileType::Grass)
-                for (int i = 0; i < 4; i++) {
-                    Tile* neighbour = getTile(sf::Vector2i{x, y} + TILE_OFFSETS[i]);
-                    if (neighbour && neighbour->type == tile->type) {
-                        tile->varient += std::pow(2, i);
-                    }
-                }
-
+            autoTile({x, y});
             updateTileTextureCoords({x, y});
         }
     }
@@ -106,14 +98,17 @@ void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
     else if (tile->type == TileType::Road) {
         v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT};
         v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
+                          TILE_HEIGHT * 2.0f};
         v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
     }
     else if (tile->type == TileType::Water) {
         v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
         v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
+                          TILE_HEIGHT * 3.0f};
+        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
+                          TILE_HEIGHT * 2.0f};
     }
 }
 
@@ -228,47 +223,33 @@ void ScreenGame::onEvent(const sf::Event& e)
             else {
                 tile->type = TileType::Road;
             }
-
-            // Update the road tiles to be the correct varient
-            // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-            for (int i = 0; i < 4; i++) {
-                Tile* neighbour = getTile(m_selectedTile + TILE_OFFSETS[i]);
-                if (neighbour && neighbour->type == tile->type) {
-
-                    // Cycle through 1, 2, 4, 8 or 2^0, 2^1, 2^2, 2^3
-                    tile->varient += std::pow(2, i);
-
-                    // Also update neighbour road varient
-                    neighbour->varient = 0;
-                    for (int j = 0; j < 4; j++) {
-                        Tile* subNeighbour =
-                            getTile(m_selectedTile + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                        if (subNeighbour && subNeighbour->type == tile->type) {
-                            neighbour->varient += std::pow(2, j);
-                        }
-                    }
-                }
-            }
         }
         else if (m_buttonPressed == sf::Mouse::Right) {
             tile->type = TileType::Grass;
-            for (int i = 0; i < 4; i++) {
-                Tile* neighbour = getTile(m_selectedTile + TILE_OFFSETS[i]);
-                if (neighbour && neighbour->type != TileType::Grass) {
-                    neighbour->varient = 0;
-                    for (int j = 0; j < 4; j++) {
-                        Tile* subNeighbour =
-                            getTile(m_selectedTile + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                        if (subNeighbour && subNeighbour->type == neighbour->type) {
-                            neighbour->varient += std::pow(2, j);
-                        }
-                    }
-                }
-            }
         }
+
+        autoTile(m_selectedTile);
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 updateTileTextureCoords(m_selectedTile + sf::Vector2i{i, j});
+            }
+        }
+    }
+}
+
+void ScreenGame::autoTile(const sf::Vector2i& position)
+{
+    https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+    for (int i = 0; i < 4; i++) {
+        Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
+        if (neighbour && neighbour->type != TileType::Grass) {
+            neighbour->varient = 0;
+            for (int j = 0; j < 4; j++) {
+                Tile* subNeighbour =
+                    getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                if (subNeighbour && subNeighbour->type == neighbour->type) {
+                    neighbour->varient += std::pow(2, j);
+                }
             }
         }
     }
@@ -285,11 +266,10 @@ sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
     window->setView(m_view);
-    
+
     // Render the tile map
     sf::RenderStates state = sf::RenderStates::Default;
     state.texture = &m_tilemap;
-
 
     auto frame = static_cast<float>(m_wateranim.getFrame().left);
     for (unsigned i = 0; i < m_tiles.size(); i++) {
@@ -301,7 +281,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         v[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
     }
 
-    window->draw(m_waterAnimationVerts.data(), m_waterAnimationVerts.size(), sf::Quads, state);
+    window->draw(m_waterAnimationVerts.data(), m_waterAnimationVerts.size(), sf::Quads,
+                 state);
     window->draw(m_tileVerts.data(), m_tileVerts.size(), sf::Quads, state);
 
     // Render the selected tile
