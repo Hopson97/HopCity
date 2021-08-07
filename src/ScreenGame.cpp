@@ -11,11 +11,12 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
     , m_wateranim(TILE_WIDTH, TILE_HEIGHT)
 {
-    m_tilemap.loadFromFile("Data/Tiles/Tilemap.png");
-    m_selectionTexture.loadFromFile("Data/Tiles/Selection.png");
+    m_tilemap.loadFromFile("Data/Textures/Tilemap.png");
+    m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
+    m_tileCorners.loadFromFile("Data/Textures/Corners.png");
+
     m_tileRect.setTexture(&m_selectionTexture);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
-    m_tileCorners.loadFromFile("Data/Tiles/Corners.png");
 
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setSize({1600, 900});
