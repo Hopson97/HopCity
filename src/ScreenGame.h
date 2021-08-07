@@ -37,6 +37,7 @@ class ScreenGame final : public Screen {
 
     std::vector<Tile> m_tiles;
     std::vector<sf::Vertex> m_grid;
+    std::vector<sf::Vertex> m_tileVerts;
 
     sf::Vector2i m_selectedTile;
     bool m_mousedown = false;
