@@ -1,11 +1,11 @@
-#ifndef IMGUI_SFML_H
-#define IMGUI_SFML_H
+#pragma once
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/System/Time.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Joystick.hpp>
+#include "SFML/Graphics/Color.hpp"
+#include "SFML/Graphics/Rect.hpp"
+#include "SFML/System/Time.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Joystick.hpp"
+
 
 #include "imgui-SFML_export.h"
 
@@ -115,4 +115,3 @@ IMGUI_SFML_API void DrawRectFilled(const sf::FloatRect& rect, const sf::Color& c
                                    float rounding = 0.0f, int rounding_corners = 0x0F);
 } // end of namespace ImGui
 
-#endif //# IMGUI_SFML_H

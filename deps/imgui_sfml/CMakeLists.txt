@@ -7,6 +7,4 @@ add_library(imgui_sfml
 )
 
 
-target_link_libraries(imgui_sfml 
-    ${CONAN_LIBS}
-)
+target_link_libraries(imgui_sfml sfml-audio sfml-graphics sfml-window sfml-system sfml-network ${OPENGL_LIBRARIES} )
