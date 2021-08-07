@@ -6,16 +6,9 @@ project(HopCity  VERSION 1.0)
 include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_basic_setup()
 
-
+file(GLOB_RECURSE SOURCES "src/*.cpp") #glob all the source files intp one place
 #Set executable
-add_executable(${PROJECT_NAME}     
-    src/main.cpp
-
-	src/Animation.cpp
-	src/Screen.cpp
-	src/ScreenMainMenu.cpp
-	src/ScreenGame.cpp
-)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 #Set C++17
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
