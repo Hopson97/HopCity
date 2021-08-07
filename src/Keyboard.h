@@ -19,6 +19,7 @@ class Keyboard {
 
             case sf::Event::KeyReleased:
                 m_keys[e.key.code] = false;
+                break;
 
             default:
                 break;

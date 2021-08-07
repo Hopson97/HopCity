@@ -1,8 +1,8 @@
 #include "Keyboard.h"
 #include "Screen.h"
-#include "ScreenMainMenu.h"
+#include "Game/ScreenMainMenu.h"
+#include "Game/ScreenGame.h"
 #include <SFML/Graphics/RenderWindow.hpp>
-
 #include "Game/World.h"
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
@@ -33,17 +33,18 @@ int main()
     // target.saveToFile("Data/Tiles/Tiles3.png");
 
     // Set up window and gui
-    sf::RenderWindow window({1600, 900}, "SFML");
+    sf::RenderWindow window({1600, 900}, "game");
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
     auto& io = ImGui::GetIO();
-    io.FontGlobalScale = ((window.getSize().x)/1000.f)*GLOBAL_FONT_SCALE;
+    //io.FontGlobalScale = ((window.getSize().x)/1000.f)*GLOBAL_FONT_SCALE;
 
 
     // Set up screen system
     ScreenManager screens;
-    screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
+    //screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
+    screens.pushScreen(std::make_unique<ScreenGame>(&screens));
     screens.update();
 
     // Time step, 30 ticks per second
@@ -73,6 +74,7 @@ int main()
                     if (e.key.code == sf::Keyboard::Escape) {
                         window.close();
                     }
+                    break;
 
                 default:
                     break;

@@ -16,9 +16,15 @@ ELSE ()
     conan_basic_setup()
 ENDIF ()
 
-file(GLOB_RECURSE SOURCES "src/*.cpp") #glob all the source files intp one place
 #Set executable
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} 
+    main.cpp
+    Animation.cpp
+    Screen.cpp 
+
+    Game/ScreenGame.cpp
+    Game/ScreenMainMenu.cpp
+)
 
 #Set C++17
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)

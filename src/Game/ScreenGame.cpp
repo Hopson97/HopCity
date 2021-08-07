@@ -9,7 +9,7 @@ const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
     , m_tiles(WORLD_SIZE * WORLD_SIZE)
-    , m_wateranim(TILE_WIDTH, TILE_HEIGHT)
+    , m_wateranim((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
 {
     m_tilemap.loadFromFile("Data/Textures/Tilemap.png");
     m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
@@ -96,19 +96,16 @@ void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
         v[3].texCoords = {TILE_WIDTH, 0};
     }
     else if (tile->type == TileType::Road) {
-        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT};
-        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
-                          TILE_HEIGHT * 2.0f};
-        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
+        v[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT};
+        v[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
     }
     else if (tile->type == TileType::Water) {
-        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
-                          TILE_HEIGHT * 3.0f};
-        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH,
-                          TILE_HEIGHT * 2.0f};
+        v[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        v[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        v[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
     }
 }
 
@@ -215,7 +212,7 @@ void ScreenGame::onEvent(const sf::Event& e)
         if (!tile) {
             return;
         }
-        tile->varient = 0;
+        
         if (m_buttonPressed == sf::Mouse::Left) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
                 tile->type = TileType::Water;
@@ -237,24 +234,6 @@ void ScreenGame::onEvent(const sf::Event& e)
     }
 }
 
-void ScreenGame::autoTile(const sf::Vector2i& position)
-{
-    https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-    for (int i = 0; i < 4; i++) {
-        Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
-        if (neighbour && neighbour->type != TileType::Grass) {
-            neighbour->varient = 0;
-            for (int j = 0; j < 4; j++) {
-                Tile* subNeighbour =
-                    getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                if (subNeighbour && subNeighbour->type == neighbour->type) {
-                    neighbour->varient += std::pow(2, j);
-                }
-            }
-        }
-    }
-}
-
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
 sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
@@ -271,6 +250,12 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     sf::RenderStates state = sf::RenderStates::Default;
     state.texture = &m_tilemap;
 
+    // if (ImGui::Begin("Info")) {
+    //    ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
+    //    ImGui::Checkbox("Draw Grid", &drawGrid);
+    //}
+    // ImGui::End();
+    // ImGui::ShowMetricsWindow(nullptr);
     auto frame = static_cast<float>(m_wateranim.getFrame().left);
     for (unsigned i = 0; i < m_tiles.size(); i++) {
         sf::Vertex* v = &m_waterAnimationVerts[i * 4];
@@ -293,11 +278,27 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     if (drawGrid && (int)m_currentZoom != 8) {
         window->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
+}
 
-    if (ImGui::Begin("Info")) {
-        ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
-        ImGui::Checkbox("Draw Grid", &drawGrid);
+void ScreenGame::autoTile(const sf::Vector2i& position)
+{
+    // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+    Tile* tile = getTile(position);
+    tile->varient = 0;
+    for (int i = 0; i < 4; i++) {
+        Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
+        if (neighbour && tile->type == neighbour->type) {
+            tile->varient += (int)std::pow(2, i);
+        }
+        if (neighbour && neighbour->type != TileType::Grass) {
+            neighbour->varient = 0;
+            for (int j = 0; j < 4; j++) {
+                Tile* subNeighbour =
+                    getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                if (subNeighbour && subNeighbour->type == neighbour->type) {
+                    neighbour->varient += (int)std::pow(2, j);
+                }
+            }
+        }
     }
-    ImGui::End();
-    ImGui::ShowMetricsWindow(nullptr);
 }

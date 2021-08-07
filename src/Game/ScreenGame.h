@@ -1,15 +1,18 @@
 #pragma once
 
-#include "Animation.h"
-#include "Screen.h"
+#include "../Animation.h"
+#include "../Screen.h"
+#include "World.h"
 
-#include "Game/World.h"
-
-enum class TileType { Grass, Road, Water };
+enum class TileType : uint8_t {
+    Grass,
+    Road,
+    Water,
+};
 
 struct Tile {
-    TileType type = TileType::Water;
-    int varient = 0;
+    TileType type = TileType::Grass;
+    uint8_t varient = 0;
 };
 
 class ScreenGame final : public Screen {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Screen.h"
+#include "../Screen.h"
 
 class ScreenMainMenu final : public Screen {
     enum class Menu {
