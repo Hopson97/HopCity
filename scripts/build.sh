@@ -35,7 +35,10 @@ mkdir -p build/release
 mkdir -p build/debug
 cd build
 
-conan install .. -s compiler.libcxx=libstdc++11 --build=missing
+if [ "$1" = "install" ]
+then
+    conan install .. -s compiler.libcxx=libstdc++11 --build=missing
+fi
 
 # Builds target
 if [ "$1" = "release" ]
