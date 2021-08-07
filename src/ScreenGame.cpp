@@ -104,15 +104,15 @@ void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
     }
     else if (tile->type == TileType::Road) {
         v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT};
-        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2};
+        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
         v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
     }
     else if (tile->type == TileType::Water) {
-        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2};
-        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 3};
-        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3};
-        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2};
+        v[0].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        v[1].texCoords = {tile->varient * (int)TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        v[2].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        v[3].texCoords = {tile->varient * (int)TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
     }
 }
 
@@ -290,8 +290,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     state.texture = &m_tilemap;
 
 
-    auto frame = m_wateranim.getFrame().left;
-    for (int i = 0; i < m_tiles.size(); i++) {
+    auto frame = static_cast<float>(m_wateranim.getFrame().left);
+    for (unsigned i = 0; i < m_tiles.size(); i++) {
         sf::Vertex* v = &m_waterAnimationVerts[i * 4];
 
         v[0].texCoords = {frame, TILE_HEIGHT * 3};
