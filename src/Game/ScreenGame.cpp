@@ -18,10 +18,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_tileRect.setTexture(&m_selectionTexture);
     m_tileRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
-    m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
-    m_view.setSize({1600, 900});
-    m_view.zoom(m_currentZoom);
-
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         // west-north grid lines
         auto startPos = tileToScreenPosition(0, i);
@@ -86,7 +82,11 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
 void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
 {
-    sf::Vertex* v = &m_tileVerts[(position.y * WORLD_SIZE + position.x) * 4];
+    unsigned vertexIndex = (position.y * WORLD_SIZE + position.x) * 4;
+    if (vertexIndex >= m_tileVerts.size()) {
+        return;
+    }
+    sf::Vertex* v = &m_tileVerts[vertexIndex];
     const Tile* tile = getTile(position);
 
     if (tile->type == TileType::Grass) {
@@ -111,37 +111,8 @@ void ScreenGame::updateTileTextureCoords(const sf::Vector2i& position)
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
-
-    // Move the view if it is on the edge of the screen
-    constexpr int GAP = 100;
+    m_camera.onInput(keyboard, window);
     auto mousePosition = sf::Mouse::getPosition(window);
-    if (mousePosition.x < GAP) {
-        //    m_view.move(-5, 0);
-    }
-    else if (mousePosition.x > (int)window.getSize().x - GAP) {
-        //   m_view.move(5, 0);
-    }
-    if (mousePosition.y < GAP) {
-        //     m_view.move(0, -5);
-    }
-    else if (mousePosition.y > (int)window.getSize().y - GAP) {
-        //      m_view.move(0, 5);
-    }
-
-    if (keyboard.isKeyDown(sf::Keyboard::A)) {
-        m_view.move(-4, 0);
-    }
-    else if (keyboard.isKeyDown(sf::Keyboard::D)) {
-        m_view.move(4, 0);
-    }
-
-    if (keyboard.isKeyDown(sf::Keyboard::S)) {
-        m_view.move(0, 4);
-    }
-    else if (keyboard.isKeyDown(sf::Keyboard::W)) {
-        m_view.move(0, -4);
-    }
-
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
     sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
@@ -150,8 +121,8 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
                            (int)worldPos.y % (int)TILE_HEIGHT};
 
     m_selectedTile = {
-        (cell.y - (int)m_originOffset.y) + (cell.x - (int)m_originOffset.x),
-        (cell.y - (int)m_originOffset.y) - (cell.x - (int)m_originOffset.x),
+        (cell.y - (int)WORLD_ORIGIN_OFFSET.y) + (cell.x - (int)WORLD_ORIGIN_OFFSET.x),
+        (cell.y - (int)WORLD_ORIGIN_OFFSET.y) - (cell.x - (int)WORLD_ORIGIN_OFFSET.x),
     };
 
     sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
@@ -165,7 +136,15 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         m_selectedTile.x++;
 }
 
-void ScreenGame::onGUI() {}
+void ScreenGame::onGUI()
+{
+    if (ImGui::Begin("Info")) {
+        ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
+        ImGui::Checkbox("Draw Grid", &drawGrid);
+    }
+    ImGui::End();
+    ImGui::ShowMetricsWindow(nullptr);
+}
 
 Tile* ScreenGame::getTile(const sf::Vector2i& position)
 {
@@ -179,6 +158,7 @@ Tile* ScreenGame::getTile(const sf::Vector2i& position)
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
+    m_camera.onEvent(e);
     if (e.type == sf::Event::MouseButtonPressed) {
         m_mousedown = true;
         m_buttonPressed = e.mouseButton.button;
@@ -186,33 +166,11 @@ void ScreenGame::onEvent(const sf::Event& e)
     else if (e.type == sf::Event::MouseButtonReleased) {
         m_mousedown = false;
     }
-    else if (e.type == sf::Event::MouseWheelScrolled) {
-        if (e.mouseWheelScroll.delta > 0 && m_currentZoom == 8) {
-            m_view.zoom(1.0f / 8.0f);
-            m_currentZoom *= 1.0f / 8.0f;
-        }
-        else if (e.mouseWheelScroll.delta > 0 && m_currentZoom > 0.065) {
-            m_view.zoom(0.5f);
-            m_currentZoom *= 0.5f;
-        }
-        else if (e.mouseWheelScroll.delta < 0 && m_currentZoom < 1) {
-            m_view.zoom(2.0f);
-            m_currentZoom *= 2.0f;
-        }
-        else if (e.mouseWheelScroll.delta < 0 && (int)m_currentZoom == 1) {
-            m_view.zoom(8.0f);
-            m_currentZoom = 8.0f;
-        }
-
-        std::cout << m_currentZoom << std::endl;
-    }
 
     if (m_mousedown) {
-        Tile* tile = &m_tiles.at(m_selectedTile.y * WORLD_SIZE + m_selectedTile.x);
-        if (!tile) {
-            return;
-        }
-        
+
+        Tile* tile = getTile(m_selectedTile);
+
         if (m_buttonPressed == sf::Mouse::Left) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
                 tile->type = TileType::Water;
@@ -236,26 +194,14 @@ void ScreenGame::onEvent(const sf::Event& e)
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
-sf::Vector2f ScreenGame::tileToScreenPosition(int x, int y)
-{
-    return {(m_originOffset.x * TILE_WIDTH) + (x - y) * (TILE_WIDTH / 2.0f),
-            (m_originOffset.y * TILE_HEIGHT) + (x + y) * (TILE_HEIGHT / 2.0f)};
-}
-
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
-    window->setView(m_view);
+    m_camera.setViewToCamera(*window);
 
     // Render the tile map
     sf::RenderStates state = sf::RenderStates::Default;
     state.texture = &m_tilemap;
 
-    // if (ImGui::Begin("Info")) {
-    //    ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
-    //    ImGui::Checkbox("Draw Grid", &drawGrid);
-    //}
-    // ImGui::End();
-    // ImGui::ShowMetricsWindow(nullptr);
     auto frame = static_cast<float>(m_wateranim.getFrame().left);
     for (unsigned i = 0; i < m_tiles.size(); i++) {
         sf::Vertex* v = &m_waterAnimationVerts[i * 4];
@@ -275,7 +221,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     window->draw(m_tileRect);
 
     // Render the the tile map grid
-    if (drawGrid && (int)m_currentZoom != 8) {
+    if (drawGrid && (int)m_camera.zoomLevel != 8) {
         window->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 }

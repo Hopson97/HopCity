@@ -3,6 +3,7 @@
 #include "../Animation.h"
 #include "../Screen.h"
 #include "World.h"
+#include "Camera.h"
 
 enum class TileType : uint8_t {
     Grass,
@@ -28,16 +29,12 @@ class ScreenGame final : public Screen {
   private:
     Tile* getTile(const sf::Vector2i& position);
     void updateTileTextureCoords(const sf::Vector2i& position);
-    sf::Vector2f tileToScreenPosition(int x, int y);
-
     void autoTile(const sf::Vector2i& position);
-
-    sf::View m_view;
 
     sf::RectangleShape m_tileRect;
     sf::Texture m_tilemap;
     sf::Texture m_selectionTexture;
-    sf::Vector2f m_originOffset{WORLD_SIZE, WORLD_SIZE};
+    
 
     sf::Image m_tileCorners;
 
@@ -52,6 +49,8 @@ class ScreenGame final : public Screen {
 
     bool drawGrid = true;
 
-    float m_currentZoom = 0.25;
+    Camera m_camera;
+
+    
     Animation m_wateranim;
 };
