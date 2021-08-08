@@ -18,6 +18,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
     m_camera.onInput(keyboard, window);
+
     auto mousePosition = sf::Mouse::getPosition(window);
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
@@ -69,8 +70,11 @@ void ScreenGame::onEvent(const sf::Event& e)
 
         forEachSelectedTile([&](const sf::Vector2i& tilepos) {
             Tile* tile = m_map.getTile(tilepos);
-            tile->type = e.mouseButton.button == sf::Mouse::Left ? TileType::Water
-                                                                 : TileType::Grass;
+            tile->type =
+                e.mouseButton.button == sf::Mouse::Left
+                    ? (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ? TileType::Road
+                                                                   : TileType::Water)
+                    : TileType::Grass;
 
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
@@ -79,28 +83,6 @@ void ScreenGame::onEvent(const sf::Event& e)
             }
         });
     }
-    /*
-        if (m_mousedown) {
-            Tile* tile = m_map.getTile(m_selectedTile);
-            if (m_buttonPressed == sf::Mouse::Left) {
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                    tile->type = TileType::Water;
-                }
-                else {
-                    tile->type = TileType::Road;
-                }
-            }
-            else if (m_buttonPressed == sf::Mouse::Right) {
-                tile->type = TileType::Grass;
-            }
-
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    m_map.updateTile(m_selectedTile + sf::Vector2i{i, j});
-                }
-            }
-        }
-        */
 }
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
