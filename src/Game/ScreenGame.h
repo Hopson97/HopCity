@@ -2,9 +2,9 @@
 
 #include "../Animation.h"
 #include "../Screen.h"
-#include "World.h"
 #include "Camera.h"
 #include "TileMap.h"
+#include "World.h"
 
 class ScreenGame final : public Screen {
   public:
@@ -17,15 +17,10 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
-
-
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
-    
 
     sf::Image m_tileCorners;
-
-
 
     sf::Vector2i m_selectedTile;
     bool m_mousedown = false;
@@ -36,6 +31,4 @@ class ScreenGame final : public Screen {
     Camera m_camera;
 
     TileMap m_map;
-
-    
 };

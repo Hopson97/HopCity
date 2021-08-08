@@ -23,3 +23,5 @@ Release/
 *.srctrlbm
 /deps/SFML-2.5.1/
 /libs/
+
+imgui.ini

@@ -4,19 +4,18 @@
 
 #include "World.h"
 
-Camera::Camera() {
+Camera::Camera()
+{
     m_view.setCenter(tileToScreenPosition(WORLD_SIZE / 2, WORLD_SIZE / 2));
     m_view.setSize({1600, 900});
     m_view.zoom(zoomLevel);
 }
 
-void Camera::setViewToCamera(sf::RenderWindow& window) 
-{ window.setView(m_view); }
+void Camera::setViewToCamera(sf::RenderWindow& window) { window.setView(m_view); }
 
-void Camera::onEvent(const sf::Event& e) 
+void Camera::onEvent(const sf::Event& e)
 {
-    if (e.type == sf::Event::MouseWheelScrolled)
-    {
+    if (e.type == sf::Event::MouseWheelScrolled) {
         if (e.mouseWheelScroll.delta > 0 && zoomLevel == 8) {
             m_view.zoom(1.0f / 8.0f);
             zoomLevel *= 1.0f / 8.0f;
@@ -36,7 +35,8 @@ void Camera::onEvent(const sf::Event& e)
     }
 }
 
-void Camera::onInput(const Keyboard& keyboard, const sf::RenderWindow& window) {
+void Camera::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
+{
 
     // Move the view if it is on the edge of the screen
     constexpr int GAP = 100;

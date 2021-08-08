@@ -4,7 +4,6 @@
 #include <imgui_sfml/imgui.h>
 #include <iostream>
 
-
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
 
@@ -14,10 +13,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
     m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
-
-
-
-
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
@@ -69,9 +64,7 @@ void ScreenGame::onEvent(const sf::Event& e)
     }
 
     if (m_mousedown) {
-
         Tile* tile = m_map.getTile(m_selectedTile);
-
         if (m_buttonPressed == sf::Mouse::Left) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
                 tile->type = TileType::Water;

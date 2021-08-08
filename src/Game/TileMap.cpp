@@ -1,57 +1,54 @@
 #include "TileMap.h"
 
 #include "World.h"
+#include <cmath>
+
+namespace {
+    void addIsometricQuad(std::vector<sf::Vertex>* quads,
+                          const sf::Vector2i& tilePosition)
+    {
+        auto pos = tileToScreenPosition(tilePosition.x, tilePosition.y);
+
+        quads->emplace_back(pos);
+        quads->emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
+        quads->emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
+        quads->emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
+    }
+
+    void addGridLine(std::vector<sf::Vertex>* gridMap, sf::Vector2f startPosition,
+                     sf::Vector2f endPosition)
+    {
+        startPosition.x += TILE_WIDTH / 2;
+        endPosition.x += TILE_WIDTH / 2;
+        gridMap->emplace_back(startPosition, sf::Color::Black);
+        gridMap->emplace_back(endPosition, sf::Color::Black);
+    }
+} // namespace
 
 TileMap::TileMap()
     : m_tiles(WORLD_SIZE * WORLD_SIZE)
-    , m_wateranim((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
+    , m_waterAnimation((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
 {
-    m_tilemap.loadFromFile("Data/Textures/Tilemap.png");
+    m_tileTextures.loadFromFile("Data/Textures/Tilemap.png");
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
-        // west-north grid lines
-        auto startPos = tileToScreenPosition(0, i);
-        auto endPos = tileToScreenPosition(WORLD_SIZE, i);
-        startPos.x += TILE_WIDTH / 2;
-        endPos.x += TILE_WIDTH / 2;
-        m_grid.emplace_back(startPos, sf::Color::Black);
-        m_grid.emplace_back(endPos, sf::Color::Black);
-
-        // east-west grid lines
-        startPos = tileToScreenPosition(i, -1);
-        endPos = tileToScreenPosition(i, WORLD_SIZE - 1);
-        startPos.y += TILE_HEIGHT / 2;
-        endPos.y += TILE_HEIGHT / 2;
-        m_grid.emplace_back(startPos, sf::Color::Black);
-        m_grid.emplace_back(endPos, sf::Color::Black);
+        addGridLine(&m_grid, tileToScreenPosition(0, i),
+                    tileToScreenPosition(WORLD_SIZE, i));
+        addGridLine(&m_grid, tileToScreenPosition(i, -1),
+                    tileToScreenPosition(i, WORLD_SIZE - 1));
     }
 
-    // "Auto tile" the tilemap
     for (int y = 0; y < WORLD_SIZE; y++) {
         for (int x = 0; x < WORLD_SIZE; x++) {
-            auto pos = tileToScreenPosition(x, y);
-
-            m_tileVerts.emplace_back(pos);
-            m_tileVerts.emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
-            m_tileVerts.emplace_back(
-                sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
-            m_tileVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
-
-            m_waterAnimationVerts.emplace_back(pos);
-            m_waterAnimationVerts.emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
-            m_waterAnimationVerts.emplace_back(
-                sf::Vector2f{pos.x + TILE_WIDTH, pos.y + TILE_HEIGHT});
-            m_waterAnimationVerts.emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
-
+            addIsometricQuad(&m_foregroundTileVerticies, {x, y});
+            addIsometricQuad(&m_backgroundTileVerticies, {x, y});
             updateTile({x, y});
         }
     }
 
-    m_wateranim.addFrame(0, 0, sf::milliseconds(320));
-    m_wateranim.addFrame(0, 1, sf::milliseconds(320));
-    m_wateranim.addFrame(0, 2, sf::milliseconds(320));
-    m_wateranim.addFrame(0, 3, sf::milliseconds(320));
-    m_wateranim.addFrame(0, 4, sf::milliseconds(320));
+    for (int i = 0; i < 5; i++) {
+        m_waterAnimation.addFrame(0, i, sf::milliseconds(320));
+    }
 }
 
 Tile* TileMap::getTile(const sf::Vector2i& position)
@@ -64,7 +61,7 @@ Tile* TileMap::getTile(const sf::Vector2i& position)
     return &m_tiles.at(position.y * WORLD_SIZE + position.x);
 }
 
-void TileMap::updateTile(const sf::Vector2i& position) 
+void TileMap::updateTile(const sf::Vector2i& position)
 {
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
@@ -88,53 +85,54 @@ void TileMap::updateTile(const sf::Vector2i& position)
         }
     }
 
-
     unsigned vertexIndex = (position.y * WORLD_SIZE + position.x) * 4;
-    if (vertexIndex >= m_tileVerts.size()) {
+    if (vertexIndex >= m_foregroundTileVerticies.size()) {
         return;
     }
-    sf::Vertex* v = &m_tileVerts[vertexIndex];
+    sf::Vertex* vertex = &m_foregroundTileVerticies[vertexIndex];
 
     if (tile->type == TileType::Grass) {
-        v[0].texCoords = {0, 0};
-        v[1].texCoords = {0, TILE_HEIGHT};
-        v[2].texCoords = {TILE_WIDTH, TILE_HEIGHT};
-        v[3].texCoords = {TILE_WIDTH, 0};
+        vertex[0].texCoords = {0, 0};
+        vertex[1].texCoords = {0, TILE_HEIGHT};
+        vertex[2].texCoords = {TILE_WIDTH, TILE_HEIGHT};
+        vertex[3].texCoords = {TILE_WIDTH, 0};
     }
     else if (tile->type == TileType::Road) {
-        v[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT};
-        v[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
+        vertex[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT};
+        vertex[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        vertex[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+                               TILE_HEIGHT * 2.0f};
+        vertex[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
     }
     else if (tile->type == TileType::Water) {
-        v[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        v[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        v[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        v[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        vertex[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        vertex[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        vertex[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+                               TILE_HEIGHT * 3.0f};
+        vertex[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+                               TILE_HEIGHT * 2.0f};
     }
 }
 
-void TileMap::renderTiles(sf::RenderWindow* window) 
+void TileMap::renderTiles(sf::RenderWindow* window)
 {
     sf::RenderStates state = sf::RenderStates::Default;
-    state.texture = &m_tilemap;
+    state.texture = &m_tileTextures;
 
-    auto frame = static_cast<float>(m_wateranim.getFrame().left);
+    auto frame = static_cast<float>(m_waterAnimation.getFrame().left);
     for (unsigned i = 0; i < m_tiles.size(); i++) {
-        sf::Vertex* v = &m_waterAnimationVerts[i * 4];
+        sf::Vertex* vertex = &m_backgroundTileVerticies[i * 4];
 
-        v[0].texCoords = {frame, TILE_HEIGHT * 3};
-        v[1].texCoords = {frame, TILE_HEIGHT * 4};
-        v[2].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 4};
-        v[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
+        vertex[0].texCoords = {frame, TILE_HEIGHT * 3};
+        vertex[1].texCoords = {frame, TILE_HEIGHT * 4};
+        vertex[2].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 4};
+        vertex[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
     }
 
-    window->draw(m_waterAnimationVerts.data(), m_waterAnimationVerts.size(), sf::Quads,
-                 state);
-    window->draw(m_tileVerts.data(), m_tileVerts.size(), sf::Quads, state);
+    window->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
+                 sf::Quads, state);
+    window->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
+                 sf::Quads, state);
 
     window->draw(m_grid.data(), m_grid.size(), sf::Lines);
-
-
 }

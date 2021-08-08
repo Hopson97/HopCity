@@ -1,13 +1,11 @@
+#include "Game/ScreenGame.h"
+#include "Game/ScreenMainMenu.h"
+#include "Game/World.h"
 #include "Keyboard.h"
 #include "Screen.h"
-#include "Game/ScreenMainMenu.h"
-#include "Game/ScreenGame.h"
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "Game/World.h"
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
-
-#define GLOBAL_FONT_SCALE 1.0f
 
 int main()
 {
@@ -37,13 +35,15 @@ int main()
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
-    auto& io = ImGui::GetIO();
-    //io.FontGlobalScale = ((window.getSize().x)/1000.f)*GLOBAL_FONT_SCALE;
 
+    // Update ImGUI UI scaling for 4K monitors
+    if (sf::VideoMode::getDesktopMode().width > 3600) {
+        ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1000.f);
+    }
 
     // Set up screen system
     ScreenManager screens;
-    //screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
+    // screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
     screens.pushScreen(std::make_unique<ScreenGame>(&screens));
     screens.update();
 

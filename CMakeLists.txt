@@ -18,12 +18,15 @@ ENDIF ()
 
 #Set executable
 add_executable(${PROJECT_NAME} 
-    main.cpp
-    Animation.cpp
-    Screen.cpp 
+    src/main.cpp
+    src/Animation.cpp
+    src/Screen.cpp 
 
-    Game/ScreenGame.cpp
-    Game/ScreenMainMenu.cpp
+    src/Game/ScreenGame.cpp
+    src/Game/ScreenMainMenu.cpp
+    src/Game/Camera.cpp
+    src/Game/TileMap.cpp
+    src/Game/World.cpp
 )
 
 #Set C++17
