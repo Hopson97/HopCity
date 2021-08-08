@@ -6,13 +6,13 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
+#include "Profiler.h"
 
 int main()
 {
     sf::Image grass;
     sf::Image path;
     sf::Image target;
-
     // grass.loadFromFile("Data/Tiles/road3.png");
     // target.create(512, 128, sf::Color::Magenta);
     //
@@ -62,6 +62,7 @@ int main()
 
         sf::Event e;
         while (window.pollEvent(e)) {
+
             screen->onEvent(e);
             keyboard.update(e);
             ImGui::SFML::ProcessEvent(e);
@@ -89,6 +90,7 @@ int main()
         lag += elapsed;
 
         // Real time stuff
+        screen->profiler.clear();
         screen->onInput(keyboard, window);
         screen->onUpdate(dt);
         ImGui::SFML::Update(window, dt);

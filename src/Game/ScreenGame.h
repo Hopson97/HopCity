@@ -7,6 +7,8 @@
 #include "World.h"
 #include <functional>
 
+//Main Game Class
+
 class ScreenGame final : public Screen {
   public:
     ScreenGame(ScreenManager* screens);

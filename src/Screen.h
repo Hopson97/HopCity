@@ -5,6 +5,7 @@
 #include <memory>
 #include <stack>
 #include <vector>
+#include "Profiler.h"
 
 class GUI;
 
@@ -51,9 +52,10 @@ class Screen {
     virtual void onUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onFixedUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onRender(sf::RenderWindow* window) = 0;
-
+    Profiler profiler;
   protected:
     ScreenManager* m_pScreens;
+
 };
 
 bool imguiBeginMenu(const char* name);

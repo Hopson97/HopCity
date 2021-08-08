@@ -27,7 +27,7 @@ add_executable(${PROJECT_NAME}
     src/Game/Camera.cpp
     src/Game/TileMapRenderer.cpp
     src/Game/World.cpp
-)
+        src/Profiler.h)
 
 #Set C++17
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
