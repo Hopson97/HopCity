@@ -2,6 +2,14 @@
 
 Isometric defo not sim city building game
 
+### Windows (Clion)
+
+_only tested with mingw 7.3.0_
+
+Clone this repository and create a `libs` folder in the directory. In this you place the already compiled 
+binaries from [here](https://www.sfml-dev.org/download/sfml/2.5.1/)  (choose right compiler), and place it
+in the created folder. After that reload the `CMakeLists.txt ` and you should be ready to run.
+
 ### Windows (Visual Studio)
 
 The easiest way to build is to use [vcpkg](https://vcpkg.io/en/index.html) and install SFML through this.
@@ -50,3 +58,5 @@ To build and run in release mode, simply add the `release` suffix:
 sh scripts/build.sh release
 sh scripts/run.sh release
 ```
+
+[]: https://www.sfml-dev.org/download/sfml/2.5.1/
