@@ -17,7 +17,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
-    auto& ts = profiler.requestTimeslot("Input");
+    auto& ts = profiler.newTimeslot("Input");
     m_camera.onInput(keyboard, window);
 
     auto mousePosition = sf::Mouse::getPosition(window);
@@ -51,7 +51,7 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
 
 void ScreenGame::onGUI()
 {
-    auto& ts = profiler.requestTimeslot("GUI");
+    auto& ts = profiler.newTimeslot("GUI");
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
         ImGuiIO& io = ImGui::GetIO();
@@ -65,7 +65,7 @@ void ScreenGame::onGUI()
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
-    auto& ts = profiler.requestTimeslot("Event");
+    auto& ts = profiler.newTimeslot("Event");
     m_camera.onEvent(e);
     if (e.type == sf::Event::MouseButtonPressed) {
         m_quadDrag = true;
@@ -93,13 +93,13 @@ void ScreenGame::onEvent(const sf::Event& e)
 }
 
 void ScreenGame::onUpdate(const sf::Time& dt) {
-    auto& ts = profiler.requestTimeslot("Update");
+    auto& ts = profiler.newTimeslot("Update");
     ts.stop();
 }
 
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
-    auto& ts = profiler.requestTimeslot("Render");
+    auto& ts = profiler.newTimeslot("Render");
     m_camera.setViewToCamera(*window);
 
     // Render the tile map

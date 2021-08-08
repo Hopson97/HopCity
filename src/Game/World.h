@@ -2,7 +2,7 @@
 
 #include <SFML/System/Vector2.hpp>
 
-constexpr int WORLD_SIZE = 512;
+constexpr int WORLD_SIZE = 250;
 
 constexpr float TILE_HEIGHT = 16.0f;
 constexpr float TILE_WIDTH = 32.0f;

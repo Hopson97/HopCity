@@ -9,6 +9,7 @@ class TimeSlot{
     TimeSlot(std::string _name): name(_name){
         begin = _internalClock.restart();
         end = begin;
+
     }
 
     void stop(){
@@ -31,16 +32,23 @@ class TimeSlot{
 class Profiler {
   public:
     enum ProfilerMode{MILLIS,MICRO};
-    Profiler()=default;
+    Profiler(){
+        _last50times.resize(50);
+    };
     ProfilerMode Mode = MICRO;
     void reset(){
 
         auto temp =_internalClock.restart();
+
         Frametime = temp.asSeconds();
         FrametimeMicro = temp.asMicroseconds();
         FrametimeMilli = temp.asMilliseconds();
         _last50times.push_back(Frametime);
         if(_last50times.size()>50){_last50times.pop_front();}
+
+        float tmpavg;
+        for(auto& x:_last50times){tmpavg+=x;}
+        FrametimeAverage = tmpavg/0.05;
 
         for(auto& x:_activeslots){
 
@@ -61,6 +69,7 @@ class Profiler {
                 _temptimes[x]=_last50times[x];
             }
             ImGui::PlotHistogram("##Times",_temptimes.data(),_last50times.size());
+            ImGui::Text("Avg: %.2f ms,(%.1f fps)",FrametimeAverage,1000.f/FrametimeAverage);
             ImGui::Separator();
             ImGui::TextColored({0, 0.6, 0.188,1},"Times in %s", Mode==MILLIS?"Milliseconds":"Microseconds");
             std::vector<float> temptime;
@@ -73,12 +82,13 @@ class Profiler {
         ImGui::End();
         _lastSlots.clear();
     };
-    TimeSlot& requestTimeslot(std::string name){
+    TimeSlot& newTimeslot(std::string name){
         return _activeslots.emplace_back(name);
     };
     int FrametimeMilli;
     int FrametimeMicro;
     float Frametime;
+    float FrametimeAverage;
   private:
     std::deque<float> _last50times;
     std::vector<TimeSlot> _activeslots;
