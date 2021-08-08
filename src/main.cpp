@@ -38,7 +38,7 @@ int main()
 
     // Update ImGUI UI scaling for 4K monitors
     if (sf::VideoMode::getDesktopMode().width > 3600) {
-        //ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);
+        ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);
     }
 
     // Set up screen system
