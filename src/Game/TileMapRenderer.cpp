@@ -1,4 +1,4 @@
-#include "TileMap.h"
+#include "TileMapRenderer.h"
 
 #include "World.h"
 #include <cmath>
@@ -27,11 +27,11 @@ namespace {
     }
 } // namespace
 
-TileMap::TileMap()
+TileMapRenderer::TileMapRenderer()
     : m_tiles(WORLD_SIZE * WORLD_SIZE)
     , m_waterAnimation((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
 {
-    m_tileTextures.loadFromFile("Data/Textures/Tilemap.png");
+    m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition({0, i}),
@@ -53,7 +53,7 @@ TileMap::TileMap()
     }
 }
 
-Tile* TileMap::getTile(const sf::Vector2i& position)
+Tile* TileMapRenderer::getTile(const sf::Vector2i& position)
 {
     static Tile e;
     if (position.y < 0 || position.y >= WORLD_SIZE || position.x < 0 ||
@@ -63,7 +63,7 @@ Tile* TileMap::getTile(const sf::Vector2i& position)
     return &m_tiles.at(position.y * WORLD_SIZE + position.x);
 }
 
-void TileMap::updateTile(const sf::Vector2i& position)
+void TileMapRenderer::updateTile(const sf::Vector2i& position)
 {
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
@@ -116,7 +116,7 @@ void TileMap::updateTile(const sf::Vector2i& position)
     }
 }
 
-void TileMap::renderTiles(sf::RenderWindow* window, bool doDetail)
+void TileMapRenderer::renderTiles(sf::RenderWindow* window, bool doDetail)
 {
     sf::RenderStates state = sf::RenderStates::Default;
     state.texture = &m_tileTextures;

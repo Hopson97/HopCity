@@ -16,9 +16,9 @@ struct Tile {
     uint8_t varient = 0;
 };
 
-struct TileMap {
+struct TileMapRenderer {
   public:
-    TileMap();
+    TileMapRenderer();
 
     Tile* getTile(const sf::Vector2i& position);
     void updateTile(const sf::Vector2i& position);
