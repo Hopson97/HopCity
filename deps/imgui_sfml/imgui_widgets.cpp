@@ -2879,7 +2879,7 @@ int ImParseFormatPrecision(const char* fmt, int default_precision)
 bool ImGui::TempInputText(const ImRect& bb, ImGuiID id, const char* label, char* buf, int buf_size, ImGuiInputTextFlags flags)
 {
     // On the first frame, g.TempInputTextId == 0, then on subsequent frames it becomes == id.
-    // We clear ActiveID on the first frame to allow the InputText() taking it back.
+    // We reset ActiveID on the first frame to allow the InputText() taking it back.
     ImGuiContext& g = *GImGui;
     const bool init = (g.TempInputId != id);
     if (init)
@@ -3609,7 +3609,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             g.ActiveIdUsingKeyInputMask |= ((ImU64)1 << ImGuiKey_Tab);
     }
 
-    // We have an edge case if ActiveId was set through another widget (e.g. widget being swapped), clear id immediately (don't wait until the end of the function)
+    // We have an edge case if ActiveId was set through another widget (e.g. widget being swapped), reset id immediately (don't wait until the end of the function)
     if (g.ActiveId == id && state == NULL)
         ClearActiveID();
 
@@ -6805,7 +6805,7 @@ ImGuiTabItem* ImGui::TabBarFindTabByID(ImGuiTabBar* tab_bar, ImGuiID tab_id)
     return NULL;
 }
 
-// The *TabId fields be already set by the docking system _before_ the actual TabItem was created, so we clear them regardless.
+// The *TabId fields be already set by the docking system _before_ the actual TabItem was created, so we reset them regardless.
 void ImGui::TabBarRemoveTab(ImGuiTabBar* tab_bar, ImGuiID tab_id)
 {
     if (ImGuiTabItem* tab = TabBarFindTabByID(tab_bar, tab_id))

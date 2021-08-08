@@ -2,6 +2,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
+//cross platform memory usage thingy
 
 class TimeSlot{
   public:
@@ -32,7 +33,7 @@ class Profiler {
     enum ProfilerMode{MILLIS,MICRO};
     Profiler()=default;
     ProfilerMode Mode = MICRO;
-    void clear(){
+    void reset(){
 
         auto temp =_internalClock.restart();
         Frametime = temp.asSeconds();
@@ -40,6 +41,7 @@ class Profiler {
         FrametimeMilli = temp.asMilliseconds();
         _last50times.push_back(Frametime);
         if(_last50times.size()>50){_last50times.pop_front();}
+
         for(auto& x:_activeslots){
 
             if(!x.stopped){
@@ -58,7 +60,7 @@ class Profiler {
             for(int x =0;x<_temptimes.size();x++){
                 _temptimes[x]=_last50times[x];
             }
-            ImGui::PlotHistogram("History",_temptimes.data(),_last50times.size());
+            ImGui::PlotHistogram("##Times",_temptimes.data(),_last50times.size());
             ImGui::Separator();
             ImGui::TextColored({0, 0.6, 0.188,1},"Times in %s", Mode==MILLIS?"Milliseconds":"Microseconds");
             std::vector<float> temptime;

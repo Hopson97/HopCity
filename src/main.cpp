@@ -90,7 +90,7 @@ int main()
         lag += elapsed;
 
         // Real time stuff
-        screen->profiler.clear();
+        screen->profiler.reset();
         screen->onInput(keyboard, window);
         screen->onUpdate(dt);
         ImGui::SFML::Update(window, dt);

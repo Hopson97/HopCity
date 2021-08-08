@@ -1044,7 +1044,7 @@ static void ShowDemoWindowWidgets()
             ImGui::InputText("password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
             ImGui::SameLine(); HelpMarker("Display all characters as '*'.\nDisable clipboard cut and copy.\nDisable logging.\n");
             ImGui::InputTextWithHint("password (w/ hint)", "<password>", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
-            ImGui::InputText("password (clear)", password, IM_ARRAYSIZE(password));
+            ImGui::InputText("password (reset)", password, IM_ARRAYSIZE(password));
             ImGui::TreePop();
         }
 
