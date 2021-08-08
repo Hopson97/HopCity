@@ -103,7 +103,9 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
-    m_map.renderTiles(window, m_camera.zoomLevel < 2);
+    m_map.setDetail(m_camera.zoomLevel < 2);
+    m_map.updateAnimation();
+    window->draw(m_map);
 
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);

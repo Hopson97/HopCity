@@ -4,6 +4,8 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/Drawable.hpp>
 
 enum class TileType : uint8_t {
     Grass,
@@ -16,14 +18,16 @@ struct Tile {
     uint8_t varient = 0;
 };
 
-struct TileMapRenderer {
+struct TileMapRenderer : public sf::Drawable, private sf::Transformable {
   public:
     TileMapRenderer();
 
     Tile* getTile(const sf::Vector2i& position);
     void updateTile(const sf::Vector2i& position);
 
-    void renderTiles(sf::RenderWindow* window, bool doDetail);
+    void updateAnimation();
+    void setDetail(bool showDetail);
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
   private:
     sf::Texture m_tileTextures;
@@ -32,4 +36,6 @@ struct TileMapRenderer {
     std::vector<sf::Vertex> m_foregroundTileVerticies;
     std::vector<sf::Vertex> m_backgroundTileVerticies;
     Animation m_waterAnimation;
+
+    bool m_showDetail;
 };

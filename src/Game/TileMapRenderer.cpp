@@ -116,14 +116,11 @@ void TileMapRenderer::updateTile(const sf::Vector2i& position)
     }
 }
 
-void TileMapRenderer::renderTiles(sf::RenderWindow* window, bool doDetail)
+void TileMapRenderer::updateAnimation() 
 {
-    sf::RenderStates state = sf::RenderStates::Default;
-    state.texture = &m_tileTextures;
-
     auto frame = static_cast<float>(m_waterAnimation.getFrame().left);
 
-    if (doDetail) {
+    if (m_showDetail) {
         for (unsigned i = 0; i < m_tiles.size(); i++) {
             sf::Vertex* vertex = &m_backgroundTileVerticies[i * 4];
 
@@ -133,13 +130,23 @@ void TileMapRenderer::renderTiles(sf::RenderWindow* window, bool doDetail)
             vertex[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
         }
     }
+}
 
-    window->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
-                 sf::Quads, state);
-    window->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
-                 sf::Quads, state);
+void TileMapRenderer::setDetail(bool showDetail) { m_showDetail = showDetail; }
 
-    if (doDetail) {
-        window->draw(m_grid.data(), m_grid.size(), sf::Lines);
+void TileMapRenderer::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+    states.transform *= getTransform();
+    states.texture = &m_tileTextures;
+
+    if (m_showDetail) {
+        target.draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
+                    sf::Quads, states);
+    }
+    target.draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
+                sf::Quads, states);
+
+    if (m_showDetail) {
+        target.draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 }

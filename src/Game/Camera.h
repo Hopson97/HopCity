@@ -6,10 +6,6 @@
 
 class Keyboard;
 
-enum class CameraEvent {
-
-};
-
 class Camera {
   public:
     Camera();
