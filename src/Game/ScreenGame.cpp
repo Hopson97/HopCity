@@ -40,6 +40,10 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         m_selectedTile.y--;
     else if (colour == sf::Color::White)
         m_selectedTile.x++;
+
+    if (m_quadDrag) {
+        m_editEndPosition = m_selectedTile;
+    }
 }
 
 void ScreenGame::onGUI()
@@ -56,12 +60,13 @@ void ScreenGame::onEvent(const sf::Event& e)
     m_camera.onEvent(e);
     if (e.type == sf::Event::MouseButtonPressed) {
         m_mousedown = true;
-        m_buttonPressed = e.mouseButton.button;
+        m_quadDrag = true;
+        m_editStartPosition = m_selectedTile;
     }
     else if (e.type == sf::Event::MouseButtonReleased) {
         m_mousedown = false;
     }
-
+/*
     if (m_mousedown) {
         Tile* tile = m_map.getTile(m_selectedTile);
         if (m_buttonPressed == sf::Mouse::Left) {
@@ -82,6 +87,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             }
         }
     }
+    */
 }
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
@@ -94,6 +100,15 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_map.renderTiles(window, m_camera.zoomLevel < 2);
 
     // Render the selected tile
-    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));
+    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
     window->draw(m_selectionRect);
+
+    if (m_quadDrag) {
+        for (int y = m_editStartPosition.y; y < m_editEndPosition.y; y++) {
+            for (int x = m_editStartPosition.x; x < m_editEndPosition.x; x++) {
+                m_selectionRect.setPosition(tileToScreenPosition({x, y}));
+                window->draw(m_selectionRect);
+            }
+        }
+    }
 }

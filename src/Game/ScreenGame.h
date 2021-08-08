@@ -28,4 +28,10 @@ class ScreenGame final : public Screen {
     Camera m_camera;
 
     TileMap m_map;
+
+
+    //Editor
+    sf::Vector2i m_editStartPosition;
+    sf::Vector2i m_editEndPosition;
+    bool m_quadDrag;
 };

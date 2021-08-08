@@ -7,7 +7,7 @@ namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads,
                           const sf::Vector2i& tilePosition)
     {
-        auto pos = tileToScreenPosition(tilePosition.x, tilePosition.y);
+        auto pos = tileToScreenPosition(tilePosition);
 
         quads->emplace_back(pos);
         quads->emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
@@ -18,10 +18,12 @@ namespace {
     void addGridLine(std::vector<sf::Vertex>* gridMap, sf::Vector2f startPosition,
                      sf::Vector2f endPosition)
     {
+        sf::Color gridColour = {0, 0, 0, 100};
+
         startPosition.x += TILE_WIDTH / 2;
         endPosition.x += TILE_WIDTH / 2;
-        gridMap->emplace_back(startPosition, sf::Color::Black);
-        gridMap->emplace_back(endPosition, sf::Color::Black);
+        gridMap->emplace_back(startPosition, gridColour);
+        gridMap->emplace_back(endPosition, gridColour);
     }
 } // namespace
 
@@ -32,10 +34,10 @@ TileMap::TileMap()
     m_tileTextures.loadFromFile("Data/Textures/Tilemap.png");
 
     for (int i = 0; i < WORLD_SIZE + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition(0, i),
-                    tileToScreenPosition(WORLD_SIZE, i));
-        addGridLine(&m_grid, tileToScreenPosition(i, -1),
-                    tileToScreenPosition(i, WORLD_SIZE - 1));
+        addGridLine(&m_grid, tileToScreenPosition({0, i}),
+                    tileToScreenPosition({WORLD_SIZE, i}));
+        addGridLine(&m_grid, tileToScreenPosition({i, -1}),
+                    tileToScreenPosition({i, WORLD_SIZE - 1}));
     }
 
     for (int y = 0; y < WORLD_SIZE; y++) {
