@@ -9,9 +9,9 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
 {
     m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
+    m_selectionRedTexture.loadFromFile("Data/Textures/SelectionRed.png");
     m_tileCorners.loadFromFile("Data/Textures/Corners.png");
 
-    m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 }
 
@@ -50,44 +50,57 @@ void ScreenGame::onGUI()
 {
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
+                    io.Framerate);
     }
     ImGui::End();
-    ImGui::ShowMetricsWindow(nullptr);
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
     m_camera.onEvent(e);
     if (e.type == sf::Event::MouseButtonPressed) {
-        m_mousedown = true;
         m_quadDrag = true;
         m_editStartPosition = m_selectedTile;
     }
     else if (e.type == sf::Event::MouseButtonReleased) {
-        m_mousedown = false;
-    }
-/*
-    if (m_mousedown) {
-        Tile* tile = m_map.getTile(m_selectedTile);
-        if (m_buttonPressed == sf::Mouse::Left) {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                tile->type = TileType::Water;
-            }
-            else {
-                tile->type = TileType::Road;
-            }
-        }
-        else if (m_buttonPressed == sf::Mouse::Right) {
-            tile->type = TileType::Grass;
-        }
+        m_quadDrag = false;
 
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                m_map.updateTile(m_selectedTile + sf::Vector2i{i, j});
+        forEachSelectedTile([&](const sf::Vector2i& tilepos) {
+            Tile* tile = m_map.getTile(tilepos);
+            tile->type = e.mouseButton.button == sf::Mouse::Left ? TileType::Water
+                                                                 : TileType::Grass;
+
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    m_map.updateTile(tilepos + sf::Vector2i{i, j});
+                }
+            }
+        });
+    }
+    /*
+        if (m_mousedown) {
+            Tile* tile = m_map.getTile(m_selectedTile);
+            if (m_buttonPressed == sf::Mouse::Left) {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+                    tile->type = TileType::Water;
+                }
+                else {
+                    tile->type = TileType::Road;
+                }
+            }
+            else if (m_buttonPressed == sf::Mouse::Right) {
+                tile->type = TileType::Grass;
+            }
+
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    m_map.updateTile(m_selectedTile + sf::Vector2i{i, j});
+                }
             }
         }
-    }
-    */
+        */
 }
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
@@ -100,15 +113,28 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_map.renderTiles(window, m_camera.zoomLevel < 2);
 
     // Render the selected tile
+    m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
     window->draw(m_selectionRect);
 
     if (m_quadDrag) {
-        for (int y = m_editStartPosition.y; y < m_editEndPosition.y; y++) {
-            for (int x = m_editStartPosition.x; x < m_editEndPosition.x; x++) {
-                m_selectionRect.setPosition(tileToScreenPosition({x, y}));
-                window->draw(m_selectionRect);
-            }
+        m_selectionRect.setTexture(&m_selectionRedTexture);
+        forEachSelectedTile([&](const sf::Vector2i& tile) {
+            m_selectionRect.setPosition(tileToScreenPosition(tile));
+            window->draw(m_selectionRect);
+        });
+    }
+}
+
+void ScreenGame::forEachSelectedTile(std::function<void(const sf::Vector2i& tile)> f)
+{
+    int startX = std::min(m_editStartPosition.x, m_editEndPosition.x);
+    int startY = std::min(m_editStartPosition.y, m_editEndPosition.y);
+    int endX = std::max(m_editStartPosition.x, m_editEndPosition.x + 1);
+    int endY = std::max(m_editStartPosition.y, m_editEndPosition.y + 1);
+    for (int y = startY; y < endY; y++) {
+        for (int x = startX; x < endX; x++) {
+            f({x, y});
         }
     }
 }

@@ -22,5 +22,4 @@ class Camera {
 
   private:
     sf::View m_view;
-
 };

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "TileMap.h"
 #include "World.h"
+#include <functional>
 
 class ScreenGame final : public Screen {
   public:
@@ -17,8 +18,11 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
+    void forEachSelectedTile(std::function<void(const sf::Vector2i& tile)> f);
+
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
+    sf::Texture m_selectionRedTexture;
 
     sf::Image m_tileCorners;
 
@@ -29,8 +33,7 @@ class ScreenGame final : public Screen {
 
     TileMap m_map;
 
-
-    //Editor
+    // Editor
     sf::Vector2i m_editStartPosition;
     sf::Vector2i m_editEndPosition;
     bool m_quadDrag;
