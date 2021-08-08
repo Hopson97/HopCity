@@ -23,7 +23,7 @@ struct TileMap {
     Tile* getTile(const sf::Vector2i& position);
     void updateTile(const sf::Vector2i& position);
 
-    void renderTiles(sf::RenderWindow* window);
+    void renderTiles(sf::RenderWindow* window, bool drawGrid);
 
   private:
     sf::Texture m_tileTextures;

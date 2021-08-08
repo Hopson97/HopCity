@@ -46,7 +46,6 @@ void ScreenGame::onGUI()
 {
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
-        ImGui::Checkbox("Draw Grid", &drawGrid);
     }
     ImGui::End();
     ImGui::ShowMetricsWindow(nullptr);
@@ -92,7 +91,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
-    m_map.renderTiles(window);
+    m_map.renderTiles(window, m_camera.zoomLevel < 2);
 
     // Render the selected tile
     m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile.x, m_selectedTile.y));

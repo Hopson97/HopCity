@@ -114,7 +114,7 @@ void TileMap::updateTile(const sf::Vector2i& position)
     }
 }
 
-void TileMap::renderTiles(sf::RenderWindow* window)
+void TileMap::renderTiles(sf::RenderWindow* window, bool drawGrid)
 {
     sf::RenderStates state = sf::RenderStates::Default;
     state.texture = &m_tileTextures;
@@ -134,5 +134,7 @@ void TileMap::renderTiles(sf::RenderWindow* window)
     window->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
                  sf::Quads, state);
 
+    if (drawGrid) {
     window->draw(m_grid.data(), m_grid.size(), sf::Lines);
+    }
 }

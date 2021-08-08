@@ -25,9 +25,6 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_selectedTile;
     bool m_mousedown = false;
     sf::Mouse::Button m_buttonPressed;
-
-    bool drawGrid = true;
-
     Camera m_camera;
 
     TileMap m_map;

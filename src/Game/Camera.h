@@ -6,6 +6,10 @@
 
 class Keyboard;
 
+enum class CameraEvent {
+
+};
+
 class Camera {
   public:
     Camera();
@@ -18,4 +22,5 @@ class Camera {
 
   private:
     sf::View m_view;
+
 };
