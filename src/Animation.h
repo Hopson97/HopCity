@@ -17,7 +17,7 @@ class Animation {
         sf::Time delay;
     };
 
-    Animation(int frameWidth, int frameHeight);
+    Animation(int frameWidth, int frameHeight, bool isRandom = false, float randFactor = 0.01);
 
     void addFrame(int row, int index, sf::Time delay);
 
@@ -32,4 +32,8 @@ class Animation {
     int m_framePointer = 0;
     const int FRAME_WIDTH;
     const int FRAME_HEIGHT;
+
+    bool m_isRandom = false;
+    bool m_randomAnimationIsRunning = false;
+    float m_randomFactor = 0.0f;
 };

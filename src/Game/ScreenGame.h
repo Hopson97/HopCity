@@ -40,5 +40,5 @@ class ScreenGame final : public Screen {
     // Editor
     sf::Vector2i m_editStartPosition;
     sf::Vector2i m_editEndPosition;
-    bool m_quadDrag;
+    bool m_quadDrag = false;
 };

@@ -15,7 +15,7 @@ enum class TileType : uint8_t {
 };
 
 struct Tile {
-    TileType type = TileType::Grass;
+    TileType type = TileType::Water;
     uint8_t varient = 0;
 };
 
