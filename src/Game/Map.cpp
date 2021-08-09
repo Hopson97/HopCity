@@ -28,11 +28,12 @@ namespace {
 } // namespace
 
 Map::Map(int worldSize)
-    : m_tiles(worldSize * worldSize)
-    , m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT)
+    : m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT)
     , m_worldSize(worldSize)
 {
     m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
+
+    m_tiles = generateWorld({0, 0}, worldSize);
 
     for (int i = 0; i < m_worldSize + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
@@ -145,9 +146,9 @@ void Map::draw(sf::RenderWindow* target)
             vertex[2].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 4};
             vertex[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
         }
-        target->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
-                     sf::Quads, states);
     }
+    target->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
+                 sf::Quads, states);
     target->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
                  sf::Quads, states);
 
