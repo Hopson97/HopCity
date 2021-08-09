@@ -37,8 +37,8 @@ Map::Map(int worldSize)
     for (int i = 0; i < m_worldSize + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
                     tileToScreenPosition(worldSize, {m_worldSize, i}));
-        addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, -1}),
-                    tileToScreenPosition(worldSize, {i, m_worldSize - 1}));
+        addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, 0}),
+                    tileToScreenPosition(worldSize, {i, m_worldSize}));
     }
 
     for (int y = 0; y < m_worldSize; y++) {
