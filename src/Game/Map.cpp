@@ -1,4 +1,4 @@
-#include "TileMapRenderer.h"
+#include "Map.h"
 
 #include "World.h"
 #include <cmath>
@@ -27,7 +27,7 @@ namespace {
     }
 } // namespace
 
-TileMapRenderer::TileMapRenderer()
+Map::Map()
     : m_tiles(WORLD_SIZE * WORLD_SIZE)
     , m_waterAnimation((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
 {
@@ -53,7 +53,17 @@ TileMapRenderer::TileMapRenderer()
     }
 }
 
-Tile* TileMapRenderer::getTile(const sf::Vector2i& position)
+void Map::setTile(const sf::Vector2i& position, TileType type)
+{
+    getTile(position)->type = type;
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            updateTile(position + sf::Vector2i{i, j});
+        }
+    }
+}
+
+Tile* Map::getTile(const sf::Vector2i& position)
 {
     static Tile e;
     if (position.y < 0 || position.y >= WORLD_SIZE || position.x < 0 ||
@@ -63,11 +73,13 @@ Tile* TileMapRenderer::getTile(const sf::Vector2i& position)
     return &m_tiles.at(position.y * WORLD_SIZE + position.x);
 }
 
-void TileMapRenderer::updateTile(const sf::Vector2i& position)
+void Map::updateTile(const sf::Vector2i& position)
 {
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+
+    // Set the tile's varient
     Tile* tile = getTile(position);
     tile->varient = 0;
     for (int i = 0; i < 4; i++) {
@@ -87,6 +99,7 @@ void TileMapRenderer::updateTile(const sf::Vector2i& position)
         }
     }
 
+    // Update the tile texture coords
     unsigned vertexIndex = (position.y * WORLD_SIZE + position.x) * 4;
     if (vertexIndex >= m_foregroundTileVerticies.size()) {
         return;
@@ -116,11 +129,13 @@ void TileMapRenderer::updateTile(const sf::Vector2i& position)
     }
 }
 
-void TileMapRenderer::updateAnimation() 
+void Map::draw(sf::RenderWindow* target)
 {
-    auto frame = static_cast<float>(m_waterAnimation.getFrame().left);
+    sf::RenderStates states = sf::RenderStates::Default;
+    states.texture = &m_tileTextures;
 
-    if (m_showDetail) {
+    if (showDetail) {
+        auto frame = static_cast<float>(m_waterAnimation.getFrame().left);
         for (unsigned i = 0; i < m_tiles.size(); i++) {
             sf::Vertex* vertex = &m_backgroundTileVerticies[i * 4];
 
@@ -129,24 +144,13 @@ void TileMapRenderer::updateAnimation()
             vertex[2].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 4};
             vertex[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
         }
+        target->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
+                     sf::Quads, states);
     }
-}
+    target->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
+                 sf::Quads, states);
 
-void TileMapRenderer::setDetail(bool showDetail) { m_showDetail = showDetail; }
-
-void TileMapRenderer::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
-    states.transform *= getTransform();
-    states.texture = &m_tileTextures;
-
-    if (m_showDetail) {
-        target.draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
-                    sf::Quads, states);
-    }
-    target.draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
-                sf::Quads, states);
-
-    if (m_showDetail) {
-        target.draw(m_grid.data(), m_grid.size(), sf::Lines);
+    if (showDetail) {
+        target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 }

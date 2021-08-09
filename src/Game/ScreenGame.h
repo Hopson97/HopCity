@@ -3,11 +3,11 @@
 #include "../Animation.h"
 #include "../Screen.h"
 #include "Camera.h"
-#include "TileMapRenderer.h"
+#include "Map.h"
 #include "World.h"
 #include <functional>
 
-//Main Game Class
+// Main Game Class
 
 class ScreenGame final : public Screen {
   public:
@@ -33,7 +33,7 @@ class ScreenGame final : public Screen {
     sf::Mouse::Button m_buttonPressed;
     Camera m_camera;
 
-    TileMapRenderer m_map;
+    Map m_map;
 
     // Editor
     sf::Vector2i m_editStartPosition;

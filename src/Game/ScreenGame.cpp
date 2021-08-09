@@ -75,24 +75,20 @@ void ScreenGame::onEvent(const sf::Event& e)
         m_quadDrag = false;
 
         forEachSelectedTile([&](const sf::Vector2i& tilepos) {
-            Tile* tile = m_map.getTile(tilepos);
-            tile->type =
+            TileType type =
                 e.mouseButton.button == sf::Mouse::Left
                     ? (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ? TileType::Road
                                                                    : TileType::Water)
                     : TileType::Grass;
+            m_map.setTile(tilepos, type);
 
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    m_map.updateTile(tilepos + sf::Vector2i{i, j});
-                }
-            }
         });
     }
     ts.stop();
 }
 
-void ScreenGame::onUpdate(const sf::Time& dt) {
+void ScreenGame::onUpdate(const sf::Time& dt)
+{
     auto& ts = profiler.newTimeslot("Update");
     ts.stop();
 }
@@ -103,9 +99,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
-    m_map.setDetail(m_camera.zoomLevel < 2);
-    m_map.updateAnimation();
-    window->draw(m_map);
+    m_map.showDetail = m_camera.zoomLevel < 2;
+    m_map.draw(window);
 
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);

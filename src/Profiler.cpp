@@ -1,6 +1,6 @@
 #include "Profiler.h"
 
-Profiler::Profiler() { m_last50times.resize(50); };
+Profiler::Profiler() { m_last50times.resize(50); }
 
 void Profiler::reset()
 {
@@ -61,4 +61,4 @@ void Profiler::onGUI()
 TimeSlot& Profiler::newTimeslot(const char* name)
 {
     return m_activeslots.emplace_back(name);
-};
+}

@@ -2,11 +2,11 @@
 #include "Game/ScreenMainMenu.h"
 #include "Game/World.h"
 #include "Keyboard.h"
+#include "Profiler.h"
 #include "Screen.h"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
-#include "Profiler.h"
 
 int main()
 {

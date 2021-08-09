@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Keyboard.h"
+#include "Profiler.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <stack>
 #include <vector>
-#include "Profiler.h"
 
 class GUI;
 
@@ -53,9 +53,9 @@ class Screen {
     virtual void onFixedUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onRender(sf::RenderWindow* window) = 0;
     Profiler profiler;
+
   protected:
     ScreenManager* m_pScreens;
-
 };
 
 bool imguiBeginMenu(const char* name);
