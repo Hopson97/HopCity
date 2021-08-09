@@ -8,8 +8,10 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
+
 int main()
 {
+
     sf::Image grass;
     sf::Image path;
     sf::Image target;

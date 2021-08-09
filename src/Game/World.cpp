@@ -2,7 +2,6 @@
 
 #include "Map.h"
 #include <iostream>
-#include <glm/gtc/noise.hpp>
 
 sf::Vector2f tileToScreenPosition(int worldSize, const sf::Vector2i& tilePosition)
 {
@@ -12,44 +11,19 @@ sf::Vector2f tileToScreenPosition(int worldSize, const sf::Vector2i& tilePositio
             (worldSize * TILE_HEIGHT) + (x + y) * (TILE_HEIGHT / 2.0f)};
 }
 
-struct TerrainGenOptions {
-    int octaves = 8;
-    float amplitude = 230;
-    float smoothness = 500;
-    float roughness = 0.58;
-    float offset = 0;
 
-    int seed;
-    int useGreedyMeshing = true;
-};
 
 float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosition,
                  const TerrainGenOptions& options, int worldSize)
 {
-    // Get voxel X/Z positions
-    // float voxelX = voxelPosition.x + chunkPosition.x * CHUNK_SIZE;
-    // float voxelZ = voxelPosition.y + chunkPosition.y * CHUNK_SIZE;
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetFractalOctaves(options.octaves);
+    noise.SetSeed(options.seed);
+    noise.SetFrequency(options.frequency); //i guess??
 
-    float tileX = tilePosition.x + chunkPosition.x * worldSize;
-    float tileY = tilePosition.y + chunkPosition.y * worldSize;
-
-    // Begin iterating through the octaves
-    float value = 0;
-    float accumulatedAmps = 0;
-    for (int i = 0; i < options.octaves; i++) {
-        float frequency = glm::pow(2.0f, i);
-        float amplitude = glm::pow(options.roughness, i);
-
-        float x = tileX * frequency / options.smoothness;
-        float y = tileY * frequency / options.smoothness;
-
-        float noise =
-            glm::simplex(glm::vec3{options.seed + x, options.seed + y, options.seed});
-        noise = (noise + 1.0f) / 2.0f;
-        value += noise * amplitude;
-        accumulatedAmps += amplitude;
-    }
-    return value / accumulatedAmps;
+    return noise.GetNoise((float)tilePosition.x,(float)tilePosition.y
+                      );
 }
 
 std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize)
@@ -57,12 +31,7 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
     
     std::vector<Tile> tiles(worldSize * worldSize);
 
-    TerrainGenOptions ops;
-    ops.amplitude = 20;
-    ops.octaves = 4;
-    ops.smoothness = 100;
-    ops.roughness = 0.55;
-    ops.offset = 0;
+    TerrainGenOptions ops = terrainGenOptions;
     srand(std::time(nullptr));
     ops.seed = rand() % 1024;
 

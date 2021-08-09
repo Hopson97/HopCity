@@ -28,7 +28,7 @@ add_executable(${PROJECT_NAME}
     src/Game/Map.cpp
     src/Game/World.cpp
     src/Profiler.cpp
-)
+        deps/FastNoiseLite.h)
 
 #Set C++17
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)

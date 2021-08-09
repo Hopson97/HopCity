@@ -32,27 +32,8 @@ Map::Map(int worldSize)
     , m_worldSize(worldSize)
 {
     m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
+    regenerate();
 
-    m_tiles = generateWorld({0, 0}, worldSize);
-
-    for (int i = 0; i < m_worldSize + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
-                    tileToScreenPosition(worldSize, {m_worldSize, i}));
-        addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, 0}),
-                    tileToScreenPosition(worldSize, {i, m_worldSize}));
-    }
-
-    for (int y = 0; y < m_worldSize; y++) {
-        for (int x = 0; x < m_worldSize; x++) {
-            addIsometricQuad(&m_foregroundTileVerticies, m_worldSize, {x, y});
-            addIsometricQuad(&m_backgroundTileVerticies, m_worldSize, {x, y});
-            updateTile({x, y});
-        }
-    }
-
-    for (int i = 0; i < 5; i++) {
-        m_waterAnimation.addFrame(0, i, sf::milliseconds(320));
-    }
 }
 
 void Map::setTile(const sf::Vector2i& position, TileType type)
@@ -154,5 +135,27 @@ void Map::draw(sf::RenderWindow* target)
 
     if (showDetail) {
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
+    }
+}
+void Map::regenerate() {
+    m_tiles = generateWorld({0, 0}, m_worldSize);
+
+    for (int i = 0; i < m_worldSize + 1; i++) {
+        addGridLine(&m_grid, tileToScreenPosition(m_worldSize, {0, i}),
+                    tileToScreenPosition(m_worldSize, {m_worldSize, i}));
+        addGridLine(&m_grid, tileToScreenPosition(m_worldSize, {i, 0}),
+                    tileToScreenPosition(m_worldSize, {i, m_worldSize}));
+    }
+
+    for (int y = 0; y < m_worldSize; y++) {
+        for (int x = 0; x < m_worldSize; x++) {
+            addIsometricQuad(&m_foregroundTileVerticies, m_worldSize, {x, y});
+            addIsometricQuad(&m_backgroundTileVerticies, m_worldSize, {x, y});
+            updateTile({x, y});
+        }
+    }
+
+    for (int i = 0; i < 5; i++) {
+        m_waterAnimation.addFrame(0, i, sf::milliseconds(320));
     }
 }
