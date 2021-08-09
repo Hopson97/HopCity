@@ -35,15 +35,19 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         (cell.y - m_worldSize) - (cell.x - m_worldSize),
     };
 
-    sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
-    if (colour == sf::Color::Red)
-        m_selectedTile.x--;
-    else if (colour == sf::Color::Green)
-        m_selectedTile.y++;
-    else if (colour == sf::Color::Blue)
-        m_selectedTile.y--;
-    else if (colour == sf::Color::White)
-        m_selectedTile.x++;
+    // clang-format off
+    if (offset.x >= 0 && 
+        offset.y >= 0 && 
+        offset.x < m_tileCorners.getSize().x && 
+        offset.y < m_tileCorners.getSize().y)
+    {
+        sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
+             if (colour == sf::Color::Red   )   m_selectedTile.x--;
+        else if (colour == sf::Color::Green )   m_selectedTile.y++;
+        else if (colour == sf::Color::Blue  )   m_selectedTile.y--;
+        else if (colour == sf::Color::White )   m_selectedTile.x++;
+    }
+    // clang-format on
 
     if (m_quadDrag) {
         m_editEndPosition = m_selectedTile;

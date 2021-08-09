@@ -37,7 +37,7 @@ struct Map {
     std::vector<sf::Vertex> m_grid;
     std::vector<sf::Vertex> m_foregroundTileVerticies;
     std::vector<sf::Vertex> m_backgroundTileVerticies;
-    
+
     Animation m_waterAnimation;
 
     int m_worldSize;

@@ -14,7 +14,7 @@ class Camera {
     void onEvent(const sf::Event& e);
     void onInput(const Keyboard& keyboard, const sf::RenderWindow& window);
 
-    float zoomLevel = 0.25;
+    float zoomLevel = 0.5;
 
   private:
     sf::View m_view;
