@@ -17,7 +17,7 @@ class Animation {
         sf::Time delay;
     };
 
-    Animation(int frameWidth, int frameHeight);
+    Animation(int frameWidth, int frameHeight,bool is_random= false,float random_factor=0.01);
 
     void addFrame(int row, int index, sf::Time delay);
 
@@ -28,7 +28,8 @@ class Animation {
     sf::Time m_overlappedTime;
 
     std::vector<Frame> m_frames;
-
+    float m_random_factor=0.f;
+    bool m_israndom, random_animation_running = false;
     int m_framePointer = 0;
     const int FRAME_WIDTH;
     const int FRAME_HEIGHT;
