@@ -1083,7 +1083,7 @@ static void ShowDemoWindowWidgets()
             if (my_str.empty())
                 my_str.push_back(0);
             Funcs::MyInputTextMultiline("##MyStr", &my_str, ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16));
-            ImGui::Text("Data: %p\nSize: %d\nCapacity: %d", (void*)my_str.begin(), my_str.size(), my_str.capacity());
+            ImGui::Text("data: %p\nSize: %d\nCapacity: %d", (void*)my_str.begin(), my_str.size(), my_str.capacity());
             ImGui::TreePop();
         }
 
@@ -1334,7 +1334,7 @@ static void ShowDemoWindowWidgets()
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode("Data Types"))
+    if (ImGui::TreeNode("data Types"))
     {
         // The DragScalar/InputScalar/SliderScalar functions allow various data types: signed/unsigned int/long long and float/double
         // To avoid polluting the public API with all possible combinations, we use the ImGuiDataType enum to pass the type,

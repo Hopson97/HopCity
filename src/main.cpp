@@ -15,7 +15,7 @@ int main()
     sf::Image grass;
     sf::Image path;
     sf::Image target;
-    // grass.loadFromFile("Data/Tiles/road3.png");
+    // grass.loadFromFile("data/Tiles/road3.png");
     // target.create(512, 128, sf::Color::Magenta);
     //
     // for (int y = 0; y < TILE_HEIGHT; y++) {
@@ -30,7 +30,7 @@ int main()
     // //    }
     // //}
     //
-    // target.saveToFile("Data/Tiles/Tiles3.png");
+    // target.saveToFile("data/Tiles/Tiles3.png");
 
     // Set up window and gui
     sf::RenderWindow window({1600, 900}, "game");

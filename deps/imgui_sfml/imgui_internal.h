@@ -76,7 +76,7 @@ Index of this file:
 struct ImBitVector;                 // Store 1-bit per value
 struct ImRect;                      // An axis-aligned rectangle (2 points)
 struct ImDrawDataBuilder;           // Helper to build a ImDrawData instance
-struct ImDrawListSharedData;        // Data shared between all ImDrawList instances
+struct ImDrawListSharedData;        // data shared between all ImDrawList instances
 struct ImGuiColorMod;               // Stacked color modifier, backup of modified data so we can restore it
 struct ImGuiColumnData;             // Storage data for a single column
 struct ImGuiColumns;                // Storage data for a columns set
@@ -730,7 +730,7 @@ struct ImGuiColorMod
     ImVec4      BackupValue;
 };
 
-// Stacked style modifier, backup of modified data so we can restore it. Data type inferred from the variable.
+// Stacked style modifier, backup of modified data so we can restore it. data type inferred from the variable.
 struct ImGuiStyleMod
 {
     ImGuiStyleVar   VarIdx;
@@ -896,7 +896,7 @@ struct ImGuiColumns
 #define IM_DRAWLIST_ARCFAST_TESSELLATION_MULTIPLIER             1
 #endif
 
-// Data shared between all ImDrawList instances
+// data shared between all ImDrawList instances
 // You may want to create your own instance of this if you want to use ImDrawList completely without ImGui. In that case, watch out for future changes to this structure.
 struct IMGUI_API ImDrawListSharedData
 {
@@ -1869,7 +1869,7 @@ namespace ImGui
     template<typename T, typename FLOAT_T>                      IMGUI_API float SliderCalcRatioFromValueT(ImGuiDataType data_type, T v, T v_min, T v_max, float power, float linear_zero_pos);
     template<typename T, typename SIGNED_T>                     IMGUI_API T     RoundScalarWithFormatT(const char* format, ImGuiDataType data_type, T v);
 
-    // Data type helpers
+    // data type helpers
     IMGUI_API const ImGuiDataTypeInfo*  DataTypeGetInfo(ImGuiDataType data_type);
     IMGUI_API int           DataTypeFormatString(char* buf, int buf_size, ImGuiDataType data_type, const void* p_data, const char* format);
     IMGUI_API void          DataTypeApplyOp(ImGuiDataType data_type, int op, void* output, void* arg_1, const void* arg_2);
