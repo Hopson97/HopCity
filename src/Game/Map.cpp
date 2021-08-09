@@ -159,3 +159,14 @@ void Map::regenerate() {
         m_waterAnimation.addFrame(0, i, sf::milliseconds(320));
     }
 }
+void Map::onGUI() {
+    ImGui::Begin("World Generation");
+    ImGui::TextColored({0.960, 0.815, 0.360,1},"Noise Options");
+    ImGui::SliderFloat("Amplitude",&terrainGenOptions.amplitude,0.f,1.f);
+    ImGui::SliderFloat("Frequency",&terrainGenOptions.frequency,0.f,1.f);
+    ImGui::SliderInt("Octaves",&terrainGenOptions.octaves,0,10);
+    if(ImGui::Button("Regenerate World")){
+        regenerate();
+    }
+    ImGui::End();
+}
