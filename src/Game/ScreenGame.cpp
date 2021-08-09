@@ -6,7 +6,9 @@
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-
+    , m_worldSize(64)
+    , m_map(m_worldSize)
+    , m_camera(m_worldSize)
 {
     m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
     m_selectionRedTexture.loadFromFile("Data/Textures/SelectionRed.png");
@@ -29,8 +31,8 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
                            (int)worldPos.y % (int)TILE_HEIGHT};
 
     m_selectedTile = {
-        (cell.y - (int)WORLD_ORIGIN_OFFSET.y) + (cell.x - (int)WORLD_ORIGIN_OFFSET.x),
-        (cell.y - (int)WORLD_ORIGIN_OFFSET.y) - (cell.x - (int)WORLD_ORIGIN_OFFSET.x),
+        (cell.y - m_worldSize) + (cell.x - m_worldSize),
+        (cell.y - m_worldSize) - (cell.x - m_worldSize),
     };
 
     sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
@@ -81,7 +83,6 @@ void ScreenGame::onEvent(const sf::Event& e)
                                                                    : TileType::Water)
                     : TileType::Grass;
             m_map.setTile(tilepos, type);
-
         });
     }
     ts.stop();
@@ -104,13 +105,13 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
-    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
+    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, m_selectedTile));
     window->draw(m_selectionRect);
 
     if (m_quadDrag) {
         m_selectionRect.setTexture(&m_selectionRedTexture);
         forEachSelectedTile([&](const sf::Vector2i& tile) {
-            m_selectionRect.setPosition(tileToScreenPosition(tile));
+            m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, tile));
             window->draw(m_selectionRect);
         });
     }

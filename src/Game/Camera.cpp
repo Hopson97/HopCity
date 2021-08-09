@@ -4,9 +4,9 @@
 
 #include "World.h"
 
-Camera::Camera()
+Camera::Camera(int worldSize)
 {
-    m_view.setCenter(tileToScreenPosition({WORLD_SIZE / 2, WORLD_SIZE / 2}));
+    m_view.setCenter(tileToScreenPosition(worldSize, {worldSize / 2, worldSize / 2}));
     m_view.setSize({1600, 900});
     m_view.zoom(zoomLevel);
 }

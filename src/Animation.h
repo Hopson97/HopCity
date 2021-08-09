@@ -17,9 +17,9 @@ class Animation {
         sf::Time delay;
     };
 
-    Animation(unsigned frameWidth, unsigned frameHeight);
+    Animation(int frameWidth, int frameHeight);
 
-    void addFrame(unsigned row, unsigned index, sf::Time delay);
+    void addFrame(int row, int index, sf::Time delay);
 
     const sf::IntRect& getFrame();
 
@@ -29,7 +29,7 @@ class Animation {
 
     std::vector<Frame> m_frames;
 
-    unsigned m_framePointer = 0;
-    const unsigned FRAME_WIDTH;
-    const unsigned FRAME_HEIGHT;
+    int m_framePointer = 0;
+    const int FRAME_WIDTH;
+    const int FRAME_HEIGHT;
 };

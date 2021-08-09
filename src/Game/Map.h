@@ -6,6 +6,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/VertexBuffer.hpp>
 
 enum class TileType : uint8_t {
     Grass,
@@ -20,7 +21,7 @@ struct Tile {
 
 struct Map {
   public:
-    Map();
+    Map(int worldSize);
 
     void setTile(const sf::Vector2i& position, TileType type);
     void draw(sf::RenderWindow* target);
@@ -36,5 +37,8 @@ struct Map {
     std::vector<sf::Vertex> m_grid;
     std::vector<sf::Vertex> m_foregroundTileVerticies;
     std::vector<sf::Vertex> m_backgroundTileVerticies;
+    
     Animation m_waterAnimation;
+
+    int m_worldSize;
 };

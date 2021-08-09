@@ -4,10 +4,10 @@
 #include <cmath>
 
 namespace {
-    void addIsometricQuad(std::vector<sf::Vertex>* quads,
+    void addIsometricQuad(std::vector<sf::Vertex>* quads, int worldSize,
                           const sf::Vector2i& tilePosition)
     {
-        auto pos = tileToScreenPosition(tilePosition);
+        auto pos = tileToScreenPosition(worldSize, tilePosition);
 
         quads->emplace_back(pos);
         quads->emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
@@ -27,23 +27,24 @@ namespace {
     }
 } // namespace
 
-Map::Map()
-    : m_tiles(WORLD_SIZE * WORLD_SIZE)
-    , m_waterAnimation((unsigned)TILE_WIDTH, (unsigned)TILE_HEIGHT)
+Map::Map(int worldSize)
+    : m_tiles(worldSize * worldSize)
+    , m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT)
+    , m_worldSize(worldSize)
 {
     m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
 
-    for (int i = 0; i < WORLD_SIZE + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition({0, i}),
-                    tileToScreenPosition({WORLD_SIZE, i}));
-        addGridLine(&m_grid, tileToScreenPosition({i, -1}),
-                    tileToScreenPosition({i, WORLD_SIZE - 1}));
+    for (int i = 0; i < m_worldSize + 1; i++) {
+        addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
+                    tileToScreenPosition(worldSize, {m_worldSize, i}));
+        addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, -1}),
+                    tileToScreenPosition(worldSize, {i, m_worldSize - 1}));
     }
 
-    for (int y = 0; y < WORLD_SIZE; y++) {
-        for (int x = 0; x < WORLD_SIZE; x++) {
-            addIsometricQuad(&m_foregroundTileVerticies, {x, y});
-            addIsometricQuad(&m_backgroundTileVerticies, {x, y});
+    for (int y = 0; y < m_worldSize; y++) {
+        for (int x = 0; x < m_worldSize; x++) {
+            addIsometricQuad(&m_foregroundTileVerticies, m_worldSize, {x, y});
+            addIsometricQuad(&m_backgroundTileVerticies, m_worldSize, {x, y});
             updateTile({x, y});
         }
     }
@@ -66,11 +67,11 @@ void Map::setTile(const sf::Vector2i& position, TileType type)
 Tile* Map::getTile(const sf::Vector2i& position)
 {
     static Tile e;
-    if (position.y < 0 || position.y >= WORLD_SIZE || position.x < 0 ||
-        position.x >= WORLD_SIZE) {
+    if (position.y < 0 || position.y >= m_worldSize || position.x < 0 ||
+        position.x >= m_worldSize) {
         return &e;
     }
-    return &m_tiles.at(position.y * WORLD_SIZE + position.x);
+    return &m_tiles.at(position.y * m_worldSize + position.x);
 }
 
 void Map::updateTile(const sf::Vector2i& position)
@@ -100,8 +101,8 @@ void Map::updateTile(const sf::Vector2i& position)
     }
 
     // Update the tile texture coords
-    unsigned vertexIndex = (position.y * WORLD_SIZE + position.x) * 4;
-    if (vertexIndex >= m_foregroundTileVerticies.size()) {
+    int vertexIndex = (position.y * m_worldSize + position.x) * 4;
+    if (vertexIndex >= (int)m_foregroundTileVerticies.size()) {
         return;
     }
     sf::Vertex* vertex = &m_foregroundTileVerticies[vertexIndex];

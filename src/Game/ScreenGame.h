@@ -31,9 +31,11 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_selectedTile;
     bool m_mousedown = false;
     sf::Mouse::Button m_buttonPressed;
-    Camera m_camera;
+
+    int m_worldSize = 64;
 
     Map m_map;
+    Camera m_camera;
 
     // Editor
     sf::Vector2i m_editStartPosition;

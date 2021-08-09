@@ -1,12 +1,12 @@
 #include "Animation.h"
 
-Animation::Animation(unsigned frameWidth, unsigned frameHeight)
+Animation::Animation(int frameWidth, int frameHeight)
     : FRAME_WIDTH(frameWidth)
     , FRAME_HEIGHT(frameHeight)
 {
 }
 
-void Animation::addFrame(unsigned row, unsigned index, sf::Time delay)
+void Animation::addFrame(int row, int index, sf::Time delay)
 {
     sf::IntRect bounds;
     bounds.top = FRAME_HEIGHT * row;
