@@ -28,7 +28,11 @@ namespace {
 } // namespace
 
 Map::Map(int worldSize)
+<<<<<<< HEAD
     : m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT, true, 0.05)
+=======
+    : m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT)
+>>>>>>> 25aeff2e412fba2bda2f86bcf2ae023b89d37037
     , m_worldSize(worldSize)
 {
     m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
