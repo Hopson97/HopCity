@@ -7,6 +7,8 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
+#include <imgui_sfml/imgui-SFML.h>
+#include <imgui_sfml/imgui.h>
 
 enum class TileType : uint8_t {
     Grass,
@@ -26,6 +28,7 @@ struct Map {
     void setTile(const sf::Vector2i& position, TileType type);
     void draw(sf::RenderWindow* target);
     void regenerate();
+    void onGUI();
 
     bool showDetail;
 

@@ -25,6 +25,7 @@ class ScreenGame final : public Screen {
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
     sf::Texture m_selectionRedTexture;
+    sf::Texture m_buttonBackground,m_buttonBackgroundPressed;
 
     sf::Image m_tileCorners;
 
@@ -41,4 +42,6 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_editStartPosition;
     sf::Vector2i m_editEndPosition;
     bool m_quadDrag = false;
+    bool m_profilerguiopen = false;
+    bool m_mapoptionsopen= false;
 };

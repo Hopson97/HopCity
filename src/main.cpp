@@ -37,7 +37,9 @@ int main()
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
-
+    sf::Image temp_icon;
+    temp_icon.loadFromFile("Data/Textures/icon.png");
+    window.setIcon(temp_icon.getSize().x,temp_icon.getSize().y,temp_icon.getPixelsPtr());
     // Update ImGUI UI scaling for 4K monitors
     if (sf::VideoMode::getDesktopMode().width > 3600) {
         ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);

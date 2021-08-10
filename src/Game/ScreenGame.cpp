@@ -13,15 +13,21 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
     m_selectionRedTexture.loadFromFile("Data/Textures/SelectionRed.png");
     m_tileCorners.loadFromFile("Data/Textures/Corners.png");
-
+    m_buttonBackground.loadFromFile("Data/Textures/UI/buttonLong_brown.png");
+    m_buttonBackgroundPressed.loadFromFile("Data/Textures/UI/buttonLong_brown_pressed.png");
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
+
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
+
     auto& ts = profiler.newTimeslot("Input");
     m_camera.onInput(keyboard, window);
-
+    //if mouse is over imgui just return
+    if(ImGui::IsAnyWindowHovered()){
+        return;
+    }
     auto mousePosition = sf::Mouse::getPosition(window);
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
@@ -64,21 +70,24 @@ void ScreenGame::onGUI()
         ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
                     io.Framerate);
     }
-    ImGui::End();
-    if(ImGui::Begin("World Generation")){
-        ImGui::TextColored({0.960, 0.815, 0.360,1},"Noise Options");
-        ImGui::SliderFloat("Amplitude",&terrainGenOptions.amplitude,0.f,1.f);
-        ImGui::SliderFloat("Amplitude",&terrainGenOptions.frequency,0.f,1.f);
-        ImGui::SliderInt("Octaves",&terrainGenOptions.octaves,0,10);
-        if(ImGui::Button("Regenerate World")){
-            m_map.regenerate();
+    if(ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Tools"))
+        {
+            ImGui::Checkbox("Terrain##check",&m_mapoptionsopen);
+            ImGui::Checkbox("Profiler##check",&m_profilerguiopen);
+            ImGui::EndMenu();
         }
+
+        ImGui::EndMainMenuBar();
     }
-
-
-
     ImGui::End();
-    profiler.onGUI();
+    if(m_profilerguiopen){
+        profiler.onGUI();
+    }
+    if(m_mapoptionsopen){
+        m_map.onGUI();
+    }
     ts.stop();
 }
 
@@ -113,6 +122,7 @@ void ScreenGame::onUpdate(const sf::Time& dt)
 
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
+
     auto& ts = profiler.newTimeslot("Render");
     m_camera.setViewToCamera(*window);
 
