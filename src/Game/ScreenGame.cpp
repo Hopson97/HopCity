@@ -17,6 +17,11 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_buttonBackgroundPressed.loadFromFile("Data/Textures/UI/buttonLong_brown_pressed.png");
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
+    //sf::Image cursor;
+    //cursor.loadFromFile("Data/Textures/UI/cursorGauntlet_grey.png");
+    //sf::Cursor cursor1;
+    //cursor1.loadFromPixels(cursor.getPixelsPtr(),cursor.getSize(),{0,0});
+
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
