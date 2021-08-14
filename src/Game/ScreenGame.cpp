@@ -63,6 +63,9 @@ void ScreenGame::onGUI()
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
                     io.Framerate);
+        if (ImGui::Button("Regen world")) {
+            m_map.regenerateTerrain();
+        }
     }
     ImGui::End();
     profiler.onGUI();

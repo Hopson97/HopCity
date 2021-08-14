@@ -55,6 +55,17 @@ Map::Map(int worldSize)
     }
 }
 
+void Map::regenerateTerrain()
+{
+    m_tiles = generateWorld({0, 0}, m_worldSize);
+
+    for (int y = 0; y < m_worldSize; y++) {
+        for (int x = 0; x < m_worldSize; x++) {
+            updateTile({x, y});
+        }
+    }
+}
+
 void Map::setTile(const sf::Vector2i& position, TileType type)
 {
     getTile(position)->type = type;
@@ -80,7 +91,6 @@ void Map::updateTile(const sf::Vector2i& position)
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-
     // Set the tile's varient
     Tile* tile = getTile(position);
     tile->varient = 0;
