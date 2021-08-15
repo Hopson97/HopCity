@@ -3,6 +3,7 @@
 #include <cmath>
 #include <imgui_sfml/imgui.h>
 #include <iostream>
+#include <unordered_set>
 
 namespace {
 
@@ -10,6 +11,13 @@ namespace {
     {
         return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
     }
+
+    struct Vec2hash {
+        inline size_t operator()(const sf::Vector2i& v) const
+        {
+            return (v.x * 88339) ^ (v.y * 91967);
+        }
+    };
 
     //
 
@@ -25,30 +33,40 @@ namespace {
                          const sf::Vector2i& end,
                          std::function<void(const sf::Vector2i& tile)> f)
     {
+
+        std::unordered_set<sf::Vector2i, Vec2hash> unique;
+        auto tryTile = [&](const sf::Vector2i pos) {
+            if (!unique.count(pos)) {
+                unique.emplace(pos);
+                f(pos);
+            }
+        };
+
         if (xDistGreater(start, mid)) {
             int startX = std::min(start.x, mid.x);
             int startY = std::min(mid.y, end.y);
-            int endX = std::max(start.x, mid.x + 1);
-            int endY = std::max(mid.y, end.y + 1);
+
+            int endX = std::max(start.x + 1, mid.x + 1);
+            int endY = std::max(mid.y + 1, end.y + 1);
 
             for (int x = startX; x < endX; x++) {
-                f({x, start.y});
+                tryTile({x, start.y});
             }
             for (int y = startY; y < endY; y++) {
-                f({mid.x, y});
+                tryTile({mid.x, y});
             }
         }
         else {
             int startX = std::min(mid.x, end.x);
             int startY = std::min(start.y, mid.y);
-            int endX = std::max(mid.x, end.x + 1);
-            int endY = std::max(start.y, mid.y + 1);
+            int endX = std::max(mid.x + 1, end.x + 1);
+            int endY = std::max(start.y + 1, mid.y + 1);
 
             for (int x = startX; x < endX; x++) {
-                f({x, mid.y});
+                tryTile({x, mid.y});
             }
             for (int y = startY; y < endY; y++) {
-                f({start.x, y});
+                tryTile({start.x, y});
             }
         }
     }
@@ -58,9 +76,9 @@ namespace {
     {
         int startX = std::min(start.x, end.x);
         int startY = std::min(start.y, end.y);
-        int endX = std::max(start.x, end.x + 1);
-        int endY = std::max(start.y, end.y + 1);
-        
+        int endX = std::max(start.x + 1, end.x + 1);
+        int endY = std::max(start.y + 1, end.y + 1);
+
         for (int y = startY; y < endY; y++) {
             for (int x = startX; x < endX; x++) {
                 f({x, y});
