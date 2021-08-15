@@ -140,9 +140,8 @@ void Map::draw(sf::RenderWindow* target)
     sf::RenderStates states = sf::RenderStates::Default;
     states.texture = &m_tileTextures;
 
-    target->draw(m_landTiles.data(), m_landTiles.size(),
-                 sf::Quads, states);
-                 
+    target->draw(m_landTiles.data(), m_landTiles.size(), sf::Quads, states);
+
     if (showDetail) {
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }

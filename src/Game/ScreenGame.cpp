@@ -4,9 +4,75 @@
 #include <imgui_sfml/imgui.h>
 #include <iostream>
 
+namespace {
+
+    bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
+    {
+        return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
+    }
+
+    //
+
+    /**
+     * @brief Calls a function for a L shape selection (for example, building a road)
+     *
+     * @param start The tile position to start at
+     * @param mid  The tile position to "pivot" the L at
+     * @param end The tile position to end end
+     * @param f Callback for each section along the L shape
+     */
+    void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid,
+                         const sf::Vector2i& end,
+                         std::function<void(const sf::Vector2i& tile)> f)
+    {
+        if (xDistGreater(start, mid)) {
+            int startX = std::min(start.x, mid.x);
+            int startY = std::min(mid.y, end.y);
+            int endX = std::max(start.x, mid.x + 1);
+            int endY = std::max(mid.y, end.y + 1);
+
+            for (int x = startX; x < endX; x++) {
+                f({x, start.y});
+            }
+            for (int y = startY; y < endY; y++) {
+                f({mid.x, y});
+            }
+        }
+        else {
+            int startX = std::min(mid.x, end.x);
+            int startY = std::min(start.y, mid.y);
+            int endX = std::max(mid.x, end.x + 1);
+            int endY = std::max(start.y, mid.y + 1);
+
+            for (int x = startX; x < endX; x++) {
+                f({x, mid.y});
+            }
+            for (int y = startY; y < endY; y++) {
+                f({start.x, y});
+            }
+        }
+    }
+
+    void forEachQuadSection(const sf::Vector2i& start, const sf::Vector2i& end,
+                            std::function<void(const sf::Vector2i& tile)> f)
+    {
+        int startX = std::min(start.x, end.x);
+        int startY = std::min(start.y, end.y);
+        int endX = std::max(start.x, end.x + 1);
+        int endY = std::max(start.y, end.y + 1);
+        
+        for (int y = startY; y < endY; y++) {
+            for (int x = startX; x < endX; x++) {
+                f({x, y});
+            }
+        }
+    }
+
+} // namespace
+
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(512)
+    , m_worldSize(64)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
@@ -50,6 +116,14 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
     // clang-format on
 
     if (m_quadDrag) {
+        if (xDistGreater(m_editStartPosition, m_editEndPosition)) {
+            m_editPivotPoint.x = m_selectedTile.x;
+            m_editPivotPoint.y = m_editStartPosition.y;
+        }
+        else {
+            m_editPivotPoint.x = m_editStartPosition.x;
+            m_editPivotPoint.y = m_selectedTile.y;
+        }
         m_editEndPosition = m_selectedTile;
     }
     ts.stop();
@@ -79,18 +153,13 @@ void ScreenGame::onEvent(const sf::Event& e)
     if (e.type == sf::Event::MouseButtonPressed) {
         m_quadDrag = true;
         m_editStartPosition = m_selectedTile;
+        m_editEndPosition = m_selectedTile;
     }
     else if (e.type == sf::Event::MouseButtonReleased) {
         m_quadDrag = false;
-
-        forEachSelectedTile([&](const sf::Vector2i& tilepos) {
-            TileType type =
-                e.mouseButton.button == sf::Mouse::Left
-                    ? (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ? TileType::Road
-                                                                   : TileType::Water)
-                    : TileType::Land;
-            m_map.setTile(tilepos, type);
-        });
+        forEachLSection(
+            m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+            [&](const sf::Vector2i& tilepos) { m_map.setTile(tilepos, TileType::Road); });
     }
     ts.stop();
 }
@@ -117,23 +186,19 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     if (m_quadDrag) {
         m_selectionRect.setTexture(&m_selectionRedTexture);
-        forEachSelectedTile([&](const sf::Vector2i& tile) {
-            m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, tile));
-            window->draw(m_selectionRect);
-        });
-    }
-    ts.stop();
-}
 
-void ScreenGame::forEachSelectedTile(std::function<void(const sf::Vector2i& tile)> f)
-{
-    int startX = std::min(m_editStartPosition.x, m_editEndPosition.x);
-    int startY = std::min(m_editStartPosition.y, m_editEndPosition.y);
-    int endX = std::max(m_editStartPosition.x, m_editEndPosition.x + 1);
-    int endY = std::max(m_editStartPosition.y, m_editEndPosition.y + 1);
-    for (int y = startY; y < endY; y++) {
-        for (int x = startX; x < endX; x++) {
-            f({x, y});
-        }
+        forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                        [&](const sf::Vector2i& tilePosition) {
+                            m_selectionRect.setPosition(
+                                tileToScreenPosition(m_worldSize, tilePosition));
+                            window->draw(m_selectionRect);
+                        });
+
+        // forEachSelectedTile([&](const sf::Vector2i& tile) {
+        //    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, tile));
+        //    window->draw(m_selectionRect);
+        //});
     }
+
+    ts.stop();
 }

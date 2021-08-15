@@ -21,7 +21,6 @@ struct Tile {
     uint8_t varient = 0;
 };
 
-
 struct Map {
   public:
     Map(int worldSize);
