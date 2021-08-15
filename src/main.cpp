@@ -36,11 +36,13 @@ int main()
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
 
-    // Update ImGUI UI scaling for 4K monitors
+    // Update ImGUI UI scaling for 4K monitors. For some reason looks bad on linux hence
+    // the ifdef
+#ifndef __linux__
     if (sf::VideoMode::getDesktopMode().width > 3600) {
         ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);
     }
-
+#endif
     // Set up screen system
     ScreenManager screens;
     // screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));

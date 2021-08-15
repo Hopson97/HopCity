@@ -3,7 +3,7 @@
 Animation::Animation(int frameWidth, int frameHeight, bool isRandom, float randFactor)
     : FRAME_WIDTH(frameWidth)
     , FRAME_HEIGHT(frameHeight)
-    
+
     , m_isRandom(isRandom)
     , m_randomFactor(randFactor)
 {
