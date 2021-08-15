@@ -18,9 +18,6 @@ namespace {
             return (v.x * 88339) ^ (v.y * 91967);
         }
     };
-
-    //
-
     /**
      * @brief Calls a function for a L shape selection (for example, building a road)
      *
@@ -34,6 +31,7 @@ namespace {
                          std::function<void(const sf::Vector2i& tile)> f)
     {
 
+        // Hack to prevent the functions running for a tile position more than once
         std::unordered_set<sf::Vector2i, Vec2hash> unique;
         auto tryTile = [&](const sf::Vector2i pos) {
             if (!unique.count(pos)) {
