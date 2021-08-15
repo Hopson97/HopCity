@@ -6,7 +6,7 @@
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(350)
+    , m_worldSize(512)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
@@ -88,7 +88,7 @@ void ScreenGame::onEvent(const sf::Event& e)
                 e.mouseButton.button == sf::Mouse::Left
                     ? (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ? TileType::Road
                                                                    : TileType::Water)
-                    : TileType::Grass;
+                    : TileType::Land;
             m_map.setTile(tilepos, type);
         });
     }

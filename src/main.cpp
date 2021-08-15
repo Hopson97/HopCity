@@ -10,15 +10,15 @@
 
 int main()
 {
-    sf::Image grass;
+    sf::Image Land;
     sf::Image path;
     sf::Image target;
-    // grass.loadFromFile("Data/Tiles/road3.png");
+    // Land.loadFromFile("Data/Tiles/road3.png");
     // target.create(512, 128, sf::Color::Magenta);
     //
     // for (int y = 0; y < TILE_HEIGHT; y++) {
     //     for (int x = 0; x < TILE_WIDTH; x++) {
-    //         target.setPixel(x, y, grass.getPixel(x, y));
+    //         target.setPixel(x, y, Land.getPixel(x, y));
     //     }
     // }
     //

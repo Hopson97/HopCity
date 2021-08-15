@@ -95,7 +95,7 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
 
             float f = std::accumulate(features.begin(), features.end(), 1.0f,
                                       std::multiplies<float>());
-            tiles[x + y * worldSize].type = f > 0.4 ? TileType::Grass : TileType::Water;
+            tiles[x + y * worldSize].type = f > 0.4 ? TileType::Land : TileType::Water;
         }
     }
     return tiles;
