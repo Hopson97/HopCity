@@ -20,8 +20,6 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
-    void forEachSelectedTile(std::function<void(const sf::Vector2i& tile)> f);
-
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
     sf::Texture m_selectionRedTexture;
@@ -39,6 +37,7 @@ class ScreenGame final : public Screen {
 
     // Editor
     sf::Vector2i m_editStartPosition;
+    sf::Vector2i m_editPivotPoint;
     sf::Vector2i m_editEndPosition;
     bool m_quadDrag = false;
 };

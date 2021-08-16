@@ -8,19 +8,17 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
-
 int main()
 {
-
-    sf::Image grass;
+    sf::Image Land;
     sf::Image path;
     sf::Image target;
-    // grass.loadFromFile("Data/Tiles/road3.png");
+    // Land.loadFromFile("Data/Tiles/road3.png");
     // target.create(512, 128, sf::Color::Magenta);
     //
     // for (int y = 0; y < TILE_HEIGHT; y++) {
     //     for (int x = 0; x < TILE_WIDTH; x++) {
-    //         target.setPixel(x, y, grass.getPixel(x, y));
+    //         target.setPixel(x, y, Land.getPixel(x, y));
     //     }
     // }
     //
@@ -38,11 +36,13 @@ int main()
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
 
-    // Update ImGUI UI scaling for 4K monitors
+    // Update ImGUI UI scaling for 4K monitors. For some reason looks bad on linux hence
+    // the ifdef
+#ifndef __linux__
     if (sf::VideoMode::getDesktopMode().width > 3600) {
         ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);
     }
-
+#endif
     // Set up screen system
     ScreenManager screens;
     // screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));

@@ -28,12 +28,36 @@ namespace {
 } // namespace
 
 Map::Map(int worldSize)
-    : m_waterAnimation((int)TILE_WIDTH, (int)TILE_HEIGHT, true, 0.05)
-    , m_worldSize(worldSize)
+    : m_worldSize(worldSize)
 {
-    m_tileTextures.loadFromFile("Data/Textures/TileMap.png");
-    regenerate();
+    m_tileTextures.loadFromFile("Data/Textures/TileMap2.png");
 
+    m_tiles = generateWorld({0, 0}, worldSize);
+
+    for (int i = 0; i < m_worldSize + 1; i++) {
+        addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
+                    tileToScreenPosition(worldSize, {m_worldSize, i}));
+        addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, 0}),
+                    tileToScreenPosition(worldSize, {i, m_worldSize}));
+    }
+
+    for (int y = 0; y < m_worldSize; y++) {
+        for (int x = 0; x < m_worldSize; x++) {
+            addIsometricQuad(&m_landTiles, m_worldSize, {x, y});
+            updateTile({x, y});
+        }
+    }
+}
+
+void Map::regenerateTerrain()
+{
+    m_tiles = generateWorld({0, 0}, m_worldSize);
+
+    for (int y = 0; y < m_worldSize; y++) {
+        for (int x = 0; x < m_worldSize; x++) {
+            updateTile({x, y});
+        }
+    }
 }
 
 void Map::setTile(const sf::Vector2i& position, TileType type)
@@ -61,7 +85,6 @@ void Map::updateTile(const sf::Vector2i& position)
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-
     // Set the tile's varient
     Tile* tile = getTile(position);
     tile->varient = 0;
@@ -70,7 +93,7 @@ void Map::updateTile(const sf::Vector2i& position)
         if (neighbour && tile->type == neighbour->type) {
             tile->varient += (int)std::pow(2, i);
         }
-        if (neighbour && neighbour->type != TileType::Grass) {
+        if (neighbour && neighbour->type != TileType::Land) {
             neighbour->varient = 0;
             for (int j = 0; j < 4; j++) {
                 Tile* subNeighbour =
@@ -84,12 +107,12 @@ void Map::updateTile(const sf::Vector2i& position)
 
     // Update the tile texture coords
     int vertexIndex = (position.y * m_worldSize + position.x) * 4;
-    if (vertexIndex >= (int)m_foregroundTileVerticies.size()) {
+    if (vertexIndex >= (int)m_landTiles.size()) {
         return;
     }
-    sf::Vertex* vertex = &m_foregroundTileVerticies[vertexIndex];
+    sf::Vertex* vertex = &m_landTiles[vertexIndex];
 
-    if (tile->type == TileType::Grass) {
+    if (tile->type == TileType::Land) {
         vertex[0].texCoords = {0, 0};
         vertex[1].texCoords = {0, TILE_HEIGHT};
         vertex[2].texCoords = {TILE_WIDTH, TILE_HEIGHT};
@@ -117,45 +140,9 @@ void Map::draw(sf::RenderWindow* target)
     sf::RenderStates states = sf::RenderStates::Default;
     states.texture = &m_tileTextures;
 
-    if (showDetail) {
-        auto frame = static_cast<float>(m_waterAnimation.getFrame().left);
-        for (unsigned i = 0; i < m_tiles.size(); i++) {
-            sf::Vertex* vertex = &m_backgroundTileVerticies[i * 4];
-
-            vertex[0].texCoords = {frame, TILE_HEIGHT * 3};
-            vertex[1].texCoords = {frame, TILE_HEIGHT * 4};
-            vertex[2].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 4};
-            vertex[3].texCoords = {frame + TILE_WIDTH, TILE_HEIGHT * 3};
-        }
-    }
-    target->draw(m_backgroundTileVerticies.data(), m_backgroundTileVerticies.size(),
-                 sf::Quads, states);
-    target->draw(m_foregroundTileVerticies.data(), m_foregroundTileVerticies.size(),
-                 sf::Quads, states);
+    target->draw(m_landTiles.data(), m_landTiles.size(), sf::Quads, states);
 
     if (showDetail) {
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
-    }
-}
-void Map::regenerate() {
-    m_tiles = generateWorld({0, 0}, m_worldSize);
-
-    for (int i = 0; i < m_worldSize + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition(m_worldSize, {0, i}),
-                    tileToScreenPosition(m_worldSize, {m_worldSize, i}));
-        addGridLine(&m_grid, tileToScreenPosition(m_worldSize, {i, 0}),
-                    tileToScreenPosition(m_worldSize, {i, m_worldSize}));
-    }
-
-    for (int y = 0; y < m_worldSize; y++) {
-        for (int x = 0; x < m_worldSize; x++) {
-            addIsometricQuad(&m_foregroundTileVerticies, m_worldSize, {x, y});
-            addIsometricQuad(&m_backgroundTileVerticies, m_worldSize, {x, y});
-            updateTile({x, y});
-        }
-    }
-
-    for (int i = 0; i < 5; i++) {
-        m_waterAnimation.addFrame(0, i, sf::milliseconds(320));
     }
 }

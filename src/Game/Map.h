@@ -9,9 +9,11 @@
 #include <SFML/Graphics/VertexBuffer.hpp>
 
 enum class TileType : uint8_t {
-    Grass,
+    Land,
     Road,
     Water,
+
+    Building,
 };
 
 struct Tile {
@@ -22,6 +24,8 @@ struct Tile {
 struct Map {
   public:
     Map(int worldSize);
+
+    void regenerateTerrain();
 
     void setTile(const sf::Vector2i& position, TileType type);
     void draw(sf::RenderWindow* target);
@@ -36,10 +40,7 @@ struct Map {
     sf::Texture m_tileTextures;
     std::vector<Tile> m_tiles;
     std::vector<sf::Vertex> m_grid;
-    std::vector<sf::Vertex> m_foregroundTileVerticies;
-    std::vector<sf::Vertex> m_backgroundTileVerticies;
-
-    Animation m_waterAnimation;
+    std::vector<sf::Vertex> m_landTiles;
 
     int m_worldSize;
 };
