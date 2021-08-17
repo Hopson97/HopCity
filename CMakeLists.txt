@@ -49,7 +49,6 @@ endif ()
 find_package(Threads)
 
 
-
 IF (WIN32)
     find_package(SFML 2.5.1 COMPONENTS system window graphics network audio REQUIRED)
     find_package(OpenGL REQUIRED)
@@ -59,11 +58,13 @@ IF (WIN32)
 
 ELSE ()
     add_subdirectory(deps/imgui_sfml)
+    add_subdirectory(deps/nuklear_sfml)
     target_include_directories(${PROJECT_NAME} PRIVATE deps)
     target_link_libraries(${PROJECT_NAME}
             Threads::Threads
             ${CONAN_LIBS}
             imgui_sfml
+            nuklear_sfml
             )
 ENDIF ()
 #Finally
