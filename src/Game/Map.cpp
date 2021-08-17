@@ -30,7 +30,7 @@ namespace {
 Map::Map(int worldSize)
     : m_worldSize(worldSize)
 {
-    m_tileTextures.loadFromFile("Data/Textures/TileMap2.png");
+    m_tileTextures.loadFromFile("data/Textures/TileMap2.png");
 
     m_tiles = generateWorld({0, 0}, worldSize);
 

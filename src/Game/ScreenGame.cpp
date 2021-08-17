@@ -92,9 +92,9 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
-    m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
-    m_selectionRedTexture.loadFromFile("Data/Textures/SelectionRed.png");
-    m_tileCorners.loadFromFile("Data/Textures/Corners.png");
+    m_selectionTexture.loadFromFile("data/Textures/Selection.png");
+    m_selectionRedTexture.loadFromFile("data/Textures/SelectionRed.png");
+    m_tileCorners.loadFromFile("data/Textures/Corners.png");
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 }
