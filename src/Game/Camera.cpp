@@ -3,6 +3,7 @@
 #include "../Keyboard.h"
 
 #include "World.h"
+#include <imgui_sfml/imgui.h>
 
 Camera::Camera(int worldSize)
 {
@@ -37,21 +38,23 @@ void Camera::onEvent(const sf::Event& e)
 
 void Camera::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
+    if (!ImGui::GetIO().WantCaptureMouse) {
 
-    // Move the view if it is on the edge of the screen
-    constexpr int GAP = 100;
-    auto mousePosition = sf::Mouse::getPosition(window);
-    if (mousePosition.x < GAP) {
-        m_view.move(-5, 0);
-    }
-    else if (mousePosition.x > (int)window.getSize().x - GAP) {
-        m_view.move(5, 0);
-    }
-    if (mousePosition.y < GAP) {
-        m_view.move(0, -5);
-    }
-    else if (mousePosition.y > (int)window.getSize().y - GAP) {
-        m_view.move(0, 5);
+        // Move the view if it is on the edge of the screen
+        constexpr int GAP = 100;
+        auto mousePosition = sf::Mouse::getPosition(window);
+        if (mousePosition.x < GAP) {
+            m_view.move(-5, 0);
+        }
+        else if (mousePosition.x > (int)window.getSize().x - GAP) {
+            m_view.move(5, 0);
+        }
+        if (mousePosition.y < GAP) {
+            m_view.move(0, -5);
+        }
+        else if (mousePosition.y > (int)window.getSize().y - GAP) {
+            m_view.move(0, 5);
+        }
     }
 
     if (keyboard.isKeyDown(sf::Keyboard::A)) {

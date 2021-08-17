@@ -104,32 +104,35 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
     auto& ts = profiler.newTimeslot("Input");
     m_camera.onInput(keyboard, window);
 
-    auto mousePosition = sf::Mouse::getPosition(window);
-    sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        auto mousePosition = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
-    sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
-                         (int)worldPos.y / (int)TILE_HEIGHT};
-    sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
-                           (int)worldPos.y % (int)TILE_HEIGHT};
+        sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
+                             (int)worldPos.y / (int)TILE_HEIGHT};
+        sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
+                               (int)worldPos.y % (int)TILE_HEIGHT};
 
-    m_selectedTile = {
-        (cell.y - m_worldSize) + (cell.x - m_worldSize),
-        (cell.y - m_worldSize) - (cell.x - m_worldSize),
-    };
+        m_selectedTile = {
+            (cell.y - m_worldSize) + (cell.x - m_worldSize),
+            (cell.y - m_worldSize) - (cell.x - m_worldSize),
+        };
 
-    // clang-format off
-    if (offset.x >= 0 && 
-        offset.y >= 0 && 
-        offset.x < m_tileCorners.getSize().x && 
-        offset.y < m_tileCorners.getSize().y)
-    {
-        sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
-             if (colour == sf::Color::Red   )   m_selectedTile.x--;
-        else if (colour == sf::Color::Green )   m_selectedTile.y++;
-        else if (colour == sf::Color::Blue  )   m_selectedTile.y--;
-        else if (colour == sf::Color::White )   m_selectedTile.x++;
+        // clang-format off
+        if (offset.x >= 0 && 
+            offset.y >= 0 && 
+            offset.x < m_tileCorners.getSize().x && 
+            offset.y < m_tileCorners.getSize().y)
+        {
+            sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
+                 if (colour == sf::Color::Red   )   m_selectedTile.x--;
+            else if (colour == sf::Color::Green )   m_selectedTile.y++;
+            else if (colour == sf::Color::Blue  )   m_selectedTile.y--;
+            else if (colour == sf::Color::White )   m_selectedTile.x++;
+        }
+        // clang-format on
+
     }
-    // clang-format on
 
     if (m_quadDrag) {
         if (xDistGreater(m_editStartPosition, m_editEndPosition)) {
@@ -166,16 +169,19 @@ void ScreenGame::onEvent(const sf::Event& e)
 {
     auto& ts = profiler.newTimeslot("Event");
     m_camera.onEvent(e);
-    if (e.type == sf::Event::MouseButtonPressed) {
-        m_quadDrag = true;
-        m_editStartPosition = m_selectedTile;
-        m_editEndPosition = m_selectedTile;
-    }
-    else if (e.type == sf::Event::MouseButtonReleased) {
-        m_quadDrag = false;
-        forEachLSection(
-            m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-            [&](const sf::Vector2i& tilepos) { m_map.setTile(tilepos, TileType::Road); });
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        if (e.type == sf::Event::MouseButtonPressed) {
+            m_quadDrag = true;
+            m_editStartPosition = m_selectedTile;
+            m_editEndPosition = m_selectedTile;
+        }
+        else if (e.type == sf::Event::MouseButtonReleased) {
+            m_quadDrag = false;
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i& tilepos) {
+                                m_map.setTile(tilepos, TileType::Road);
+                            });
+        }
     }
     ts.stop();
 }
