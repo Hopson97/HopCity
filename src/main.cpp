@@ -111,7 +111,7 @@ int main()
         }
         nk_end(nuklear);
 
-        screen->onGUI();
+        screen->onGUI(nuklear);
         ImGui::SFML::Render(window);
         nk_sfml_render(NK_ANTI_ALIASING_ON);
 

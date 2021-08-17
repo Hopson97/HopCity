@@ -8,7 +8,7 @@ ScreenMainMenu::ScreenMainMenu(ScreenManager* stack)
 {
 }
 
-void ScreenMainMenu::onGUI()
+void ScreenMainMenu::onGUI(nk_context* nuklear)
 {
     if (imguiBeginMenu("M A I N   M E N U")) {
         ImGui::Text("Welcome to xyz by Hopson");

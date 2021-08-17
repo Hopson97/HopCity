@@ -33,8 +33,14 @@ void Profiler::reset()
     m_activeslots.clear();
 }
 
-void Profiler::onGUI()
+void Profiler::onGUI(nk_context* nuklear)
 {
+    if (nk_begin(nuklear, "Profiler", nk_rect(10, 10, 400, 600), NK_WINDOW_SCALABLE | NK_WINDOW_MOVABLE | NK_WINDOW_MINIMIZABLE)) {
+
+       // nk_labelf_colored(nuklear, 0, {0, 100, 250, 255}, "Current Frametime: %f ms", static_cast<float>(frametime * 1000.0f));
+
+        nk_end(nuklear);
+    }
     if (ImGui::Begin("Profiler")) {
         ImGui::TextColored({0, 0.392f, 0.960f, 1}, "Current Frametime: %f ms",
                            static_cast<float>(frametime * 1000.0f));

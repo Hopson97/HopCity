@@ -6,14 +6,12 @@
 #include "Map.h"
 #include "World.h"
 #include <functional>
-
 // Main Game Class
-
 class ScreenGame final : public Screen {
   public:
     ScreenGame(ScreenManager* screens);
 
-    void onGUI() override;
+    void onGUI(nk_context* nuklear) override;
     void onInput(const Keyboard& keyboard, const sf::RenderWindow& window) override;
     void onEvent(const sf::Event& e) override;
     void onUpdate(const sf::Time& dt) override;

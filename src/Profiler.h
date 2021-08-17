@@ -5,6 +5,8 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
+#include <nuklear_sfml/nuklear_def.h>
+
 class TimeSlot {
   public:
     TimeSlot(std::string _name)
@@ -39,7 +41,7 @@ class Profiler {
     };
     Profiler();
     void reset();
-    void onGUI();
+    void onGUI(nk_context* nuklear);
 
     TimeSlot& newTimeslot(const char* name);
 

@@ -11,7 +11,7 @@ class ScreenMainMenu final : public Screen {
   public:
     ScreenMainMenu(ScreenManager* screens);
 
-    void onGUI() override;
+    void onGUI(nk_context* nuklear) override;
     void onRender(sf::RenderWindow* window) override;
 
   private:

@@ -145,7 +145,7 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
     ts.stop();
 }
 
-void ScreenGame::onGUI()
+void ScreenGame::onGUI(nk_context* nuklear)
 {
     auto& ts = profiler.newTimeslot("GUI");
     if (ImGui::Begin("Info")) {
@@ -158,7 +158,7 @@ void ScreenGame::onGUI()
         }
     }
     ImGui::End();
-    profiler.onGUI();
+    profiler.onGUI(nuklear);
     ts.stop();
 }
 

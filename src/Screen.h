@@ -10,6 +10,7 @@
 class GUI;
 
 class Screen;
+#include <nuklear_sfml/nuklear_def.h>
 
 class ScreenManager final {
     struct Action {
@@ -43,7 +44,7 @@ class Screen {
     Screen(ScreenManager* screens);
     virtual ~Screen() = default;
 
-    virtual void onGUI() {}
+    virtual void onGUI(nk_context* nuklear) {}
     virtual void onEvent([[maybe_unused]] const sf::Event& e) {}
     virtual void onInput([[maybe_unused]] const Keyboard& keyboard,
                          [[maybe_unused]] const sf::RenderWindow& window)
