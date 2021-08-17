@@ -4,8 +4,20 @@
 
 ScreenMainMenu::ScreenMainMenu(ScreenManager* stack)
     : Screen(stack)
-
+    , newgameanim(32, 64, false)
+    , loopedani(32, 64, false)
 {
+    for (int i = 0; i < 9; i++) {
+        newgameanim.addFrame(0, i, sf::milliseconds(150));
+    }
+    for (int i = 9; i < 16; i++) {
+        loopedani.addFrame(0, i, sf::milliseconds(150));
+    }
+
+    testTexutre.loadFromFile("data/Textures/NewGame.png");
+    testFrame.setTexture(&testTexutre);
+    testFrame.setSize({256, 512});
+    testFrame.setPosition(200, 450 - 256);
 }
 
 void ScreenMainMenu::onGUI()
@@ -23,4 +35,12 @@ void ScreenMainMenu::onGUI()
     }
     ImGui::End();
 }
-void ScreenMainMenu::onRender(sf::RenderWindow* window) {}
+void ScreenMainMenu::onRender(sf::RenderWindow* window) 
+{
+    if (!newgameanim.isOnLastFrame()) {
+        testFrame.setTextureRect(newgameanim.getFrame());
+    }
+    else {
+        testFrame.setTextureRect(loopedani.getFrame());
+    }
+    window->draw(testFrame); }

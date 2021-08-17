@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Screen.h"
-
+#include "../Animation.h"
 class ScreenMainMenu final : public Screen {
     enum class Menu {
         MainMenu,
@@ -15,4 +15,8 @@ class ScreenMainMenu final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
+    Animation newgameanim;
+    Animation loopedani;
+    sf::Texture testTexutre;
+    sf::RectangleShape testFrame;
 };

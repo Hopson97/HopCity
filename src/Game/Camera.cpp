@@ -16,7 +16,7 @@ void Camera::setViewToCamera(sf::RenderWindow& window) { window.setView(m_view);
 
 void Camera::onEvent(const sf::Event& e)
 {
-    if (e.type == sf::Event::MouseWheelScrolled) {
+    if (e.type == sf::Event::MouseWheelScrolled && !ImGui::GetIO().WantCaptureMouse) {
         if (e.mouseWheelScroll.delta > 0 && zoomLevel == 8) {
             m_view.zoom(1.0f / 8.0f);
             zoomLevel *= 1.0f / 8.0f;

@@ -45,3 +45,5 @@ const sf::IntRect& Animation::getFrame()
     m_timer.restart();
     return m_frames[m_framePointer].bounds;
 }
+
+bool Animation::isOnLastFrame() const { return m_framePointer == m_frames.size() - 1; }

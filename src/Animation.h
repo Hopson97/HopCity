@@ -24,6 +24,8 @@ class Animation {
 
     const sf::IntRect& getFrame();
 
+    bool isOnLastFrame() const;
+
   private:
     sf::Clock m_timer;
     sf::Time m_overlappedTime;

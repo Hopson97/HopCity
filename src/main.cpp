@@ -26,7 +26,7 @@ int main()
     // Set up screen system
     ScreenManager screens;
     // screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
-    screens.pushScreen(std::make_unique<ScreenGame>(&screens));
+    screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
     screens.update();
 
     // Time step, 30 ticks per second
