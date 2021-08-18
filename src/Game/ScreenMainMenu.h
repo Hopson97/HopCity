@@ -21,4 +21,5 @@ class ScreenMainMenu final : public Screen {
     Animation loopedani;
     sf::Texture testTexutre;
     sf::RectangleShape testFrame;
+    sf::RectangleShape m_wall;
 };
