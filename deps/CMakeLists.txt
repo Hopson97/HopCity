@@ -1,2 +1,0 @@
-add_subdirectory(imgui_sfml)
-add_subdirectory(nuklear_sfml)

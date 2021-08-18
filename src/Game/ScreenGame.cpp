@@ -97,7 +97,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_tileCorners.loadFromFile("data/Textures/Corners.png");
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
-
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
@@ -132,7 +131,6 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
             else if (colour == sf::Color::White )   m_selectedTile.x++;
         }
         // clang-format on
-
     }
 
     if (m_quadDrag) {
@@ -206,7 +204,6 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, m_selectedTile));
     window->draw(m_selectionRect);
-
 
     if (m_quadDrag) {
         m_selectionRect.setTexture(&m_selectionRedTexture);

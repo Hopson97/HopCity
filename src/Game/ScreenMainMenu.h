@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Screen.h"
 #include "../Animation.h"
+#include "../Screen.h"
 class ScreenMainMenu final : public Screen {
     enum class Menu {
         MainMenu,
@@ -9,9 +9,10 @@ class ScreenMainMenu final : public Screen {
     };
 
   public:
-    ScreenMainMenu(ScreenManager* screens);
+    ScreenMainMenu(ScreenManager* screens, const sf::RenderWindow& window);
 
     void onGUI() override;
+    void onInput(const Keyboard& keyboard, const sf::RenderWindow& window) override;
     void onRender(sf::RenderWindow* window) override;
 
   private:

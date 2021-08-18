@@ -2,7 +2,7 @@
 #include "ScreenGame.h"
 #include <imgui_sfml/imgui.h>
 
-ScreenMainMenu::ScreenMainMenu(ScreenManager* stack)
+ScreenMainMenu::ScreenMainMenu(ScreenManager* stack, const sf::RenderWindow& window)
     : Screen(stack)
     , newgameanim(32, 64, false)
     , loopedani(32, 64, false)
@@ -17,7 +17,7 @@ ScreenMainMenu::ScreenMainMenu(ScreenManager* stack)
     testTexutre.loadFromFile("data/Textures/NewGame.png");
     testFrame.setTexture(&testTexutre);
     testFrame.setSize({256, 512});
-    testFrame.setPosition(200, 450 - 256);
+    testFrame.setPosition(200, window.getSize().y / 2 - 256);
 }
 
 void ScreenMainMenu::onGUI()
@@ -35,12 +35,23 @@ void ScreenMainMenu::onGUI()
     }
     ImGui::End();
 }
-void ScreenMainMenu::onRender(sf::RenderWindow* window) 
+
+void ScreenMainMenu::onInput([[maybe_unused]]const Keyboard& keyboard, const sf::RenderWindow& window)
 {
-    if (!newgameanim.isOnLastFrame()) {
-        testFrame.setTextureRect(newgameanim.getFrame());
+    auto mp = sf::Mouse::getPosition(window);
+
+    if (testFrame.getGlobalBounds().contains((float)mp.x, (float)mp.y)) {
+        if (!newgameanim.isOnLastFrame()) {
+            testFrame.setTextureRect(newgameanim.progressFrame());
+        }
+        else {
+            testFrame.setTextureRect(loopedani.progressFrame());
+        }
     }
     else {
-        testFrame.setTextureRect(loopedani.getFrame());
+        newgameanim.reset();
+        testFrame.setTextureRect(newgameanim.progressFrame());
     }
-    window->draw(testFrame); }
+}
+
+void ScreenMainMenu::onRender(sf::RenderWindow* window) { window->draw(testFrame); }
