@@ -16,6 +16,8 @@ int main()
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
 
+    Profiler profiler;
+
     // Update ImGUI UI scaling for 4K monitors. For some reason looks bad on linux hence
     // the ifdef
 #ifndef __linux__
@@ -41,26 +43,34 @@ int main()
 
     while (window.isOpen() && !screens.isEmpty()) {
         Screen* screen = &screens.peekScreen();
-        sf::Event e;
-        while (window.pollEvent(e)) {
+        profiler.reset();
 
-            ImGui::SFML::ProcessEvent(e);
-            screen->onEvent(e);
-            keyboard.update(e);
-            switch (e.type) {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
+        {
 
-                case sf::Event::KeyReleased:
-                    if (e.key.code == sf::Keyboard::Escape) {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Events");
+
+            sf::Event e;
+            while (window.pollEvent(e)) {
+
+                ImGui::SFML::ProcessEvent(e);
+                screen->onEvent(e);
+                keyboard.update(e);
+                switch (e.type) {
+                    case sf::Event::Closed:
                         window.close();
-                    }
-                    break;
+                        break;
 
-                default:
-                    break;
+                    case sf::Event::KeyReleased:
+                        if (e.key.code == sf::Keyboard::Escape) {
+                            window.close();
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
+            profilerSlot.stop();
         }
 
         // Get times
@@ -70,27 +80,49 @@ int main()
         lastTime = time;
         lag += elapsed;
 
-        // Real time stuff
-        screen->profiler.reset();
-        screen->onInput(keyboard, window);
-        screen->onUpdate(dt);
-        ImGui::SFML::Update(window, dt);
+        // User input (real time)
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Input");
+            screen->onInput(keyboard, window);
+            profilerSlot.stop();
+        }
 
-        ImGui::ShowDemoWindow();
+        // Game update
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Update");
+            screen->onUpdate(dt);
+            ImGui::SFML::Update(window, dt);
+            profilerSlot.stop();
+        }
 
-        // Fixed time update
-        while (lag >= timePerUpdate) {
-            lag -= timePerUpdate;
-            screen->onFixedUpdate(elapsed);
+        // Fixed update
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Fixed Update");
+            // Fixed time update
+            while (lag >= timePerUpdate) {
+                lag -= timePerUpdate;
+                screen->onFixedUpdate(elapsed);
+            }
+            profilerSlot.stop();
         }
 
         // Rendering
         window.clear({64, 164, 223});
-        screen->onRender(&window);
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Render");
+            screen->onRender(&window);
+            profilerSlot.stop();
+        }
 
-        screen->onGUI();
+        // GUI/ ImGUI stuff
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("GUI");
+            screen->onGUI();
+            profilerSlot.stop();
+        }
+
+        profiler.onGUI();
         ImGui::SFML::Render(window);
-
         window.display();
         screens.update();
     }

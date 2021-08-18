@@ -101,7 +101,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
-    auto& ts = profiler.newTimeslot("Input");
     m_camera.onInput(keyboard, window);
 
     if (!ImGui::GetIO().WantCaptureMouse) {
@@ -144,12 +143,10 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         }
         m_editEndPosition = m_selectedTile;
     }
-    ts.stop();
 }
 
 void ScreenGame::onGUI()
 {
-    auto& ts = profiler.newTimeslot("GUI");
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
         ImGuiIO& io = ImGui::GetIO();
@@ -160,13 +157,10 @@ void ScreenGame::onGUI()
         }
     }
     ImGui::End();
-    profiler.onGUI();
-    ts.stop();
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
-    auto& ts = profiler.newTimeslot("Event");
     m_camera.onEvent(e);
     if (!ImGui::GetIO().WantCaptureMouse) {
         if (e.type == sf::Event::MouseButtonPressed) {
@@ -182,18 +176,12 @@ void ScreenGame::onEvent(const sf::Event& e)
                             });
         }
     }
-    ts.stop();
 }
 
-void ScreenGame::onUpdate(const sf::Time& dt)
-{
-    auto& ts = profiler.newTimeslot("Update");
-    ts.stop();
-}
+void ScreenGame::onUpdate(const sf::Time& dt) {}
 
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
-    auto& ts = profiler.newTimeslot("Render");
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
@@ -220,6 +208,4 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         //    window->draw(m_selectionRect);
         //});
     }
-
-    ts.stop();
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Keyboard.h"
-#include "Profiler.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <stack>
@@ -52,7 +51,6 @@ class Screen {
     virtual void onUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onFixedUpdate([[maybe_unused]] const sf::Time& dt) {}
     virtual void onRender(sf::RenderWindow* window) = 0;
-    Profiler profiler;
 
   protected:
     ScreenManager* m_pScreens;

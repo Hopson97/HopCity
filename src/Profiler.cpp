@@ -35,7 +35,8 @@ void Profiler::reset()
 
 void Profiler::onGUI()
 {
-    if (ImGui::Begin("Profiler")) {
+    ImGui::SetNextWindowBgAlpha(0.7f); 
+    if (ImGui::Begin("Profiler", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav)) {
         ImGui::TextColored({0, 0.392f, 0.960f, 1}, "Current Frametime: %f ms",
                            static_cast<float>(frametime * 1000.0f));
 

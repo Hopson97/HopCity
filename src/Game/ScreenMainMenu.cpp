@@ -36,7 +36,20 @@ void ScreenMainMenu::onGUI()
     ImGui::End();
 }
 
-void ScreenMainMenu::onInput([[maybe_unused]]const Keyboard& keyboard, const sf::RenderWindow& window)
+void ScreenMainMenu::onEvent(const sf::Event& e)
+{
+    if (e.type == sf::Event::MouseButtonReleased &&
+        e.mouseButton.button == sf::Mouse::Left) {
+        float x = (float)e.mouseButton.x;
+        float y = (float)e.mouseButton.y;
+        if (testFrame.getGlobalBounds().contains(x, y)) {
+            m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
+        }
+    }
+}
+
+void ScreenMainMenu::onInput([[maybe_unused]] const Keyboard& keyboard,
+                             const sf::RenderWindow& window)
 {
     auto mp = sf::Mouse::getPosition(window);
 
