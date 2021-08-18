@@ -17,9 +17,10 @@ class ScreenMainMenu final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
-    Animation newgameanim;
-    Animation loopedani;
-    sf::Texture testTexutre;
-    sf::RectangleShape testFrame;
+    Animation m_buttonAnimation;
+    sf::Texture m_newGameTexture;
+    sf::Texture m_loadGameTexture;
+    sf::RectangleShape m_newGameButton;
+    sf::RectangleShape m_loadGameButton;
     sf::RectangleShape m_wall;
 };

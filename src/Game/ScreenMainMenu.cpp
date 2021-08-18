@@ -2,20 +2,29 @@
 #include "ScreenGame.h"
 #include <imgui_sfml/imgui.h>
 
+
+
 ScreenMainMenu::ScreenMainMenu(ScreenManager* stack, const sf::RenderWindow& window)
     : Screen(stack)
-    , newgameanim(32, 64, false)
-    , loopedani(32, 64, false)
+    , m_buttonAnimation(32, 64, false)
 {
     for (int i = 0; i < 6; i++) {
-        newgameanim.addFrame(0, i, sf::milliseconds(100));
+        m_buttonAnimation.addFrame(0, i, sf::milliseconds(100));
     }
 
-    testTexutre.loadFromFile("data/Textures/NewGame.png");
-    testFrame.setTexture(&testTexutre);
-    testFrame.setSize({256, 512});
+    m_newGameTexture.loadFromFile("data/Textures/NewGame.png");
+    m_loadGameTexture.loadFromFile("data/Textures/LoadGame.png");
+
+    m_newGameButton.setTexture(&m_newGameTexture);
+    m_newGameButton.setSize({256, 512});
+    m_newGameButton.setPosition(300, window.getSize().y / 2 - 256);
+
+    m_loadGameButton.setTexture(&m_loadGameTexture);
+    m_loadGameButton.setSize({256, 512});
+    m_loadGameButton.setPosition(600, window.getSize().y / 2 - 256);
+
     m_wall.setSize({400, window.getSize().y});
-    testFrame.setPosition(300, window.getSize().y / 2 - 256);
+
 }
 
 void ScreenMainMenu::onGUI() {}
@@ -26,8 +35,11 @@ void ScreenMainMenu::onEvent(const sf::Event& e)
         e.mouseButton.button == sf::Mouse::Left) {
         float x = (float)e.mouseButton.x;
         float y = (float)e.mouseButton.y;
-        if (testFrame.getGlobalBounds().contains(x, y)) {
+        if (m_newGameButton.getGlobalBounds().contains(x, y)) {
             m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
+        }
+        else if (m_loadGameButton.getGlobalBounds().contains(x, y)) {
+            //m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
         }
     }
 }
@@ -38,12 +50,12 @@ void ScreenMainMenu::onInput([[maybe_unused]] const Keyboard& keyboard,
 
     auto mp = sf::Mouse::getPosition(window);
 
-    if (testFrame.getGlobalBounds().contains((float)mp.x, (float)mp.y)) {
-        testFrame.setTextureRect(newgameanim.progressFrame());
+    if (m_newGameButton.getGlobalBounds().contains((float)mp.x, (float)mp.y)) {
+        m_newGameButton.setTextureRect(m_buttonAnimation.progressFrame());
     }
     else {
-        newgameanim.reset();
-        testFrame.setTextureRect(newgameanim.progressFrame());
+        m_buttonAnimation.reset();
+        m_newGameButton.setTextureRect(m_buttonAnimation.progressFrame());
     }
 }
 
@@ -55,6 +67,7 @@ void ScreenMainMenu::onRender(sf::RenderWindow* window)
         m_wall.setFillColor(i % 2 == 0 ? sf::Color{100, 100, 100} : sf::Color::White);
         window->draw(m_wall);
     }
-    window->draw(testFrame);
+    window->draw(m_newGameButton);
+    window->draw(m_loadGameButton);
 
 }
