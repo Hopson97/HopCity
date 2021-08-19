@@ -2,6 +2,7 @@
 
 #include "World.h"
 #include <cmath>
+#include <iostream>
 
 namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads, int worldSize,
@@ -76,8 +77,6 @@ void Map::setTile(const sf::Vector2i& position, TileType type)
     if (itr != m_structures.end()) {
         m_structures.erase(itr);
     }
-
-    
 }
 
 Tile* Map::getTile(const sf::Vector2i& position)
@@ -156,16 +155,14 @@ void Map::draw(sf::RenderWindow* target)
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 
-
-
+    m_structureRect.setFillColor({255, 255, 255, 100});
     for (const auto& s : sorted) {
         const auto& structure = m_structures[s];
         if (structure.type == StructureType::FirTree) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
             m_structureRect.setTextureRect(
                 sf::IntRect{0, 0, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
-            m_structureRect.setPosition(
-                tileToScreenPosition(m_worldSize, s));
+            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
 
             m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
 
@@ -173,10 +170,10 @@ void Map::draw(sf::RenderWindow* target)
         }
         else if (structure.type == StructureType::Wall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
-            m_structureRect.setTextureRect(sf::IntRect{
-                0, (int)TILE_HEIGHT * 2, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
-            m_structureRect.setPosition(
-                tileToScreenPosition(m_worldSize, s));
+            m_structureRect.setTextureRect(
+                sf::IntRect{(int)TILE_WIDTH, (int)TILE_HEIGHT * 2, (int)TILE_WIDTH,
+                            (int)TILE_HEIGHT * 2});
+            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
 
             m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
 
@@ -187,12 +184,15 @@ void Map::draw(sf::RenderWindow* target)
 
 void Map::placeStructure(StructureType type, const sf::Vector2i& position)
 {
-    Structure s;
-    s.type = type;
-    m_structures.emplace(position, s);
+    if (m_structures.find(position) == m_structures.end()) {
+        std::cout << "Cannot even rn\n";
+        Structure s;
+        s.type = type;
 
-    sorted.push_back(position);
-    std::sort(sorted.begin(), sorted.end(), [&](auto& a, auto& b) {
-        return a.x < b.x;
-    });
+
+        m_structures[position] = s;
+        sorted.push_back(position);
+        std::sort(sorted.begin(), sorted.end(),
+                  [&](auto& a, auto& b) { return a.x < b.x; });
+    }
 }
