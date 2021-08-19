@@ -8,4 +8,5 @@ constexpr float TILE_WIDTH = 32.0f;
 
 sf::Vector2f tileToScreenPosition(int worldSize, const sf::Vector2i& tilePosition);
 
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize);
+std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize,
+                                Map* map);

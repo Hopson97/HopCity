@@ -88,7 +88,7 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(64)
+    , m_worldSize(128)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {

@@ -2,8 +2,6 @@
 #include "ScreenGame.h"
 #include <imgui_sfml/imgui.h>
 
-
-
 ScreenMainMenu::ScreenMainMenu(ScreenManager* stack, const sf::RenderWindow& window)
     : Screen(stack)
     , m_buttonAnimation(32, 64, false)
@@ -16,15 +14,14 @@ ScreenMainMenu::ScreenMainMenu(ScreenManager* stack, const sf::RenderWindow& win
     m_loadGameTexture.loadFromFile("data/Textures/LoadGame.png");
 
     m_newGameButton.setTexture(&m_newGameTexture);
-    m_newGameButton.setSize({256, 512});
-    m_newGameButton.setPosition(300, window.getSize().y / 2 - 256);
+    m_newGameButton.setSize({256.0f, 512.0f});
+    m_newGameButton.setPosition(300.0f, (float)window.getSize().y / 2.0f - 256.0f);
 
     m_loadGameButton.setTexture(&m_loadGameTexture);
-    m_loadGameButton.setSize({256, 512});
-    m_loadGameButton.setPosition(600, window.getSize().y / 2 - 256);
+    m_loadGameButton.setSize({256.0f, 512});
+    m_loadGameButton.setPosition(600, (float)window.getSize().y / 2.0f - 256.0f);
 
-    m_wall.setSize({400, window.getSize().y});
-
+    m_wall.setSize({400.0f, (float)window.getSize().y});
 }
 
 void ScreenMainMenu::onGUI() {}
@@ -39,7 +36,7 @@ void ScreenMainMenu::onEvent(const sf::Event& e)
             m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
         }
         else if (m_loadGameButton.getGlobalBounds().contains(x, y)) {
-            //m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
+            // m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
         }
     }
 }
@@ -63,11 +60,10 @@ void ScreenMainMenu::onRender(sf::RenderWindow* window)
 {
     for (int i = 0; i < 1600 / 400; i++) {
         m_wall.setPosition(i * 400, 0);
-        
+
         m_wall.setFillColor(i % 2 == 0 ? sf::Color{100, 100, 100} : sf::Color::White);
         window->draw(m_wall);
     }
     window->draw(m_newGameButton);
     window->draw(m_loadGameButton);
-
 }

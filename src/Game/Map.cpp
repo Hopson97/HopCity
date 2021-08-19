@@ -31,8 +31,10 @@ Map::Map(int worldSize)
     : m_worldSize(worldSize)
 {
     m_tileTextures.loadFromFile("data/Textures/TileMap2.png");
+    m_structureMap.loadFromFile("data/Textures/Structures.png");
 
-    m_tiles = generateWorld({0, 0}, worldSize);
+    m_structureRect.setTexture(&m_structureMap);
+    m_tiles = generateWorld({0, 0}, worldSize, this);
 
     for (int i = 0; i < m_worldSize + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
@@ -43,7 +45,7 @@ Map::Map(int worldSize)
 
     for (int y = 0; y < m_worldSize; y++) {
         for (int x = 0; x < m_worldSize; x++) {
-            addIsometricQuad(&m_landTiles, m_worldSize, {x, y});
+            addIsometricQuad(&m_tileVerts, m_worldSize, {x, y});
             updateTile({x, y});
         }
     }
@@ -51,7 +53,7 @@ Map::Map(int worldSize)
 
 void Map::regenerateTerrain()
 {
-    m_tiles = generateWorld({0, 0}, m_worldSize);
+    m_tiles = generateWorld({0, 0}, m_worldSize, this);
 
     for (int y = 0; y < m_worldSize; y++) {
         for (int x = 0; x < m_worldSize; x++) {
@@ -107,10 +109,10 @@ void Map::updateTile(const sf::Vector2i& position)
 
     // Update the tile texture coords
     int vertexIndex = (position.y * m_worldSize + position.x) * 4;
-    if (vertexIndex >= (int)m_landTiles.size()) {
+    if (vertexIndex >= (int)m_tileVerts.size()) {
         return;
     }
-    sf::Vertex* vertex = &m_landTiles[vertexIndex];
+    sf::Vertex* vertex = &m_tileVerts[vertexIndex];
 
     if (tile->type == TileType::Land) {
         vertex[0].texCoords = {0, 0};
@@ -140,9 +142,30 @@ void Map::draw(sf::RenderWindow* target)
     sf::RenderStates states = sf::RenderStates::Default;
     states.texture = &m_tileTextures;
 
-    target->draw(m_landTiles.data(), m_landTiles.size(), sf::Quads, states);
+    target->draw(m_tileVerts.data(), m_tileVerts.size(), sf::Quads, states);
 
     if (showDetail) {
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
+
+    for (const Structure& structure : m_structures) {
+
+        if (structure.type == StructureType::FirTree) {
+            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
+            m_structureRect.setTextureRect(
+                sf::IntRect{0, 0, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
+            m_structureRect.setPosition(
+                tileToScreenPosition(m_worldSize, structure.tilePosition));
+
+            target->draw(m_structureRect);
+        }
+    }
+}
+
+void Map::placeStructure(StructureType type, const sf::Vector2i& position)
+{
+    Structure s;
+    s.type = type;
+    s.tilePosition = position;
+    m_structures.push_back(s);
 }

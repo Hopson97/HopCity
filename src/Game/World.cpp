@@ -51,9 +51,9 @@ float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosi
     return value / accumulatedAmps;
 }
 
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize)
+std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize,
+                                Map* map)
 {
-
     std::vector<Tile> tiles(worldSize * worldSize);
 
     TerrainGenOptions ops;
@@ -91,11 +91,18 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
             features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
 
             // Noise
-            features.push_back(getNoiseAt({x, y}, chunkPosition, ops, worldSize));
+            float n = getNoiseAt({x, y}, chunkPosition, ops, worldSize);
+            features.push_back(n);
 
             float f = std::accumulate(features.begin(), features.end(), 1.0f,
                                       std::multiplies<float>());
             tiles[x + y * worldSize].type = f > 0.4 ? TileType::Land : TileType::Water;
+
+            if (tiles[x + y * worldSize].type == TileType::Land &&  pointDist(rng) > 4 && n > 0.6) {
+                map->placeStructure(StructureType::FirTree, {x, y});
+            }
+
+            // Maybe add a tree
         }
     }
     return tiles;
