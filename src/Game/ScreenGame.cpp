@@ -12,12 +12,6 @@ namespace {
         return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
     }
 
-    struct Vec2hash {
-        inline size_t operator()(const sf::Vector2i& v) const
-        {
-            return (v.x * 88339) ^ (v.y * 91967);
-        }
-    };
     /**
      * @brief Calls a function for a L shape selection (for example, building a road)
      *
@@ -120,8 +114,8 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         // clang-format off
         if (offset.x >= 0 && 
             offset.y >= 0 && 
-            offset.x < m_tileCorners.getSize().x && 
-            offset.y < m_tileCorners.getSize().y)
+            offset.x < (int)m_tileCorners.getSize().x && 
+            offset.y < (int)m_tileCorners.getSize().y)
         {
             sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
                  if (colour == sf::Color::Red   )   m_selectedTile.x--;
@@ -173,6 +167,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilepos) {
                                 m_map.setTile(tilepos, TileType::Road);
+                                m_map.placeStructure(StructureType::Wall, tilepos);
                             });
         }
     }

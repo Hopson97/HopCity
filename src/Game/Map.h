@@ -9,6 +9,13 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 
+struct Vec2hash {
+    inline size_t operator()(const sf::Vector2i& v) const
+    {
+        return (v.x * 88339) ^ (v.y * 91967);
+    }
+};
+
 enum class TileType : uint8_t {
     Land,
     Road,
@@ -17,9 +24,7 @@ enum class TileType : uint8_t {
     Building,
 };
 
-enum class StructureType {
-    FirTree,
-};
+enum class StructureType { FirTree, Wall };
 
 struct Tile {
     TileType type = TileType::Water;
@@ -28,7 +33,6 @@ struct Tile {
 
 struct Structure {
     StructureType type;
-    sf::Vector2i tilePosition;
 };
 
 struct Map {
@@ -54,7 +58,8 @@ struct Map {
     std::vector<sf::Vertex> m_grid;
     std::vector<sf::Vertex> m_tileVerts;
 
-    std::vector<Structure> m_structures;
+    std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;
+    std::vector<sf::Vector2i> sorted;
 
     sf::RectangleShape m_structureRect;
     sf::Texture m_structureMap;

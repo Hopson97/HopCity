@@ -81,7 +81,7 @@ int main()
         lag += elapsed;
 
         // User input (real time)
-        {
+        if (window.hasFocus()) {
             TimeSlot& profilerSlot = profiler.newTimeslot("Input");
             screen->onInput(keyboard, window);
             profilerSlot.stop();

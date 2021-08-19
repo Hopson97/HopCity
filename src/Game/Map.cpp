@@ -53,6 +53,7 @@ Map::Map(int worldSize)
 
 void Map::regenerateTerrain()
 {
+    m_structures.clear();
     m_tiles = generateWorld({0, 0}, m_worldSize, this);
 
     for (int y = 0; y < m_worldSize; y++) {
@@ -70,6 +71,13 @@ void Map::setTile(const sf::Vector2i& position, TileType type)
             updateTile(position + sf::Vector2i{i, j});
         }
     }
+
+    auto itr = m_structures.find(position);
+    if (itr != m_structures.end()) {
+        m_structures.erase(itr);
+    }
+
+    
 }
 
 Tile* Map::getTile(const sf::Vector2i& position)
@@ -148,14 +156,29 @@ void Map::draw(sf::RenderWindow* target)
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 
-    for (const Structure& structure : m_structures) {
 
+
+    for (const auto& s : sorted) {
+        const auto& structure = m_structures[s];
         if (structure.type == StructureType::FirTree) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
             m_structureRect.setTextureRect(
                 sf::IntRect{0, 0, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
             m_structureRect.setPosition(
-                tileToScreenPosition(m_worldSize, structure.tilePosition));
+                tileToScreenPosition(m_worldSize, s));
+
+            m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
+
+            target->draw(m_structureRect);
+        }
+        else if (structure.type == StructureType::Wall) {
+            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
+            m_structureRect.setTextureRect(sf::IntRect{
+                0, (int)TILE_HEIGHT * 2, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
+            m_structureRect.setPosition(
+                tileToScreenPosition(m_worldSize, s));
+
+            m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
 
             target->draw(m_structureRect);
         }
@@ -166,6 +189,10 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
 {
     Structure s;
     s.type = type;
-    s.tilePosition = position;
-    m_structures.push_back(s);
+    m_structures.emplace(position, s);
+
+    sorted.push_back(position);
+    std::sort(sorted.begin(), sorted.end(), [&](auto& a, auto& b) {
+        return a.x < b.x;
+    });
 }

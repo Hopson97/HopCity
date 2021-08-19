@@ -98,7 +98,8 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
                                       std::multiplies<float>());
             tiles[x + y * worldSize].type = f > 0.4 ? TileType::Land : TileType::Water;
 
-            if (tiles[x + y * worldSize].type == TileType::Land &&  pointDist(rng) > 4 && n > 0.6) {
+            if (tiles[x + y * worldSize].type == TileType::Land && pointDist(rng) > 4 &&
+                n > 0.6) {
                 map->placeStructure(StructureType::FirTree, {x, y});
             }
 
