@@ -12,9 +12,10 @@
 struct Vec2hash {
     inline size_t operator()(const sf::Vector2i& v) const
     {
-        return (v.x * 88339) ^ (v.y * 91967);
+        return (static_cast<size_t>(v.x) << 32) | static_cast<size_t>(v.y);
     }
 };
+
 
 enum class TileType : uint8_t {
     Land,

@@ -72,11 +72,6 @@ void Map::setTile(const sf::Vector2i& position, TileType type)
             updateTile(position + sf::Vector2i{i, j});
         }
     }
-
-    auto itr = m_structures.find(position);
-    if (itr != m_structures.end()) {
-        m_structures.erase(itr);
-    }
 }
 
 Tile* Map::getTile(const sf::Vector2i& position)
@@ -184,15 +179,12 @@ void Map::draw(sf::RenderWindow* target)
 
 void Map::placeStructure(StructureType type, const sf::Vector2i& position)
 {
+    
     if (m_structures.find(position) == m_structures.end()) {
-        std::cout << "Cannot even rn\n";
-        Structure s;
-        s.type = type;
-
-
-        m_structures[position] = s;
+        std::cout << "Adding\n";
+        m_structures[position] = {type};
         sorted.push_back(position);
         std::sort(sorted.begin(), sorted.end(),
-                  [&](auto& a, auto& b) { return a.x < b.x; });
+                  [&](auto& a, auto& b) { return a.x < b.x && a.y < b.y; });
     }
 }
