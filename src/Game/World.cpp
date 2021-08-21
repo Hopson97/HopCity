@@ -84,11 +84,11 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
             std::vector<float> features;
 
             // Oceans
-            features.push_back(std::abs(x - (isEast ? 0 : ws)) / ws * ewOceanSize);
-            features.push_back(std::abs(y - (isSouth ? 0 : ws)) / ws * nsOceanSize);
+            //  features.push_back(std::abs(x - (isEast ? 0 : ws)) / ws * ewOceanSize);
+            // features.push_back(std::abs(y - (isSouth ? 0 : ws)) / ws * nsOceanSize);
 
             // River
-            features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
+            //  features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
 
             // Noise
             float n = getNoiseAt({x, y}, chunkPosition, ops, worldSize);

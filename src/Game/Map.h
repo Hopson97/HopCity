@@ -8,6 +8,7 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
+#include <set>
 
 struct Vec2hash {
     inline size_t operator()(const sf::Vector2i& v) const
@@ -16,6 +17,12 @@ struct Vec2hash {
     }
 };
 
+struct Vec2Compare {
+    inline bool operator()(const sf::Vector2i& l, const sf::Vector2i& r) const
+    {
+        return l.x < r.x || l.y < r.y;
+    }
+};
 
 enum class TileType : uint8_t {
     Land,
@@ -34,6 +41,7 @@ struct Tile {
 
 struct Structure {
     StructureType type;
+    uint8_t varient = 0;
 };
 
 struct Map {
@@ -60,7 +68,7 @@ struct Map {
     std::vector<sf::Vertex> m_tileVerts;
 
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;
-    std::vector<sf::Vector2i> sorted;
+    std::set<sf::Vector2i, Vec2Compare> sorted;
 
     sf::RectangleShape m_structureRect;
     sf::Texture m_structureMap;

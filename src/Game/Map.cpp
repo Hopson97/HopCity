@@ -55,6 +55,7 @@ Map::Map(int worldSize)
 void Map::regenerateTerrain()
 {
     m_structures.clear();
+    sorted.clear();
     m_tiles = generateWorld({0, 0}, m_worldSize, this);
 
     for (int y = 0; y < m_worldSize; y++) {
@@ -66,6 +67,10 @@ void Map::regenerateTerrain()
 
 void Map::setTile(const sf::Vector2i& position, TileType type)
 {
+    if (position.y < 0 || position.y >= m_worldSize || position.x < 0 ||
+        position.x >= m_worldSize) {
+        return;
+    }
     getTile(position)->type = type;
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -84,9 +89,10 @@ Tile* Map::getTile(const sf::Vector2i& position)
     return &m_tiles.at(position.y * m_worldSize + position.x);
 }
 
+const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+
 void Map::updateTile(const sf::Vector2i& position)
 {
-    const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
     // Set the tile's varient
@@ -150,7 +156,6 @@ void Map::draw(sf::RenderWindow* target)
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 
-    m_structureRect.setFillColor({255, 255, 255, 100});
     for (const auto& s : sorted) {
         const auto& structure = m_structures[s];
         if (structure.type == StructureType::FirTree) {
@@ -166,8 +171,8 @@ void Map::draw(sf::RenderWindow* target)
         else if (structure.type == StructureType::Wall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
             m_structureRect.setTextureRect(
-                sf::IntRect{(int)TILE_WIDTH, (int)TILE_HEIGHT * 2, (int)TILE_WIDTH,
-                            (int)TILE_HEIGHT * 2});
+                sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 2,
+                            (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
             m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
 
             m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
@@ -179,12 +184,41 @@ void Map::draw(sf::RenderWindow* target)
 
 void Map::placeStructure(StructureType type, const sf::Vector2i& position)
 {
-    
+    if (position.y < 0 || position.y >= m_worldSize || position.x < 0 ||
+        position.x >= m_worldSize) {
+        return;
+    }
     if (m_structures.find(position) == m_structures.end()) {
         std::cout << "Adding\n";
+        Structure* s = &m_structures.emplace(std::make_pair(position, Structure{type}))
+                            .first->second;
+
         m_structures[position] = {type};
-        sorted.push_back(position);
-        std::sort(sorted.begin(), sorted.end(),
-                  [&](auto& a, auto& b) { return a.x < b.x && a.y < b.y; });
+        sorted.insert(position);
+
+        s->varient = 0;
+        for (int i = 0; i < 4; i++) {
+
+            auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
+
+            if (neighbour != m_structures.end() && neighbour->second.type == s->type) {
+                s->varient += (int)std::pow(2, i);
+            }
+
+            if (neighbour != m_structures.end() &&
+                neighbour->second.type != StructureType::FirTree) {
+                neighbour->second.varient = 0;
+
+                for (int j = 0; j < 4; j++) {
+                    auto subNeighbour =
+                        m_structures.find(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+
+                    if (subNeighbour != m_structures.end() &&
+                        subNeighbour->second.type == neighbour->second.type) {
+                        neighbour->second.varient += (int)std::pow(2, j);
+                    }
+                }
+            }
+        }
     }
 }

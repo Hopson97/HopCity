@@ -166,7 +166,6 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_quadDrag = false;
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilepos) {
-                                m_map.setTile(tilepos, TileType::Road);
                                 m_map.placeStructure(StructureType::Wall, tilepos);
                             });
         }
