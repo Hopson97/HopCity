@@ -4,7 +4,7 @@
 #include "../Screen.h"
 #include "Camera.h"
 #include "Map.h"
-#include "World.h"
+#include "WorldGeneration.h"
 #include <functional>
 
 // Main Game Class

@@ -1,6 +1,6 @@
 #include "Map.h"
 
-#include "World.h"
+#include "WorldGeneration.h"
 #include <cmath>
 #include <iostream>
 

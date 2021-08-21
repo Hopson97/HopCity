@@ -2,7 +2,7 @@
 
 #include "../Keyboard.h"
 
-#include "World.h"
+#include "WorldGeneration.h"
 #include <imgui_sfml/imgui.h>
 
 Camera::Camera(int worldSize)

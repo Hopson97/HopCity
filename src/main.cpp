@@ -1,6 +1,6 @@
 #include "Game/ScreenGame.h"
 #include "Game/ScreenMainMenu.h"
-#include "Game/World.h"
+#include "Game/WorldGeneration.h"
 #include "Keyboard.h"
 #include "Profiler.h"
 #include "Screen.h"
