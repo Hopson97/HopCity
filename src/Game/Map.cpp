@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "WorldConstants.h"
+
 namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads, int worldSize,
                           const sf::Vector2i& tilePosition)
@@ -168,17 +170,31 @@ void Map::draw(sf::RenderWindow* target)
 
             target->draw(m_structureRect);
         }
-        else if (structure.type == StructureType::Wall) {
+        else if (structure.type == StructureType::MudWall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
             m_structureRect.setTextureRect(
                 sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 2,
                             (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
             m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
 
-            m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
+            m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
 
             target->draw(m_structureRect);
         }
+        else if (structure.type == StructureType::StoneWall) {
+            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 4});
+            m_structureRect.setTextureRect(
+                sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 4,
+                            (int)TILE_WIDTH, (int)TILE_HEIGHT * 4});
+
+            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
+
+            m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
+
+            target->draw(m_structureRect);
+        }
+
+
     }
 }
 

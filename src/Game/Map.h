@@ -28,11 +28,13 @@ enum class TileType : uint8_t {
     Land,
     Road,
     Water,
-
-    Building,
 };
 
-enum class StructureType { FirTree, Wall };
+enum class StructureType {
+    FirTree,
+    MudWall,
+    StoneWall,
+};
 
 struct Tile {
     TileType type = TileType::Water;

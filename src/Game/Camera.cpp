@@ -5,6 +5,8 @@
 #include "WorldGeneration.h"
 #include <imgui_sfml/imgui.h>
 
+#include "WorldConstants.h"
+
 Camera::Camera(int worldSize)
 {
     m_view.setCenter(tileToScreenPosition(worldSize, {worldSize / 2, worldSize / 2}));
