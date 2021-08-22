@@ -27,8 +27,7 @@ add_executable(${PROJECT_NAME}
     src/Game/Camera.cpp
     src/Game/Map.cpp
     src/Game/WorldGeneration.cpp
-    src/Profiler.cpp
-)
+    src/Profiler.cpp)
 
 #Set C++17
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
@@ -53,6 +52,7 @@ IF (WIN32)
     find_package(SFML 2.5.1 COMPONENTS system window graphics network audio REQUIRED)
     find_package(OpenGL REQUIRED)
     add_subdirectory(deps/imgui_sfml)
+    add_subdirectory(deps/glm)
     target_include_directories(${PROJECT_NAME} PRIVATE deps)
     target_link_libraries(${PROJECT_NAME} sfml-audio sfml-graphics sfml-window sfml-system sfml-network ${OPENGL_LIBRARIES} imgui_sfml )
 

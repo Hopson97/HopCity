@@ -97,21 +97,21 @@ void Map::updateTile(const sf::Vector2i& position)
 {
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-    // Set the tile's varient
+    // Set the tile's variant
     Tile* tile = getTile(position);
-    tile->varient = 0;
+    tile->variant = 0;
     for (int i = 0; i < 4; i++) {
         Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
         if (neighbour && tile->type == neighbour->type) {
-            tile->varient += (int)std::pow(2, i);
+            tile->variant += (int)std::pow(2, i);
         }
         if (neighbour && neighbour->type != TileType::Land) {
-            neighbour->varient = 0;
+            neighbour->variant = 0;
             for (int j = 0; j < 4; j++) {
                 Tile* subNeighbour =
                     getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
                 if (subNeighbour && subNeighbour->type == neighbour->type) {
-                    neighbour->varient += (int)std::pow(2, j);
+                    neighbour->variant += (int)std::pow(2, j);
                 }
             }
         }
@@ -131,18 +131,18 @@ void Map::updateTile(const sf::Vector2i& position)
         vertex[3].texCoords = {TILE_WIDTH, 0};
     }
     else if (tile->type == TileType::Road) {
-        vertex[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT};
-        vertex[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        vertex[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+        vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT};
+        vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
                                TILE_HEIGHT * 2.0f};
-        vertex[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
+        vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
     }
     else if (tile->type == TileType::Water) {
-        vertex[0].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        vertex[1].texCoords = {tile->varient * TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        vertex[2].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+        vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 2.0f};
+        vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 3.0f};
+        vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
                                TILE_HEIGHT * 3.0f};
-        vertex[3].texCoords = {tile->varient * TILE_WIDTH + TILE_WIDTH,
+        vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
                                TILE_HEIGHT * 2.0f};
     }
 }
@@ -173,7 +173,7 @@ void Map::draw(sf::RenderWindow* target)
         else if (structure.type == StructureType::MudWall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
             m_structureRect.setTextureRect(
-                sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 2,
+                sf::IntRect{structure.variant * TILE_WIDTH, (int)TILE_HEIGHT * 2,
                             (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
             m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
 
@@ -184,7 +184,7 @@ void Map::draw(sf::RenderWindow* target)
         else if (structure.type == StructureType::StoneWall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 4});
             m_structureRect.setTextureRect(
-                sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 4,
+                sf::IntRect{structure.variant * TILE_WIDTH, (int)TILE_HEIGHT * 4,
                             (int)TILE_WIDTH, (int)TILE_HEIGHT * 4});
 
             m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
@@ -193,8 +193,6 @@ void Map::draw(sf::RenderWindow* target)
 
             target->draw(m_structureRect);
         }
-
-
     }
 }
 
@@ -212,18 +210,18 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
         m_structures[position] = {type};
         sorted.insert(position);
 
-        s->varient = 0;
+        s->variant = 0;
         for (int i = 0; i < 4; i++) {
 
             auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
 
             if (neighbour != m_structures.end() && neighbour->second.type == s->type) {
-                s->varient += (int)std::pow(2, i);
+                s->variant += (int)std::pow(2, i);
             }
 
             if (neighbour != m_structures.end() &&
                 neighbour->second.type != StructureType::FirTree) {
-                neighbour->second.varient = 0;
+                neighbour->second.variant = 0;
 
                 for (int j = 0; j < 4; j++) {
                     auto subNeighbour =
@@ -231,7 +229,7 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
 
                     if (subNeighbour != m_structures.end() &&
                         subNeighbour->second.type == neighbour->second.type) {
-                        neighbour->second.varient += (int)std::pow(2, j);
+                        neighbour->second.variant += (int)std::pow(2, j);
                     }
                 }
             }
