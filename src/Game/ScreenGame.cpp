@@ -5,6 +5,8 @@
 #include <iostream>
 #include <unordered_set>
 
+#include "WorldConstants.h"
+
 namespace {
 
     bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
@@ -166,7 +168,13 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_quadDrag = false;
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilepos) {
-                                m_map.placeStructure(StructureType::Wall, tilepos);
+                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){
+                                m_map.placeStructure(StructureType::MudWall, tilepos);
+                                }
+                                else {
+                                m_map.placeStructure(StructureType::StoneWall, tilepos);
+
+                                }
                             });
         }
     }

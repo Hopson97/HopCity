@@ -6,6 +6,7 @@
 #include <numeric>
 #include <random>
 
+#include "WorldConstants.h"
 struct TerrainGenOptions {
     int octaves = 8;
     float amplitude = 230;
@@ -61,17 +62,17 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
     std::uniform_int_distribution<int> seedDist(0, 4096);
 
     ops.seed = seedDist(rng);
-    float riverPoint = pointDist(rng);
-    float nsOceanSize = pointDist(rng);
-    float ewOceanSize = pointDist(rng);
-    bool isEast = dirDist(rng) == 1;
-    bool isSouth = dirDist(rng) == 1;
-    int riverDirection = dirDist(rng);
-    float ws = static_cast<float>(worldSize);
+    // float riverPoint = pointDist(rng);
+    // float nsOceanSize = pointDist(rng);
+    // float ewOceanSize = pointDist(rng);
+    // bool isEast = dirDist(rng) == 1;
+    // bool isSouth = dirDist(rng) == 1;
+    // int riverDirection = dirDist(rng);
+    // float ws = static_cast<float>(worldSize);
 
     for (int y = 0; y < worldSize; y++) {
         for (int x = 0; x < worldSize; x++) {
-            int rd = riverDirection == 1 ? x : y;
+            // int rd = riverDirection == 1 ? x : y;
 
             std::vector<float> features;
 
