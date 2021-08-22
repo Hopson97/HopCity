@@ -2,6 +2,7 @@
 
 #include "../Animation.h"
 #include "Structures.h"
+#include "Tiles.h"
 #include "unordered_map"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -11,31 +12,6 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <set>
-
-struct Vec2hash {
-    inline size_t operator()(const sf::Vector2i& v) const
-    {
-        return (static_cast<size_t>(v.x) << 32) | static_cast<size_t>(v.y);
-    }
-};
-
-struct Vec2Compare {
-    inline bool operator()(const sf::Vector2i& l, const sf::Vector2i& r) const
-    {
-        return l.x < r.x || l.y < r.y;
-    }
-};
-
-enum class TileType : uint8_t {
-    Land,
-    Road,
-    Water,
-};
-
-struct Tile {
-    TileType type = TileType::Water;
-    uint8_t variant = 0;
-};
 
 struct Map {
   public:

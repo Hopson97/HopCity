@@ -1,14 +1,9 @@
 
 #pragma once
 
+#include "Common.h"
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
-
-enum class VairantType {
-    None = 0,
-    Neighbour = 1,
-    Random = 2,
-};
 
 enum class StructureType {
     FirTree = 0,
@@ -26,12 +21,12 @@ enum class StructurePlacement {
 
 struct StructureDef {
     sf::Vector2f size;
-    int textureIndex;
+    int textureIndex = 0;
 
-    VairantType variantType;
-    int variations; // For Random variation
+    VairantType variantType = VairantType::None;
+    int variations = 0; // For Random variation
 
-    StructurePlacement placement;
+    StructurePlacement placement = StructurePlacement::Land;
 
     // Builder functions
     StructureDef& giveVarity(int variations);

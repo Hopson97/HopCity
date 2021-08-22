@@ -6,7 +6,7 @@
 #include <numeric>
 #include <random>
 
-#include "WorldConstants.h"
+#include "Common.h"
 struct TerrainGenOptions {
     int octaves = 8;
     float amplitude = 230;

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 
-#include "WorldConstants.h"
+#include "Common.h"
 #include <SFML/Window/Mouse.hpp>
 
 namespace {
@@ -75,10 +75,13 @@ void Map::regenerateTerrain()
 
 void Map::setTile(const sf::Vector2i& position, TileType type)
 {
+    // Check for out of bounds
     if (position.y < 0 || position.y >= m_worldSize || position.x < 0 ||
         position.x >= m_worldSize) {
         return;
     }
+
+    // Set tile + update its neighbours
     getTile(position)->type = type;
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -89,35 +92,51 @@ void Map::setTile(const sf::Vector2i& position, TileType type)
 
 Tile* Map::getTile(const sf::Vector2i& position)
 {
+    // Check for out of bounds
     static Tile e;
     if (position.y < 0 || position.y >= m_worldSize || position.x < 0 ||
         position.x >= m_worldSize) {
         return &e;
     }
+
+    // Get the tile
     return &m_tiles.at(position.y * m_worldSize + position.x);
 }
 
+// Used for the "bitmask" techique to auto tile structures and the land
+// https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
 const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
 void Map::updateTile(const sf::Vector2i& position)
 {
-
-    // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
     // Set the tile'structure variant
     Tile* tile = getTile(position);
-    tile->variant = 0;
-    for (int i = 0; i < 4; i++) {
-        Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
-        if (neighbour && tile->type == neighbour->type) {
-            tile->variant += (int)std::pow(2, i);
-        }
-        if (neighbour && neighbour->type != TileType::Land) {
-            neighbour->variant = 0;
-            for (int j = 0; j < 4; j++) {
-                Tile* subNeighbour =
-                    getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                if (subNeighbour && subNeighbour->type == neighbour->type) {
-                    neighbour->variant += (int)std::pow(2, j);
+    const TileDef* def = &getTileDef(tile->type);
+
+    if (def->variantType == VairantType::Random) {
+        std::random_device rd;
+        std::mt19937 rng{rd()};
+        std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
+        tile->variant = varietyDist(rng);
+    }
+    else if (def->variantType == VairantType::Neighbour) {
+        tile->variant = 0;
+
+        for (int i = 0; i < 4; i++) {
+            Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
+            if (neighbour && tile->type == neighbour->type) {
+                tile->variant += (int)std::pow(2, i);
+            }
+
+            if (neighbour &&
+                getTileDef(neighbour->type).variantType == VairantType::Neighbour) {
+                neighbour->variant = 0;
+                for (int j = 0; j < 4; j++) {
+                    Tile* subNeighbour =
+                        getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                    if (subNeighbour && subNeighbour->type == neighbour->type) {
+                        neighbour->variant += (int)std::pow(2, j);
+                    }
                 }
             }
         }
@@ -129,28 +148,12 @@ void Map::updateTile(const sf::Vector2i& position)
         return;
     }
     sf::Vertex* vertex = &m_tileVerts[vertexIndex];
-
-    if (tile->type == TileType::Land) {
-        vertex[0].texCoords = {0, 0};
-        vertex[1].texCoords = {0, TILE_HEIGHT};
-        vertex[2].texCoords = {TILE_WIDTH, TILE_HEIGHT};
-        vertex[3].texCoords = {TILE_WIDTH, 0};
-    }
-    else if (tile->type == TileType::Road) {
-        vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT};
-        vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
-                               TILE_HEIGHT * 2.0f};
-        vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT};
-    }
-    else if (tile->type == TileType::Water) {
-        vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 2.0f};
-        vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * 3.0f};
-        vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
-                               TILE_HEIGHT * 3.0f};
-        vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
-                               TILE_HEIGHT * 2.0f};
-    }
+    float idx = static_cast<float>(def->textureIndex);
+    vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * idx};
+    vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * (idx + 1)};
+    vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
+                           TILE_HEIGHT * (idx + 1)};
+    vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * idx};
 }
 
 void Map::draw(sf::RenderWindow* target)
@@ -178,9 +181,6 @@ void Map::draw(sf::RenderWindow* target)
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(m_worldSize, structure));
         target->draw(m_structureRect);
-
-        std::cout << str.variant << std::endl;
-        std::cout << def->variations << std::endl << std::endl;
     }
 }
 
@@ -204,23 +204,21 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
             std::mt19937 rng{rd()};
             std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
             structure->variant = varietyDist(rng);
-            std::cout << structure->variant << std::endl;
-            std::cout << def->variations << std::endl << std::endl;
         }
         else if (def->variantType == VairantType::Neighbour) {
-        structure->variant = 0;
+            structure->variant = 0;
 
+            // Update the structure based on its neighbours
             for (int i = 0; i < 4; i++) {
-
                 auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
-
                 if (neighbour != m_structures.end() &&
                     neighbour->second.type == structure->type) {
                     structure->variant += (int)std::pow(2, i);
                 }
 
                 if (neighbour != m_structures.end() &&
-                    neighbour->second.type != StructureType::FirTree) {
+                    getStructure(neighbour->second.type).variantType ==
+                        VairantType::Neighbour) {
                     neighbour->second.variant = 0;
 
                     for (int j = 0; j < 4; j++) {

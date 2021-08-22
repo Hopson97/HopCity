@@ -5,7 +5,7 @@
 #include "WorldGeneration.h"
 #include <imgui_sfml/imgui.h>
 
-#include "WorldConstants.h"
+#include "Common.h"
 
 Camera::Camera(int worldSize)
 {
@@ -43,7 +43,7 @@ void Camera::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
     if (!ImGui::GetIO().WantCaptureMouse) {
 
         // Move the view if it is on the edge of the screen
-        constexpr int GAP = 100;
+        constexpr int GAP = 25;
         auto mousePosition = sf::Mouse::getPosition(window);
         if (mousePosition.x < GAP) {
             m_view.move(-5, 0);

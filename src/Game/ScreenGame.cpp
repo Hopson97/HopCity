@@ -1,11 +1,12 @@
 #include "ScreenGame.h"
 #include "ScreenMainMenu.h"
+#include "Tiles.h"
 #include <cmath>
 #include <imgui_sfml/imgui.h>
 #include <iostream>
 #include <unordered_set>
 
-#include "WorldConstants.h"
+#include "Common.h"
 
 namespace {
 
@@ -84,7 +85,7 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(11)
+    , m_worldSize(300)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
@@ -95,6 +96,8 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
     registerStructures();
+    registerTiles();
+
     m_map.initWorld();
 }
 

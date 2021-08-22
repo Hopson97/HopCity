@@ -21,7 +21,6 @@ void registerStructures()
                           StructurePlacement::Land);
 
         registered = true;
-        std::cout << getStructure(StructureType::FirTree).variations << std::endl;
     }
 }
 
@@ -32,7 +31,6 @@ StructureDef& registerStructure(StructureType type, const sf::Vector2f& size,
     StructureDef def;
     def.size = size;
     def.variantType = variance;
-    std::cout << (int)type << " " << (int)variance << std::endl;
     def.textureIndex = textureIndex;
     def.placement = placement;
 
