@@ -41,6 +41,11 @@ int main()
     Keyboard keyboard;
     sf::Clock updateClock;
 
+    //gui bools
+    bool m_profilerOpen= false;
+    bool m_infoOpen = false;
+    bool m_brushOpen = false;
+
     while (window.isOpen() && !screens.isEmpty()) {
         Screen* screen = &screens.peekScreen();
         profiler.reset();
@@ -117,11 +122,30 @@ int main()
         // GUI/ ImGUI stuff
         {
             TimeSlot& profilerSlot = profiler.newTimeslot("GUI");
+            // Top Menu like in old games
+            {
+                if(ImGui::BeginMainMenuBar())
+                {
+                    if (ImGui::BeginMenu("File"))
+                    {
+
+
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Settings"))
+                    {
+                        ImGui::Checkbox("Profiler",&m_profilerOpen);
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndMainMenuBar();
+                }
+            }
             screen->onGUI();
             profilerSlot.stop();
         }
 
-        profiler.onGUI();
+        if(m_profilerOpen)
+            profiler.onGUI();
         ImGui::SFML::Render(window);
         window.display();
         screens.update();
