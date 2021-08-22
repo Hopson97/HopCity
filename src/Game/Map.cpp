@@ -3,6 +3,7 @@
 #include "WorldGeneration.h"
 #include <cmath>
 #include <iostream>
+#include <random>
 
 #include "WorldConstants.h"
 #include <SFML/Window/Mouse.hpp>
@@ -38,7 +39,6 @@ Map::Map(int worldSize)
     m_structureMap.loadFromFile("data/Textures/Structures.png");
 
     m_structureRect.setTexture(&m_structureMap);
-    m_tiles = generateWorld({0, 0}, worldSize, this);
 
     for (int i = 0; i < m_worldSize + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition(worldSize, {0, i}),
@@ -46,6 +46,11 @@ Map::Map(int worldSize)
         addGridLine(&m_grid, tileToScreenPosition(worldSize, {i, 0}),
                     tileToScreenPosition(worldSize, {i, m_worldSize}));
     }
+}
+
+void Map::initWorld()
+{
+    m_tiles = generateWorld({0, 0}, m_worldSize, this);
 
     for (int y = 0; y < m_worldSize; y++) {
         for (int x = 0; x < m_worldSize; x++) {
@@ -98,7 +103,7 @@ void Map::updateTile(const sf::Vector2i& position)
 {
 
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
-    // Set the tile's variant
+    // Set the tile'structure variant
     Tile* tile = getTile(position);
     tile->variant = 0;
     for (int i = 0; i < 4; i++) {
@@ -159,8 +164,8 @@ void Map::draw(sf::RenderWindow* target)
         target->draw(m_grid.data(), m_grid.size(), sf::Lines);
     }
 
-    for (const auto& s : sorted) {
-        const auto& str = m_structures[s];
+    for (const auto& structure : sorted) {
+        const auto& str = m_structures[structure];
         const StructureDef* def = &getStructure(str.type);
 
         m_structureRect.setSize({TILE_WIDTH * def->size.x, TILE_HEIGHT * def->size.y});
@@ -171,8 +176,11 @@ void Map::draw(sf::RenderWindow* target)
                                         (int)def->size.y * (int)TILE_HEIGHT});
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
-        m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
+        m_structureRect.setPosition(tileToScreenPosition(m_worldSize, structure));
         target->draw(m_structureRect);
+
+        std::cout << str.variant << std::endl;
+        std::cout << def->variations << std::endl << std::endl;
     }
 }
 
@@ -183,21 +191,32 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
         return;
     }
     if (m_structures.find(position) == m_structures.end()) {
-        Structure* s = &m_structures.emplace(std::make_pair(position, Structure{type}))
-                            .first->second;
-
-        m_structures[position] = {type};
+        Structure* structure =
+            &m_structures.emplace(std::make_pair(position, Structure{type}))
+                 .first->second;
         sorted.insert(position);
 
-        s->variant = 0;
-        if (getStructure(type).variantType == VairantType::Neighbour) {
+        const StructureDef* def = &getStructure(type);
+
+        if (def->variantType == VairantType::Random) {
+
+            std::random_device rd;
+            std::mt19937 rng{rd()};
+            std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
+            structure->variant = varietyDist(rng);
+            std::cout << structure->variant << std::endl;
+            std::cout << def->variations << std::endl << std::endl;
+        }
+        else if (def->variantType == VairantType::Neighbour) {
+        structure->variant = 0;
+
             for (int i = 0; i < 4; i++) {
 
                 auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
 
                 if (neighbour != m_structures.end() &&
-                    neighbour->second.type == s->type) {
-                    s->variant += (int)std::pow(2, i);
+                    neighbour->second.type == structure->type) {
+                    structure->variant += (int)std::pow(2, i);
                 }
 
                 if (neighbour != m_structures.end() &&

@@ -84,7 +84,7 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(128)
+    , m_worldSize(11)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
@@ -95,6 +95,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
     registerStructures();
+    m_map.initWorld();
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)

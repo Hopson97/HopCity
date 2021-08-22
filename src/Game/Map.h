@@ -41,6 +41,8 @@ struct Map {
   public:
     Map(int worldSize);
 
+    void initWorld();
+
     void regenerateTerrain();
     void setTile(const sf::Vector2i& position, TileType type);
     void draw(sf::RenderWindow* target);
