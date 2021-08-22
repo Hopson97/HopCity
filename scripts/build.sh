@@ -29,7 +29,7 @@ fi
 
 # Creates the folder for the buildaries
 mkdir -p HopCity
-mkdir -p HopCity/Data
+mkdir -p HopCity/data
 mkdir -p build
 mkdir -p build/release
 mkdir -p build/debug
@@ -49,4 +49,4 @@ else
     target_debug
 fi
 
-cp -R Data HopCity/
+cp -R data HopCity/

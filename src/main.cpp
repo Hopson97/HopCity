@@ -1,6 +1,6 @@
 #include "Game/ScreenGame.h"
 #include "Game/ScreenMainMenu.h"
-#include "Game/World.h"
+#include "Game/WorldGeneration.h"
 #include "Keyboard.h"
 #include "Profiler.h"
 #include "Screen.h"
@@ -10,31 +10,13 @@
 
 int main()
 {
-    sf::Image Land;
-    sf::Image path;
-    sf::Image target;
-    // Land.loadFromFile("Data/Tiles/road3.png");
-    // target.create(512, 128, sf::Color::Magenta);
-    //
-    // for (int y = 0; y < TILE_HEIGHT; y++) {
-    //     for (int x = 0; x < TILE_WIDTH; x++) {
-    //         target.setPixel(x, y, Land.getPixel(x, y));
-    //     }
-    // }
-    //
-    // // for(int y = 0; y < TILE_HEIGHT; y++) {
-    // //    for(int x = 0; x < TILE_WIDTH * 16; x++) {
-    // //        target.setPixel(x, y + TILE_HEIGHT, path.getPixel(x, y));
-    // //    }
-    // //}
-    //
-    // target.saveToFile("Data/Tiles/Tiles3.png");
-
     // Set up window and gui
     sf::RenderWindow window({1600, 900}, "game");
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
+
+    Profiler profiler;
 
     // Update ImGUI UI scaling for 4K monitors. For some reason looks bad on linux hence
     // the ifdef
@@ -46,7 +28,7 @@ int main()
     // Set up screen system
     ScreenManager screens;
     // screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens));
-    screens.pushScreen(std::make_unique<ScreenGame>(&screens));
+    screens.pushScreen(std::make_unique<ScreenMainMenu>(&screens, window));
     screens.update();
 
     // Time step, 30 ticks per second
@@ -61,27 +43,34 @@ int main()
 
     while (window.isOpen() && !screens.isEmpty()) {
         Screen* screen = &screens.peekScreen();
+        profiler.reset();
 
-        sf::Event e;
-        while (window.pollEvent(e)) {
+        {
 
-            screen->onEvent(e);
-            keyboard.update(e);
-            ImGui::SFML::ProcessEvent(e);
-            switch (e.type) {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
+            TimeSlot& profilerSlot = profiler.newTimeslot("Events");
 
-                case sf::Event::KeyReleased:
-                    if (e.key.code == sf::Keyboard::Escape) {
+            sf::Event e;
+            while (window.pollEvent(e)) {
+
+                ImGui::SFML::ProcessEvent(e);
+                screen->onEvent(e);
+                keyboard.update(e);
+                switch (e.type) {
+                    case sf::Event::Closed:
                         window.close();
-                    }
-                    break;
+                        break;
 
-                default:
-                    break;
+                    case sf::Event::KeyReleased:
+                        if (e.key.code == sf::Keyboard::Escape) {
+                            window.close();
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
+            profilerSlot.stop();
         }
 
         // Get times
@@ -91,25 +80,49 @@ int main()
         lastTime = time;
         lag += elapsed;
 
-        // Real time stuff
-        screen->profiler.reset();
-        screen->onInput(keyboard, window);
-        screen->onUpdate(dt);
-        ImGui::SFML::Update(window, dt);
+        // User input (real time)
+        if (window.hasFocus()) {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Input");
+            screen->onInput(keyboard, window);
+            profilerSlot.stop();
+        }
 
-        // Fixed time update
-        while (lag >= timePerUpdate) {
-            lag -= timePerUpdate;
-            screen->onFixedUpdate(elapsed);
+        // Game update
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Update");
+            screen->onUpdate(dt);
+            ImGui::SFML::Update(window, dt);
+            profilerSlot.stop();
+        }
+
+        // Fixed update
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Fixed Update");
+            // Fixed time update
+            while (lag >= timePerUpdate) {
+                lag -= timePerUpdate;
+                screen->onFixedUpdate(elapsed);
+            }
+            profilerSlot.stop();
         }
 
         // Rendering
         window.clear({64, 164, 223});
-        screen->onRender(&window);
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("Render");
+            screen->onRender(&window);
+            profilerSlot.stop();
+        }
 
-        screen->onGUI();
+        // GUI/ ImGUI stuff
+        {
+            TimeSlot& profilerSlot = profiler.newTimeslot("GUI");
+            screen->onGUI();
+            profilerSlot.stop();
+        }
+
+        profiler.onGUI();
         ImGui::SFML::Render(window);
-
         window.display();
         screens.update();
     }

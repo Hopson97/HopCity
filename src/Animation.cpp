@@ -20,7 +20,12 @@ void Animation::addFrame(int row, int index, sf::Time delay)
     m_frames.emplace_back(bounds, delay);
 }
 
-const sf::IntRect& Animation::getFrame()
+const sf::IntRect& Animation::getCurrentFrame()
+{
+    return m_frames[m_framePointer].bounds;
+}
+
+const sf::IntRect& Animation::progressFrame()
 {
     if (m_isRandom) {
         if (rand() % 1024 < (int)(m_randomFactor * 1024.0f) &&
@@ -44,4 +49,12 @@ const sf::IntRect& Animation::getFrame()
     }
     m_timer.restart();
     return m_frames[m_framePointer].bounds;
+}
+
+bool Animation::isOnLastFrame() const { return m_framePointer == m_frames.size() - 1; }
+
+void Animation::reset()
+{
+    m_framePointer = 0;
+    m_timer.restart();
 }

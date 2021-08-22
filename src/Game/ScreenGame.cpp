@@ -12,12 +12,6 @@ namespace {
         return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
     }
 
-    struct Vec2hash {
-        inline size_t operator()(const sf::Vector2i& v) const
-        {
-            return (v.x * 88339) ^ (v.y * 91967);
-        }
-    };
     /**
      * @brief Calls a function for a L shape selection (for example, building a road)
      *
@@ -88,48 +82,49 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(64)
+    , m_worldSize(128)
     , m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
-    m_selectionTexture.loadFromFile("Data/Textures/Selection.png");
-    m_selectionRedTexture.loadFromFile("Data/Textures/SelectionRed.png");
-    m_tileCorners.loadFromFile("Data/Textures/Corners.png");
+    m_selectionTexture.loadFromFile("data/Textures/Selection.png");
+    m_selectionRedTexture.loadFromFile("data/Textures/SelectionRed.png");
+    m_tileCorners.loadFromFile("data/Textures/Corners.png");
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
-    auto& ts = profiler.newTimeslot("Input");
     m_camera.onInput(keyboard, window);
 
-    auto mousePosition = sf::Mouse::getPosition(window);
-    sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        auto mousePosition = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
-    sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
-                         (int)worldPos.y / (int)TILE_HEIGHT};
-    sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
-                           (int)worldPos.y % (int)TILE_HEIGHT};
+        sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
+                             (int)worldPos.y / (int)TILE_HEIGHT};
+        sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
+                               (int)worldPos.y % (int)TILE_HEIGHT};
 
-    m_selectedTile = {
-        (cell.y - m_worldSize) + (cell.x - m_worldSize),
-        (cell.y - m_worldSize) - (cell.x - m_worldSize),
-    };
+        m_selectedTile = {
+            (cell.y - m_worldSize) + (cell.x - m_worldSize),
+            (cell.y - m_worldSize) - (cell.x - m_worldSize),
+        };
 
-    // clang-format off
-    if (offset.x >= 0 && 
-        offset.y >= 0 && 
-        offset.x < m_tileCorners.getSize().x && 
-        offset.y < m_tileCorners.getSize().y)
-    {
-        sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
-             if (colour == sf::Color::Red   )   m_selectedTile.x--;
-        else if (colour == sf::Color::Green )   m_selectedTile.y++;
-        else if (colour == sf::Color::Blue  )   m_selectedTile.y--;
-        else if (colour == sf::Color::White )   m_selectedTile.x++;
+        // clang-format off
+        if (offset.x >= 0 && 
+            offset.y >= 0 && 
+            offset.x < (int)m_tileCorners.getSize().x && 
+            offset.y < (int)m_tileCorners.getSize().y)
+        {
+            sf::Color colour = m_tileCorners.getPixel(offset.x, offset.y);
+                 if (colour == sf::Color::Red   )   m_selectedTile.x--;
+            else if (colour == sf::Color::Green )   m_selectedTile.y++;
+            else if (colour == sf::Color::Blue  )   m_selectedTile.y--;
+            else if (colour == sf::Color::White )   m_selectedTile.x++;
+        }
+        // clang-format on
     }
-    // clang-format on
 
     if (m_quadDrag) {
         if (xDistGreater(m_editStartPosition, m_editEndPosition)) {
@@ -142,12 +137,10 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         }
         m_editEndPosition = m_selectedTile;
     }
-    ts.stop();
 }
 
 void ScreenGame::onGUI()
 {
-    auto& ts = profiler.newTimeslot("GUI");
     if (ImGui::Begin("Info")) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
         ImGuiIO& io = ImGui::GetIO();
@@ -158,50 +151,31 @@ void ScreenGame::onGUI()
         }
     }
     ImGui::End();
-    if(ImGui::Begin("World Generation")){
-        ImGui::TextColored({0.960, 0.815, 0.360,1},"Noise Options");
-        ImGui::SliderFloat("Amplitude",&terrainGenOptions.amplitude,0.f,1.f);
-        ImGui::SliderFloat("Amplitude",&terrainGenOptions.frequency,0.f,1.f);
-        ImGui::SliderInt("Octaves",&terrainGenOptions.octaves,0,10);
-        if(ImGui::Button("Regenerate World")){
-            m_map.regenerate();
-        }
-    }
-
-
-
-    ImGui::End();
-    profiler.onGUI();
-    ts.stop();
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
-    auto& ts = profiler.newTimeslot("Event");
     m_camera.onEvent(e);
-    if (e.type == sf::Event::MouseButtonPressed) {
-        m_quadDrag = true;
-        m_editStartPosition = m_selectedTile;
-        m_editEndPosition = m_selectedTile;
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        if (e.type == sf::Event::MouseButtonPressed) {
+            m_quadDrag = true;
+            m_editStartPosition = m_selectedTile;
+            m_editEndPosition = m_selectedTile;
+        }
+        else if (e.type == sf::Event::MouseButtonReleased) {
+            m_quadDrag = false;
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i& tilepos) {
+                                m_map.placeStructure(StructureType::Wall, tilepos);
+                            });
+        }
     }
-    else if (e.type == sf::Event::MouseButtonReleased) {
-        m_quadDrag = false;
-        forEachLSection(
-            m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-            [&](const sf::Vector2i& tilepos) { m_map.setTile(tilepos, TileType::Road); });
-    }
-    ts.stop();
 }
 
-void ScreenGame::onUpdate(const sf::Time& dt)
-{
-    auto& ts = profiler.newTimeslot("Update");
-    ts.stop();
-}
+void ScreenGame::onUpdate(const sf::Time& dt) {}
 
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
-    auto& ts = profiler.newTimeslot("Render");
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
@@ -228,6 +202,4 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         //    window->draw(m_selectionRect);
         //});
     }
-
-    ts.stop();
 }

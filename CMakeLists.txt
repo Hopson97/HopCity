@@ -26,7 +26,7 @@ add_executable(${PROJECT_NAME}
     src/Game/ScreenMainMenu.cpp
     src/Game/Camera.cpp
     src/Game/Map.cpp
-    src/Game/World.cpp
+    src/Game/WorldGeneration.cpp
     src/Profiler.cpp
         deps/FastNoiseLite.h)
 
@@ -47,7 +47,6 @@ endif ()
 
 #Find libraries
 find_package(Threads)
-
 
 
 IF (WIN32)

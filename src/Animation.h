@@ -22,7 +22,11 @@ class Animation {
 
     void addFrame(int row, int index, sf::Time delay);
 
-    const sf::IntRect& getFrame();
+    const sf::IntRect& progressFrame();
+    const sf::IntRect& getCurrentFrame();
+
+    bool isOnLastFrame() const;
+    void reset();
 
   private:
     sf::Clock m_timer;
