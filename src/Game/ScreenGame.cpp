@@ -93,6 +93,8 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_tileCorners.loadFromFile("data/Textures/Corners.png");
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
+
+    registerStructures();
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)

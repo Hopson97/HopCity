@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "WorldConstants.h"
+#include <SFML/Window/Mouse.hpp>
 
 namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads, int worldSize,
@@ -159,40 +160,19 @@ void Map::draw(sf::RenderWindow* target)
     }
 
     for (const auto& s : sorted) {
-        const auto& structure = m_structures[s];
-        if (structure.type == StructureType::FirTree) {
-            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
-            m_structureRect.setTextureRect(
-                sf::IntRect{0, 0, (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
-            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
+        const auto& str = m_structures[s];
+        const StructureDef* def = &getStructure(str.type);
 
-            m_structureRect.setOrigin({0, m_structureRect.getSize().x - TILE_HEIGHT});
+        m_structureRect.setSize({TILE_WIDTH * def->size.x, TILE_HEIGHT * def->size.y});
 
-            target->draw(m_structureRect);
-        }
-        else if (structure.type == StructureType::MudWall) {
-            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 2});
-            m_structureRect.setTextureRect(
-                sf::IntRect{structure.variant * TILE_WIDTH, (int)TILE_HEIGHT * 2,
-                            (int)TILE_WIDTH, (int)TILE_HEIGHT * 2});
-            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
+        m_structureRect.setTextureRect({(int)TILE_WIDTH * str.variant * (int)def->size.x,
+                                        (int)TILE_HEIGHT * def->textureIndex,
+                                        (int)def->size.x * (int)TILE_WIDTH,
+                                        (int)def->size.y * (int)TILE_HEIGHT});
 
-            m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
-
-            target->draw(m_structureRect);
-        }
-        else if (structure.type == StructureType::StoneWall) {
-            m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 4});
-            m_structureRect.setTextureRect(
-                sf::IntRect{structure.variant * TILE_WIDTH, (int)TILE_HEIGHT * 4,
-                            (int)TILE_WIDTH, (int)TILE_HEIGHT * 4});
-
-            m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
-
-            m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
-
-            target->draw(m_structureRect);
-        }
+        m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
+        m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
+        target->draw(m_structureRect);
     }
 }
 
@@ -211,25 +191,28 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
         sorted.insert(position);
 
         s->variant = 0;
-        for (int i = 0; i < 4; i++) {
+        if (getStructure(type).variantType == VairantType::Neighbour) {
+            for (int i = 0; i < 4; i++) {
 
-            auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
+                auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
 
-            if (neighbour != m_structures.end() && neighbour->second.type == s->type) {
-                s->variant += (int)std::pow(2, i);
-            }
+                if (neighbour != m_structures.end() &&
+                    neighbour->second.type == s->type) {
+                    s->variant += (int)std::pow(2, i);
+                }
 
-            if (neighbour != m_structures.end() &&
-                neighbour->second.type != StructureType::FirTree) {
-                neighbour->second.variant = 0;
+                if (neighbour != m_structures.end() &&
+                    neighbour->second.type != StructureType::FirTree) {
+                    neighbour->second.variant = 0;
 
-                for (int j = 0; j < 4; j++) {
-                    auto subNeighbour =
-                        m_structures.find(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                    for (int j = 0; j < 4; j++) {
+                        auto subNeighbour = m_structures.find(position + TILE_OFFSETS[i] +
+                                                              TILE_OFFSETS[j]);
 
-                    if (subNeighbour != m_structures.end() &&
-                        subNeighbour->second.type == neighbour->second.type) {
-                        neighbour->second.variant += (int)std::pow(2, j);
+                        if (subNeighbour != m_structures.end() &&
+                            subNeighbour->second.type == neighbour->second.type) {
+                            neighbour->second.variant += (int)std::pow(2, j);
+                        }
                     }
                 }
             }

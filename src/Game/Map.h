@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Animation.h"
+#include "Structures.h"
 #include "unordered_map"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -31,19 +32,8 @@ enum class TileType : uint8_t {
     Water,
 };
 
-enum class StructureType {
-    FirTree,
-    MudWall,
-    StoneWall,
-};
-
 struct Tile {
     TileType type = TileType::Water;
-    uint8_t variant = 0;
-};
-
-struct Structure {
-    StructureType type;
     uint8_t variant = 0;
 };
 

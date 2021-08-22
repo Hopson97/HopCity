@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
     src/Game/ScreenMainMenu.cpp
     src/Game/Camera.cpp
     src/Game/Map.cpp
+    src/Game/Structures.cpp
     src/Game/WorldGeneration.cpp
     src/Profiler.cpp)
 
