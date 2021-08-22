@@ -9,6 +9,7 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <set>
+#include "unordered_map"
 
 struct Vec2hash {
     inline size_t operator()(const sf::Vector2i& v) const

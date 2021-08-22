@@ -8,7 +8,7 @@ _only tested with mingw 7.3.0_
 
 Clone this repository and create a `libs` folder in the directory. In this you place the already compiled 
 binaries from [here](https://www.sfml-dev.org/download/sfml/2.5.1/)  (choose right compiler), and place it
-in the created folder. After that reload the `CMakeLists.txt ` and you should be ready to run.
+in the created folder, there you need to place "glm" too (get it from [here](https://github.com/g-truc/glm)) . After that reload the `CMakeLists.txt ` and you should be ready to run.
 
 ### Windows (Visual Studio)
 
