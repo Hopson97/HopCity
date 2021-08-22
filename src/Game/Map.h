@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Animation.h"
+#include "unordered_map"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -9,7 +10,6 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <set>
-#include "unordered_map"
 
 struct Vec2hash {
     inline size_t operator()(const sf::Vector2i& v) const
@@ -52,16 +52,11 @@ struct Map {
     Map(int worldSize);
 
     void regenerateTerrain();
-
     void setTile(const sf::Vector2i& position, TileType type);
-
     void draw(sf::RenderWindow* target);
-
-    void regenerate();
+    void placeStructure(StructureType type, const sf::Vector2i& position);
 
     bool showDetail;
-
-    void placeStructure(StructureType type, const sf::Vector2i& position);
 
   private:
     Tile* getTile(const sf::Vector2i& position);

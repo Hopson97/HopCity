@@ -184,7 +184,7 @@ void Map::draw(sf::RenderWindow* target)
         else if (structure.type == StructureType::StoneWall) {
             m_structureRect.setSize({TILE_WIDTH, TILE_HEIGHT * 4});
             m_structureRect.setTextureRect(
-                sf::IntRect{structure.varient * TILE_WIDTH, (int)TILE_HEIGHT * 4,
+                sf::IntRect{structure.variant * TILE_WIDTH, (int)TILE_HEIGHT * 4,
                             (int)TILE_WIDTH, (int)TILE_HEIGHT * 4});
 
             m_structureRect.setPosition(tileToScreenPosition(m_worldSize, s));
@@ -193,8 +193,6 @@ void Map::draw(sf::RenderWindow* target)
 
             target->draw(m_structureRect);
         }
-
-
     }
 }
 

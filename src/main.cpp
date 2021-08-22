@@ -40,11 +40,7 @@ int main()
     // Misc/ Util
     Keyboard keyboard;
     sf::Clock updateClock;
-
-    //gui bools
     bool profilerOpen = false;
-    bool m_infoOpen = false;
-    bool m_brushOpen = false;
 
     while (window.isOpen() && !screens.isEmpty()) {
         Screen* screen = &screens.peekScreen();
@@ -69,8 +65,8 @@ int main()
                         if (e.key.code == sf::Keyboard::Escape) {
                             window.close();
                         }
-                        if(e.key.code == sf::Keyboard::F3)
-                            profilerOpen=!profilerOpen;
+                        if (e.key.code == sf::Keyboard::F3)
+                            profilerOpen = !profilerOpen;
                         break;
 
                     default:
@@ -128,7 +124,7 @@ int main()
             profilerSlot.stop();
         }
 
-        if(profilerOpen)
+        if (profilerOpen)
             profiler.onGUI();
         ImGui::SFML::Render(window);
         window.display();

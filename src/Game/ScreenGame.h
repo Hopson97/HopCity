@@ -40,6 +40,4 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_editPivotPoint;
     sf::Vector2i m_editEndPosition;
     bool m_quadDrag = false;
-
-
 };

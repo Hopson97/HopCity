@@ -168,12 +168,12 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_quadDrag = false;
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilepos) {
-                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){
-                                m_map.placeStructure(StructureType::MudWall, tilepos);
+                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+                                    m_map.placeStructure(StructureType::MudWall, tilepos);
                                 }
                                 else {
-                                m_map.placeStructure(StructureType::StoneWall, tilepos);
-
+                                    m_map.placeStructure(StructureType::StoneWall,
+                                                         tilepos);
                                 }
                             });
         }
