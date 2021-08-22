@@ -39,12 +39,12 @@ enum class StructureType {
 
 struct Tile {
     TileType type = TileType::Water;
-    uint8_t varient = 0;
+    uint8_t variant = 0;
 };
 
 struct Structure {
     StructureType type;
-    uint8_t varient = 0;
+    uint8_t variant = 0;
 };
 
 struct Map {
@@ -56,6 +56,7 @@ struct Map {
     void setTile(const sf::Vector2i& position, TileType type);
 
     void draw(sf::RenderWindow* target);
+
     void regenerate();
 
     bool showDetail;
