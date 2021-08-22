@@ -42,7 +42,7 @@ int main()
     sf::Clock updateClock;
 
     //gui bools
-    bool m_profilerOpen= false;
+    bool profilerOpen = false;
     bool m_infoOpen = false;
     bool m_brushOpen = false;
 
@@ -69,6 +69,8 @@ int main()
                         if (e.key.code == sf::Keyboard::Escape) {
                             window.close();
                         }
+                        if(e.key.code == sf::Keyboard::F3)
+                            profilerOpen=!profilerOpen;
                         break;
 
                     default:
@@ -122,29 +124,11 @@ int main()
         // GUI/ ImGUI stuff
         {
             TimeSlot& profilerSlot = profiler.newTimeslot("GUI");
-            // Top Menu like in old games
-            {
-                if(ImGui::BeginMainMenuBar())
-                {
-                    if (ImGui::BeginMenu("File"))
-                    {
-
-
-                        ImGui::EndMenu();
-                    }
-                    if (ImGui::BeginMenu("Settings"))
-                    {
-                        ImGui::Checkbox("Profiler",&m_profilerOpen);
-                        ImGui::EndMenu();
-                    }
-                    ImGui::EndMainMenuBar();
-                }
-            }
             screen->onGUI();
             profilerSlot.stop();
         }
 
-        if(m_profilerOpen)
+        if(profilerOpen)
             profiler.onGUI();
         ImGui::SFML::Render(window);
         window.display();
