@@ -183,7 +183,6 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
         return;
     }
     if (m_structures.find(position) == m_structures.end()) {
-        std::cout << "Adding\n";
         Structure* s = &m_structures.emplace(std::make_pair(position, Structure{type}))
                             .first->second;
 

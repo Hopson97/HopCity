@@ -89,7 +89,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     , m_camera(m_worldSize)
 {
     m_selectionTexture.loadFromFile("data/Textures/Selection.png");
-    m_selectionRedTexture.loadFromFile("data/Textures/SelectionRed.png");
+    m_selectionQuadTexture.loadFromFile("data/Textures/SelectionQuad.png");
     m_tileCorners.loadFromFile("data/Textures/Corners.png");
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
@@ -168,16 +168,16 @@ void ScreenGame::onEvent(const sf::Event& e)
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
             m_quadDrag = false;
-            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                            [&](const sf::Vector2i& tilepos) {
-                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                                    m_map.placeStructure(StructureType::MudWall, tilepos);
-                                }
-                                else {
-                                    m_map.placeStructure(StructureType::StoneWall,
-                                                         tilepos);
-                                }
-                            });
+            forEachLSection(
+                m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                [&](const sf::Vector2i& tilePosition) {
+                    if (getStructure(StructureType::StoneWall).placement ==
+                        StructurePlacement::Land) {
+                        if (m_map.getTile(tilePosition)->type == TileType::Land) {
+                            m_map.placeStructure(StructureType::StoneWall, tilePosition);
+                        }
+                    }
+                });
         }
     }
 }
@@ -198,10 +198,19 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     window->draw(m_selectionRect);
 
     if (m_quadDrag) {
-        m_selectionRect.setTexture(&m_selectionRedTexture);
+        m_selectionRect.setTexture(&m_selectionQuadTexture);
 
         forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                         [&](const sf::Vector2i& tilePosition) {
+                            if (getStructure(StructureType::StoneWall).placement ==
+                                StructurePlacement::Land) {
+                                if (m_map.getTile(tilePosition)->type == TileType::Land) {
+                                    m_selectionRect.setFillColor(sf::Color::Green);
+                                }
+                                else {
+                                    m_selectionRect.setFillColor(sf::Color::Red);
+                                }
+                            }
                             m_selectionRect.setPosition(
                                 tileToScreenPosition(m_worldSize, tilePosition));
                             window->draw(m_selectionRect);

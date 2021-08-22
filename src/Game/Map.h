@@ -45,11 +45,11 @@ struct Map {
     void setTile(const sf::Vector2i& position, TileType type);
     void draw(sf::RenderWindow* target);
     void placeStructure(StructureType type, const sf::Vector2i& position);
+    Tile* getTile(const sf::Vector2i& position);
 
     bool showDetail;
 
   private:
-    Tile* getTile(const sf::Vector2i& position);
     void updateTile(const sf::Vector2i& position);
 
     sf::Texture m_tileTextures;

@@ -22,7 +22,7 @@ class ScreenGame final : public Screen {
   private:
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
-    sf::Texture m_selectionRedTexture;
+    sf::Texture m_selectionQuadTexture;
 
     sf::Image m_tileCorners;
 

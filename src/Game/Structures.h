@@ -18,10 +18,13 @@ enum class StructureType {
     NUM_TYPES
 };
 
+enum class StructurePlacement { Land, Water, WatersEdge };
+
 struct StructureDef {
     sf::Vector2f size;
     int textureIndex;
     VairantType variantType;
+    StructurePlacement placement;
 };
 
 struct Structure {
@@ -31,5 +34,5 @@ struct Structure {
 
 void registerStructures();
 void registerStructure(StructureType type, const sf::Vector2f& size, int textureIndex,
-                       VairantType variance);
+                       VairantType variance, StructurePlacement placement);
 const StructureDef& getStructure(StructureType type);
