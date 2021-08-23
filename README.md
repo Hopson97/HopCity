@@ -2,6 +2,14 @@
 
 Isometric defo not sim city building game
 
+
+## Screenshots
+
+![Walls](Screenshots/Walls.png)
+
+
+## Building + Running
+
 ### Windows (Clion)
 
 _only tested with mingw 7.3.0_
