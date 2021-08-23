@@ -14,10 +14,10 @@ void registerStructures()
                           StructurePlacement::Land)
             .giveVarity(7);
 
-        registerStructure(StructureType::MudWall, {1, 2}, 2, VairantType::Neighbour,
+        registerStructure(StructureType::MudWall, {1, 3}, 2, VairantType::Neighbour,
                           StructurePlacement::Land);
 
-        registerStructure(StructureType::StoneWall, {1, 4}, 4, VairantType::Neighbour,
+        registerStructure(StructureType::StoneWall, {1, 4}, 5, VairantType::Neighbour,
                           StructurePlacement::Land);
 
         registered = true;
