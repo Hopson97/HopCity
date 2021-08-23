@@ -2,7 +2,7 @@
 
 #include <array>
 
-std::array<TileDef, (size_t)TileType::NUM_TILES> tiles;
+std::array<TileDef, (std::size_t)TileType::NUM_TILES> tiles;
 
 void registerTiles()
 {
@@ -17,8 +17,8 @@ TileDef& registerTile(TileType type, int textureIndex, VairantType variance)
     def.variantType = variance;
     def.textureIndex = textureIndex;
 
-    tiles[(size_t)type] = def;
-    return tiles[(size_t)type];
+    tiles[(std::size_t)type] = def;
+    return tiles[(std::size_t)type];
 }
 
-const TileDef& getTileDef(TileType type) { return tiles[(size_t)type]; }
+const TileDef& getTileDef(TileType type) { return tiles[(std::size_t)type]; }
