@@ -54,7 +54,7 @@ void Profiler::onGUI()
                            Mode == ProfilerMode::Milliseconds ? "Milliseconds"
                                                               : "Microseconds");
         for (auto& ts : m_lastSlots) {
-            ImGui::Text("%s: %f", ts.first.c_str(), ts.second);
+            ImGui::Text("%s: %0.2f", ts.first.c_str(), ts.second);
         }
     }
     ImGui::End();
