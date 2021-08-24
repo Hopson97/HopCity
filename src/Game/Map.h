@@ -13,6 +13,32 @@
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <set>
 
+constexpr int CHUNK_SIZE = 16;
+
+struct TileChunk : public sf::Drawable, private sf::Transformable {
+    std::vector<Tile> tiles;
+    std::vector<sf::Vertex> m_tileVerts;
+    sf::Texture* tileTextures;
+
+    sf::Vector2i chunkPosition;
+
+    void init(const sf::Vector2i& position, int worldSize);
+
+    void draw(sf::RenderTarget& window,
+              sf::RenderStates states = sf::RenderStates::Default) const override;
+
+    void updateTile(const sf::Vector2i& position);
+
+    Tile* getTile(const sf::Vector2i& position);
+};
+
+struct TileChunkManager {
+    std::vector<TileChunk> tilechunks;
+    sf::Texture tileTextures;
+    void initChunks();
+};
+
+/*
 struct Map {
   public:
     Map(int worldSize);
@@ -42,4 +68,4 @@ struct Map {
     sf::Texture m_structureMap;
 
     int m_worldSize;
-};
+};*/

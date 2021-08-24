@@ -85,8 +85,8 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(300)
-    , m_map(m_worldSize)
+    , m_worldSize(4)
+    //, m_map(m_worldSize)
     , m_camera(m_worldSize)
 {
     m_selectionTexture.loadFromFile("data/Textures/Selection.png");
@@ -98,7 +98,9 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     registerStructures();
     registerTiles();
 
-    m_map.initWorld();
+    m_tileManager.initChunks();
+
+    // m_map.initWorld();
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
@@ -155,7 +157,7 @@ void ScreenGame::onGUI()
         ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
                     io.Framerate);
         if (ImGui::Button("Regen world")) {
-            m_map.regenerateTerrain();
+            // m_map.regenerateTerrain();
         }
     }
     ImGui::End();
@@ -172,16 +174,17 @@ void ScreenGame::onEvent(const sf::Event& e)
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
             m_quadDrag = false;
-            forEachLSection(
-                m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                [&](const sf::Vector2i& tilePosition) {
-                    if (getStructure(StructureType::StoneWall).placement ==
-                        StructurePlacement::Land) {
-                        if (m_map.getTile(tilePosition)->type == TileType::Land) {
-                            m_map.placeStructure(StructureType::StoneWall, tilePosition);
-                        }
-                    }
-                });
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i& tilePosition) {
+                                if (getStructure(StructureType::StoneWall).placement ==
+                                    StructurePlacement::Land) {
+                                    // if (m_map.getTile(tilePosition)->type ==
+                                    // TileType::Land) {
+                                    //    m_map.placeStructure(StructureType::StoneWall,
+                                    //    tilePosition);
+                                    //}
+                                }
+                            });
         }
     }
 }
@@ -193,13 +196,17 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_camera.setViewToCamera(*window);
 
     // Render the tile map
-    m_map.showDetail = m_camera.zoomLevel < 2;
-    m_map.draw(window);
-
+    //  m_map.showDetail = m_camera.zoomLevel < 2;
+    //  m_map.draw(window);
+    for (auto& chunk : m_tileManager.tilechunks) {
+        chunk.draw(*window);
+    }
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, m_selectedTile));
     window->draw(m_selectionRect);
+
+
 
     if (m_quadDrag) {
         m_selectionRect.setTexture(&m_selectionQuadTexture);
@@ -208,12 +215,13 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                         [&](const sf::Vector2i& tilePosition) {
                             if (getStructure(StructureType::StoneWall).placement ==
                                 StructurePlacement::Land) {
-                                if (m_map.getTile(tilePosition)->type == TileType::Land) {
-                                    m_selectionRect.setFillColor(sf::Color::Green);
-                                }
-                                else {
-                                    m_selectionRect.setFillColor(sf::Color::Red);
-                                }
+                                // if (m_map.getTile(tilePosition)->type ==
+                                // TileType::Land) {
+                                //    m_selectionRect.setFillColor(sf::Color::Green);
+                                //}
+                                // else {
+                                ///    m_selectionRect.setFillColor(sf::Color::Red);
+                                ////}
                             }
                             m_selectionRect.setPosition(
                                 tileToScreenPosition(m_worldSize, tilePosition));
