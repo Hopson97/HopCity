@@ -8,4 +8,4 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
                                 Map* map);
                                 */
 
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize);
+std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int seed);

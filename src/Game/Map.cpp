@@ -9,10 +9,10 @@
 #include <SFML/Window/Mouse.hpp>
 
 namespace {
-    void addIsometricQuad(std::vector<sf::Vertex>* quads, int worldSize,
+    void addIsometricQuad(std::vector<sf::Vertex>* quads,
                           const sf::Vector2i& tilePosition)
     {
-        auto pos = tileToScreenPosition(worldSize, tilePosition);
+        auto pos = tileToScreenPosition(tilePosition);
 
         quads->emplace_back(pos);
         quads->emplace_back(sf::Vector2f{pos.x, pos.y + TILE_HEIGHT});
@@ -249,19 +249,26 @@ void TileChunkManager::initChunks()
     for (int y = 0; y < 2; y++) {
         for (int x = 0; x < 2; x++) {
             TileChunk chunk;
-            chunk.init({x, y}, CHUNK_SIZE);
-            chunk.tileTextures = &tileTextures;
+            chunk.init({x, y});
 
             tilechunks.push_back(chunk);
         }
     }
 }
 
+void TileChunkManager::draw(sf::RenderTarget& window)
+{
+    sf::RenderStates states;
+    states.texture = &tileTextures;
+
+    for (auto& chunk : tilechunks) {
+        chunk.draw(window, states);
+    }
+}
+
 void TileChunk::draw(sf::RenderTarget& window, sf::RenderStates states) const
 {
-    states.texture = tileTextures;
     states.transform *= getTransform();
-
     window.draw(m_tileVerts.data(), m_tileVerts.size(), sf::Quads, states);
 }
 
@@ -327,17 +334,19 @@ Tile* TileChunk::getTile(const sf::Vector2i& position)
     return &tiles.at(position.y * CHUNK_SIZE + position.x);
 }
 
-void TileChunk::init(const sf::Vector2i& position, int worldSize)
+//    std::uniform_int_distribution<int> seedDist(0, 4096);
+
+void TileChunk::init(const sf::Vector2i& position)
 {
-    tiles = generateWorld({0, 0}, worldSize);
+    tiles = generateWorld(position, 450);
     chunkPosition = position;
 
-    for (int y = 0; y < worldSize; y++) {
-        for (int x = 0; x < worldSize; x++) {
-            addIsometricQuad(&m_tileVerts, worldSize, {x, y});
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            addIsometricQuad(&m_tileVerts, {x, y});
             updateTile({x, y});
         }
     }
 
-    setPosition(tileToScreenPosition(CHUNK_SIZE, {position.x * CHUNK_SIZE, position.y * CHUNK_SIZE}));
+    setPosition(tileToScreenPosition({position.x * CHUNK_SIZE, position.y * CHUNK_SIZE}));
 }
