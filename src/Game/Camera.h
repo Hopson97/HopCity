@@ -8,7 +8,7 @@ class Keyboard;
 
 class Camera {
   public:
-    Camera(int worldSize);
+    Camera();
 
     void setViewToCamera(sf::RenderWindow& window);
     void onEvent(const sf::Event& e);

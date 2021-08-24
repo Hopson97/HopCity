@@ -30,8 +30,6 @@ class ScreenGame final : public Screen {
     bool m_mousedown = false;
     sf::Mouse::Button m_buttonPressed;
 
-    int m_worldSize = 64;
-
     TileChunkManager m_tileManager;
 
     // Map m_map;

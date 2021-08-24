@@ -18,14 +18,14 @@ struct TerrainGenOptions {
 };
 
 float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosition,
-                 const TerrainGenOptions& options, int worldSize)
+                 const TerrainGenOptions& options)
 {
     // Get voxel X/Z positions
     // float voxelX = voxelPosition.x + chunkPosition.x * CHUNK_SIZE;
     // float voxelZ = voxelPosition.y + chunkPosition.y * CHUNK_SIZE;
 
-    float tileX = (float)(tilePosition.x + chunkPosition.x * worldSize);
-    float tileY = (float)(tilePosition.y + chunkPosition.y * worldSize);
+    float tileX = (float)(tilePosition.x + chunkPosition.x * CHUNK_SIZE);
+    float tileY = (float)(tilePosition.y + chunkPosition.y * CHUNK_SIZE);
 
     // Begin iterating through the octaves
     float value = 0;
@@ -102,9 +102,9 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
     return tiles;
 }
 */
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize)
+std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int seed)
 {
-    std::vector<Tile> tiles(worldSize * worldSize);
+    std::vector<Tile> tiles(CHUNK_SIZE * CHUNK_SIZE);
 
     TerrainGenOptions ops;
     ops.amplitude = 20;
@@ -116,9 +116,8 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
     std::mt19937 rng{rd()};
     std::uniform_real_distribution<float> pointDist(2, 6);
     std::uniform_int_distribution<int> dirDist(1, 2);
-    //std::uniform_int_distribution<int> seedDist(0, 4096);
 
-    ops.seed = 50;//seedDist(rng);
+    ops.seed = seed;
     // float riverPoint = pointDist(rng);
     // float nsOceanSize = pointDist(rng);
     // float ewOceanSize = pointDist(rng);
@@ -127,8 +126,8 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
     // int riverDirection = dirDist(rng);
     // float ws = static_cast<float>(worldSize);
 
-    for (int y = 0; y < worldSize; y++) {
-        for (int x = 0; x < worldSize; x++) {
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
             // int rd = riverDirection == 1 ? x : y;
 
             std::vector<float> features;
@@ -141,12 +140,12 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize
             //  features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
 
             // Noise
-            float n = getNoiseAt({x, y}, chunkPosition, ops, worldSize);
+            float n = getNoiseAt({x, y}, chunkPosition, ops);
             features.push_back(n);
 
             float f = std::accumulate(features.begin(), features.end(), 1.0f,
                                       std::multiplies<float>());
-            tiles[x + y * worldSize].type = f > 0.4 ? TileType::Land : TileType::Water;
+            tiles[x + y * CHUNK_SIZE].type = f > 0.4 ? TileType::Land : TileType::Water;
 
             // Maybe add a tree
         }

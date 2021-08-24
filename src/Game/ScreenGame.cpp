@@ -85,9 +85,7 @@ namespace {
 
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
-    , m_worldSize(4)
-    //, m_map(m_worldSize)
-    , m_camera(m_worldSize)
+//, m_map(m_worldSize)
 {
     m_selectionTexture.loadFromFile("data/Textures/Selection.png");
     m_selectionQuadTexture.loadFromFile("data/Textures/SelectionQuad.png");
@@ -117,8 +115,8 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
                                (int)worldPos.y % (int)TILE_HEIGHT};
 
         m_selectedTile = {
-            (cell.y - m_worldSize) + (cell.x - m_worldSize),
-            (cell.y - m_worldSize) - (cell.x - m_worldSize),
+            (cell.y - CHUNK_SIZE) + (cell.x - CHUNK_SIZE),
+            (cell.y - CHUNK_SIZE) - (cell.x - CHUNK_SIZE),
         };
 
         // clang-format off
@@ -198,15 +196,11 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     // Render the tile map
     //  m_map.showDetail = m_camera.zoomLevel < 2;
     //  m_map.draw(window);
-    for (auto& chunk : m_tileManager.tilechunks) {
-        chunk.draw(*window);
-    }
+    m_tileManager.draw(*window);
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
-    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, m_selectedTile));
+    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
     window->draw(m_selectionRect);
-
-
 
     if (m_quadDrag) {
         m_selectionRect.setTexture(&m_selectionQuadTexture);
@@ -224,7 +218,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                                 ////}
                             }
                             m_selectionRect.setPosition(
-                                tileToScreenPosition(m_worldSize, tilePosition));
+                                tileToScreenPosition(tilePosition));
                             window->draw(m_selectionRect);
                         });
 
