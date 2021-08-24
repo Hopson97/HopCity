@@ -32,7 +32,9 @@ class ScreenGame final : public Screen {
 
     int m_worldSize = 64;
 
-    Map m_map;
+    TileChunkManager m_tileManager;
+
+    // Map m_map;
     Camera m_camera;
 
     // Editor

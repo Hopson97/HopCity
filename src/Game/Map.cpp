@@ -30,8 +30,13 @@ namespace {
         gridMap->emplace_back(startPosition, gridColour);
         gridMap->emplace_back(endPosition, gridColour);
     }
+
+    // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+    const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+
 } // namespace
 
+/*
 Map::Map(int worldSize)
     : m_worldSize(worldSize)
 {
@@ -104,7 +109,8 @@ Tile* Map::getTile(const sf::Vector2i& position)
 }
 
 // Used for the "bitmask" techique to auto tile structures and the land
-// https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+//
+https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
 const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
 void Map::updateTile(const sf::Vector2i& position)
@@ -234,4 +240,104 @@ void Map::placeStructure(StructureType type, const sf::Vector2i& position)
             }
         }
     }
+}
+*/
+
+void TileChunkManager::initChunks()
+{
+    tileTextures.loadFromFile("data/Textures/TileMap2.png");
+    for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < 2; x++) {
+            TileChunk chunk;
+            chunk.init({x, y}, CHUNK_SIZE);
+            chunk.tileTextures = &tileTextures;
+
+            tilechunks.push_back(chunk);
+        }
+    }
+}
+
+void TileChunk::draw(sf::RenderTarget& window, sf::RenderStates states) const
+{
+    states.texture = tileTextures;
+    states.transform *= getTransform();
+
+    window.draw(m_tileVerts.data(), m_tileVerts.size(), sf::Quads, states);
+}
+
+void TileChunk::updateTile(const sf::Vector2i& position)
+{
+    // Set the tile'structure variant
+    Tile* tile = getTile(position);
+    const TileDef* def = &getTileDef(tile->type);
+
+    if (def->variantType == VairantType::Random) {
+        std::random_device rd;
+        std::mt19937 rng{rd()};
+        std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
+        tile->variant = varietyDist(rng);
+    }
+    else if (def->variantType == VairantType::Neighbour) {
+        tile->variant = 0;
+
+        for (int i = 0; i < 4; i++) {
+            Tile* neighbour = getTile(position + TILE_OFFSETS[i]);
+            if (neighbour && tile->type == neighbour->type) {
+                tile->variant += (int)std::pow(2, i);
+            }
+
+            if (neighbour &&
+                getTileDef(neighbour->type).variantType == VairantType::Neighbour) {
+                neighbour->variant = 0;
+                for (int j = 0; j < 4; j++) {
+                    Tile* subNeighbour =
+                        getTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                    if (subNeighbour && subNeighbour->type == neighbour->type) {
+                        neighbour->variant += (int)std::pow(2, j);
+                    }
+                }
+            }
+        }
+    }
+
+    // Update the tile texture coords
+    int vertexIndex = (position.y * CHUNK_SIZE + position.x) * 4;
+    if (vertexIndex >= (int)m_tileVerts.size()) {
+        return;
+    }
+    sf::Vertex* vertex = &m_tileVerts[vertexIndex];
+    float idx = static_cast<float>(def->textureIndex);
+    vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * idx};
+    vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * (idx + 1)};
+    vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
+                           TILE_HEIGHT * (idx + 1)};
+    vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * idx};
+}
+
+Tile* TileChunk::getTile(const sf::Vector2i& position)
+{
+    // Check for out of bounds
+    static Tile e;
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 ||
+        position.x >= CHUNK_SIZE) {
+        return &e;
+    }
+
+    // Get the tile
+    return &tiles.at(position.y * CHUNK_SIZE + position.x);
+}
+
+void TileChunk::init(const sf::Vector2i& position, int worldSize)
+{
+    tiles = generateWorld({0, 0}, worldSize);
+    chunkPosition = position;
+
+    for (int y = 0; y < worldSize; y++) {
+        for (int x = 0; x < worldSize; x++) {
+            addIsometricQuad(&m_tileVerts, worldSize, {x, y});
+            updateTile({x, y});
+        }
+    }
+
+    setPosition(tileToScreenPosition(CHUNK_SIZE, {position.x * CHUNK_SIZE, position.y * CHUNK_SIZE}));
 }
