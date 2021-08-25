@@ -96,7 +96,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     registerStructures();
     registerTiles();
 
-    m_tileManager.initChunks();
+    m_tileManager.initWorld();
 
     // m_map.initWorld();
 }
@@ -174,6 +174,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_quadDrag = false;
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilePosition) {
+                                m_tileManager.setTile({tilePosition}, TileType::Road);
                                 if (getStructure(StructureType::StoneWall).placement ==
                                     StructurePlacement::Land) {
                                     // if (m_map.getTile(tilePosition)->type ==
@@ -196,7 +197,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     // Render the tile map
     //  m_map.showDetail = m_camera.zoomLevel < 2;
     //  m_map.draw(window);
-    m_tileManager.draw(*window);
+    m_tileManager.draw(window);
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
