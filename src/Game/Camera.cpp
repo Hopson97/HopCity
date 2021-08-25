@@ -9,8 +9,7 @@
 
 Camera::Camera()
 {
-    m_view.setCenter(
-        tileToScreenPosition({CHUNK_SIZE + CHUNK_SIZE, CHUNK_SIZE + CHUNK_SIZE}));
+    m_view.setCenter(tileToScreenPosition({0, 0}));
     m_view.setSize({1600, 900});
     m_view.zoom(zoomLevel);
 }

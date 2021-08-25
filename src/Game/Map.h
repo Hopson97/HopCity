@@ -17,7 +17,8 @@ class TileChunkManager;
 
 class TileChunk : public sf::Drawable, private sf::Transformable {
   public:
-    void init(const sf::Vector2i& position, TileChunkManager* chunkManager);
+    TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager);
+    void generateTerrain(int seed);
 
     void draw(sf::RenderTarget& window,
               sf::RenderStates states = sf::RenderStates::Default) const override;
@@ -31,16 +32,16 @@ class TileChunk : public sf::Drawable, private sf::Transformable {
 
     std::vector<Tile> m_tiles;
     std::vector<sf::Vertex> m_tileVerts;
-    sf::Texture* m_tileTextures;
 
     sf::Vector2i m_chunkPosition;
 
-    TileChunkManager* mp_chunkManager;
+    TileChunkManager* mp_chunkManager = nullptr;
 };
 
 class TileChunkManager {
   public:
     void initWorld();
+    void addChunk(const sf::Vector2i& chunkPos);
 
     void regenerateTerrain();
     void setTile(const sf::Vector2i& position, TileType type);
@@ -51,8 +52,6 @@ class TileChunkManager {
     bool showDetail;
 
   private:
-    void updateTile(const sf::Vector2i& position);
-
     sf::Texture m_tileTextures;
     std::unordered_map<sf::Vector2i, TileChunk, Vec2hash> m_chunks;
     std::vector<sf::Vertex> m_grid;
@@ -62,4 +61,6 @@ class TileChunkManager {
 
     sf::RectangleShape m_structureRect;
     sf::Texture m_structureMap;
+
+    int m_seed = 52323;
 };
