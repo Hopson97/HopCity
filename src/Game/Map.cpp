@@ -53,14 +53,15 @@ void TileChunkManager::initWorld()
 
     m_structureRect.setTexture(&m_structureMap);
 
-    for (int y = 0; y < 1; y++) {
-        for (int x = 0; x < 2; x++) {
-            TileChunk chunk;
-            chunk.init({x, y}, this);
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> seedDist(0, 4096);
+    m_seed = seedDist(rng);
 
-            m_chunks[{x, y}] = chunk;
-        }
-    }
+    addChunk({0, 0});
+    addChunk({1, 0});
+    addChunk({2, 0});
+    addChunk({3, 0});
 
     for (int i = 0; i < CHUNK_SIZE + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition({0, i}),
@@ -70,17 +71,27 @@ void TileChunkManager::initWorld()
     }
 }
 
+void TileChunkManager::addChunk(const sf::Vector2i& chunkPos)
+{
+    if (m_chunks.find(chunkPos) == m_chunks.end()) {
+        auto chunk = m_chunks.emplace(chunkPos, TileChunk{chunkPos, this});
+        chunk.first->second.generateTerrain(m_seed);
+    }
+}
+
 void TileChunkManager::regenerateTerrain()
 {
-    // m_structures.clear();
-    // sorted.clear();
-    // m_tiles = generateWorld({0, 0}, m_worldSize, this);
-    //
-    // for (int y = 0; y < m_worldSize; y++) {
-    //    for (int x = 0; x < m_worldSize; x++) {
-    //        updateTile({x, y});
-    //    }
-    //}
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> seedDist(0, 4096);
+    m_seed = seedDist(rng);
+
+    m_structures.clear();
+    sorted.clear();
+    for (auto& chunk : m_chunks) {
+        chunk.second.generateTerrain(m_seed);
+    }
 }
 
 void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
@@ -90,7 +101,8 @@ void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
 
     auto chunkItr = m_chunks.find(chunkPos);
     if (chunkItr == m_chunks.end()) {
-        return;
+        addChunk(chunkPos);
+        chunkItr = m_chunks.find(chunkPos);
     }
 
     chunkItr->second.getTile(localPos)->type = type;
@@ -103,9 +115,11 @@ void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
                 toLocalTilePosition(tilePosition + sf::Vector2i{i, j});
 
             auto chunkItr = m_chunks.find(chunkPos);
-            if (chunkItr != m_chunks.end()) {
-                chunkItr->second.updateTile(localPos);
+            if (chunkItr == m_chunks.end()) {
+                addChunk(chunkPos);
+                chunkItr = m_chunks.find(chunkPos);
             }
+            chunkItr->second.updateTile(localPos);
         }
     }
 }
@@ -114,8 +128,6 @@ Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
 {
     sf::Vector2i chunkPos = toChunkPosition(tilePosition);
     sf::Vector2i localPos = toLocalTilePosition(tilePosition);
-
-    // Get the tile
 
     auto chunkItr = m_chunks.find(chunkPos);
     if (chunkItr != m_chunks.end()) {
@@ -278,21 +290,29 @@ Tile* TileChunk::getGlobalTile(const sf::Vector2i& position)
                                      m_chunkPosition.y * CHUNK_SIZE + position.y});
 }
 
-//    std::uniform_int_distribution<int> seedDist(0, 4096);
+//   ;
 
-void TileChunk::init(const sf::Vector2i& position, TileChunkManager* chunkManager)
+TileChunk::TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager)
+    : m_chunkPosition(position)
+    , mp_chunkManager(chunkManager)
 {
-    m_tiles = generateWorld(position, 450);
-    m_chunkPosition = position;
-    mp_chunkManager = chunkManager;
-
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             addIsometricQuad(&m_tileVerts, {x, y});
             updateTile({x, y});
         }
     }
-
     setPosition(
         tileToScreenPosition({(position.x - 2) * CHUNK_SIZE, position.y * CHUNK_SIZE}));
+}
+
+void TileChunk::generateTerrain(int seed)
+{
+    m_tiles = generateWorld(m_chunkPosition, seed);
+
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            updateTile({x, y});
+        }
+    }
 }
