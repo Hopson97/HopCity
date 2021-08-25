@@ -35,3 +35,20 @@ inline sf::Vector2f tileToScreenPosition(const sf::Vector2i& tilePosition)
     return {(CHUNK_SIZE * TILE_WIDTH) + (x - y) * (TILE_WIDTH / 2.0f),
             (CHUNK_SIZE * TILE_HEIGHT) + (x + y) * (TILE_HEIGHT / 2.0f)};
 }
+
+inline sf::Vector2i toChunkPosition(const sf::Vector2i& tilePosition)
+{
+    return {tilePosition.x / CHUNK_SIZE, tilePosition.y / CHUNK_SIZE};
+}
+
+inline sf::Vector2i toLocalTilePosition(const sf::Vector2i& worldTilePosition)
+{
+    return {worldTilePosition.x % CHUNK_SIZE, worldTilePosition.y % CHUNK_SIZE};
+}
+
+inline sf::Vector2i toGlobalTilePosition(const sf::Vector2i& chunkPosition,
+                                         const sf::Vector2i& localTilePosition)
+{
+    return {chunkPosition.x * CHUNK_SIZE + localTilePosition.x,
+            chunkPosition.y * CHUNK_SIZE + localTilePosition.y};
+}
