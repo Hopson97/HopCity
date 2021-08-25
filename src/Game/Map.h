@@ -15,6 +15,16 @@
 
 class TileChunkManager;
 
+class GridMap : public sf::Drawable, public sf::Transformable {
+  public:
+    GridMap();
+    void draw(sf::RenderTarget& window,
+              sf::RenderStates states = sf::RenderStates::Default) const override;
+
+  private:
+    std::vector<sf::Vertex> m_grid;
+};
+
 class TileChunk : public sf::Drawable, private sf::Transformable {
   public:
     TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager);
@@ -54,13 +64,13 @@ class TileChunkManager {
   private:
     sf::Texture m_tileTextures;
     std::unordered_map<sf::Vector2i, TileChunk, Vec2hash> m_chunks;
-    std::vector<sf::Vertex> m_grid;
-
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;
     std::set<sf::Vector2i, Vec2Compare> sorted;
 
     sf::RectangleShape m_structureRect;
     sf::Texture m_structureMap;
+
+    GridMap m_gridMap;
 
     int m_seed = 52323;
 };

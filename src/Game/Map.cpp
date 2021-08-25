@@ -52,13 +52,6 @@ void TileChunkManager::initWorld()
     addChunk({1, 0});
     addChunk({2, 0});
     addChunk({3, 0});
-
-    for (int i = 0; i < CHUNK_SIZE + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition({0, i}),
-                    tileToScreenPosition({CHUNK_SIZE, i}));
-        addGridLine(&m_grid, tileToScreenPosition({i, 0}),
-                    tileToScreenPosition({i, CHUNK_SIZE}));
-    }
 }
 
 void TileChunkManager::addChunk(const sf::Vector2i& chunkPos)
@@ -135,11 +128,15 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     states.texture = &m_tileTextures;
 
     for (auto& chunk : m_chunks) {
+
         chunk.second.draw(*window, states);
+        // if (showDetail) {
+
+        // m_gridMap.setPosition(tileToScreenPosition(
+        //     {(chunk.first.x) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
+        // m_gridMap.draw(*window);
+        // }
     }
-    // if (showDetail) {
-    window->draw(m_grid.data(), m_grid.size(), sf::Lines);
-    // }
 
     for (const auto& structure : sorted) {
         const auto& str = m_structures[structure];
@@ -304,4 +301,20 @@ void TileChunk::generateTerrain(int seed)
             updateTile({x, y});
         }
     }
+}
+
+GridMap::GridMap()
+{
+    for (int i = 0; i < CHUNK_SIZE + 1; i++) {
+        addGridLine(&m_grid, tileToScreenPosition({0, i}),
+                    tileToScreenPosition({CHUNK_SIZE, i}));
+        addGridLine(&m_grid, tileToScreenPosition({i, 0}),
+                    tileToScreenPosition({i, CHUNK_SIZE}));
+    }
+}
+
+void GridMap::draw(sf::RenderTarget& window, sf::RenderStates states) const
+{
+    states.transform *= getTransform();
+    window.draw(m_grid.data(), m_grid.size(), sf::Lines);
 }
