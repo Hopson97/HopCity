@@ -31,16 +31,6 @@ namespace {
         gridMap->emplace_back(endPosition, gridColour);
     }
 
-    sf::Vector2i toChunkPosition(const sf::Vector2i& tilePosition)
-    {
-        return {tilePosition.x / CHUNK_SIZE, tilePosition.y / CHUNK_SIZE};
-    }
-
-    sf::Vector2i toLocalTilePosition(const sf::Vector2i& worldTilePosition)
-    {
-        return {worldTilePosition.x % CHUNK_SIZE, worldTilePosition.y % CHUNK_SIZE};
-    }
-
     // https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
     const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
@@ -147,9 +137,9 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     for (auto& chunk : m_chunks) {
         chunk.second.draw(*window, states);
     }
-    if (showDetail) {
-        window->draw(m_grid.data(), m_grid.size(), sf::Lines);
-    }
+    // if (showDetail) {
+    window->draw(m_grid.data(), m_grid.size(), sf::Lines);
+    // }
 
     for (const auto& structure : sorted) {
         const auto& str = m_structures[structure];
@@ -286,8 +276,7 @@ Tile* TileChunk::getTile(const sf::Vector2i& position)
 
 Tile* TileChunk::getGlobalTile(const sf::Vector2i& position)
 {
-    return mp_chunkManager->getTile({m_chunkPosition.x * CHUNK_SIZE + position.x,
-                                     m_chunkPosition.y * CHUNK_SIZE + position.y});
+    return mp_chunkManager->getTile(toGlobalTilePosition(m_chunkPosition, position));
 }
 
 //   ;
@@ -308,7 +297,7 @@ TileChunk::TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManage
 
 void TileChunk::generateTerrain(int seed)
 {
-    m_tiles = generateWorld(m_chunkPosition, seed);
+    m_tiles = generateWorld(m_chunkPosition, mp_chunkManager, seed);
 
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {

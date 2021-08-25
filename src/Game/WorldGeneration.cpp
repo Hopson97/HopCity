@@ -43,66 +43,9 @@ float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosi
     }
     return value / accumulatedAmps;
 }
-/*
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int worldSize,
-                                Map* map)
-{
-    std::vector<Tile> tiles(worldSize * worldSize);
 
-    TerrainGenOptions ops;
-    ops.amplitude = 20;
-    ops.octaves = 4;
-    ops.smoothness = 100;
-    ops.roughness = 0.55f;
-
-    std::random_device rd;
-    std::mt19937 rng{rd()};
-    std::uniform_real_distribution<float> pointDist(2, 6);
-    std::uniform_int_distribution<int> dirDist(1, 2);
-    std::uniform_int_distribution<int> seedDist(0, 4096);
-
-    ops.seed = seedDist(rng);
-    // float riverPoint = pointDist(rng);
-    // float nsOceanSize = pointDist(rng);
-    // float ewOceanSize = pointDist(rng);
-    // bool isEast = dirDist(rng) == 1;
-    // bool isSouth = dirDist(rng) == 1;
-    // int riverDirection = dirDist(rng);
-    // float ws = static_cast<float>(worldSize);
-
-    for (int y = 0; y < worldSize; y++) {
-        for (int x = 0; x < worldSize; x++) {
-            // int rd = riverDirection == 1 ? x : y;
-
-            std::vector<float> features;
-
-            // Oceans
-            //  features.push_back(std::abs(x - (isEast ? 0 : ws)) / ws * ewOceanSize);
-            // features.push_back(std::abs(y - (isSouth ? 0 : ws)) / ws * nsOceanSize);
-
-            // River
-            //  features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
-
-            // Noise
-            float n = getNoiseAt({x, y}, chunkPosition, ops, worldSize);
-            features.push_back(n);
-
-            float f = std::accumulate(features.begin(), features.end(), 1.0f,
-                                      std::multiplies<float>());
-            tiles[x + y * worldSize].type = f > 0.4 ? TileType::Land : TileType::Water;
-
-            if (tiles[x + y * worldSize].type == TileType::Land && pointDist(rng) > 4 &&
-                n > 0.6) {
-                map->placeStructure(StructureType::FirTree, {x, y});
-            }
-
-            // Maybe add a tree
-        }
-    }
-    return tiles;
-}
-*/
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int seed)
+std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, TileChunkManager* map,
+                                int seed)
 {
     std::vector<Tile> tiles(CHUNK_SIZE * CHUNK_SIZE);
 
@@ -147,7 +90,11 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, int seed)
                                       std::multiplies<float>());
             tiles[x + y * CHUNK_SIZE].type = f > 0.4 ? TileType::Land : TileType::Water;
 
-            // Maybe add a tree
+            if (tiles[x + y * CHUNK_SIZE].type == TileType::Land && pointDist(rng) > 4 &&
+                n > 0.6) {
+                map->placeStructure(StructureType::FirTree,
+                                    toGlobalTilePosition(chunkPosition, {x, y}));
+            }
         }
     }
     return tiles;
