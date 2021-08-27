@@ -130,12 +130,12 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     for (auto& chunk : m_chunks) {
 
         chunk.second.draw(*window, states);
-        // if (showDetail) {
+        if (showDetail) {
 
-        // m_gridMap.setPosition(tileToScreenPosition(
-        //     {(chunk.first.x) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
-        // m_gridMap.draw(*window);
-        // }
+         m_gridMap.setPosition(tileToScreenPosition(
+             {(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
+         m_gridMap.draw(*window);
+        }
     }
 
     for (const auto& structure : sorted) {
@@ -316,5 +316,5 @@ GridMap::GridMap()
 void GridMap::draw(sf::RenderTarget& window, sf::RenderStates states) const
 {
     states.transform *= getTransform();
-    window.draw(m_grid.data(), m_grid.size(), sf::Lines);
+    window.draw(m_grid.data(), m_grid.size(), sf::Lines, states);
 }
