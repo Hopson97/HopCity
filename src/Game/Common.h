@@ -3,7 +3,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
 
-constexpr int CHUNK_SIZE = 64;
+constexpr int CHUNK_SIZE = 128;
 
 constexpr float TILE_HEIGHT = 16.0f;
 constexpr float TILE_WIDTH = 32.0f;
