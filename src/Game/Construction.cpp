@@ -23,22 +23,9 @@ bool structureButton(StructureType structureType, CurrentConstruction& currCon)
 
 void onConstructionGUI(CurrentConstruction& currCon)
 {
-
-    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();    ImGui::Separator();
-    ImGui::Separator();
-    ImGui::Separator();
+    for (int i = 0; i < 26; i++) {
+        ImGui::Separator();
+    }
     if (ImGui::BeginTabBar("construction")) {
         if (ImGui::BeginTabItem("Buildings")) {
             ImGui::EndTabItem();

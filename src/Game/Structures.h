@@ -32,6 +32,11 @@ enum class StructurePlacement {
     WatersEdge = 2,
 };
 
+
+/**
+ * @brief The defition of a structure type and the common data between all instances
+ * 
+ */
 struct StructureDef {
     std::string name;
 
@@ -57,6 +62,10 @@ struct StructureDef {
     StructureDef& setConstructionType(ConstructionType type);
 };
 
+/**
+ * @brief A structure that has been placed in the world
+ * 
+ */
 struct Structure {
     StructureType type;
     int variant = 0;

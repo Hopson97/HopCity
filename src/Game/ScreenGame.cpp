@@ -93,6 +93,14 @@ void ScreenGame::onGUI()
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
+    auto tryPlaceStructure = [&](const sf::Vector2i& tilePosition,
+                                   StructureType structure)
+    {
+        if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
+            m_tileManager.placeStructure(structure, tilePosition);
+        }
+    };
+
     m_camera.onEvent(e);
     if (!ImGui::GetIO().WantCaptureMouse) {
         if (e.type == sf::Event::MouseButtonPressed) {
@@ -107,22 +115,16 @@ void ScreenGame::onEvent(const sf::Event& e)
                 StructureRegistry::instance().getStructure(m_currConstruction.strType);
 
             if (def.constructionType == ConstructionType::DynamicPath) {
-                forEachLSection(
-                    m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                    [&](const sf::Vector2i& tilePosition) {
-                        if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
-                            m_tileManager.placeStructure(structure, tilePosition);
-                        }
-                    });
+                forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                                [&](const sf::Vector2i& tilePosition) {
+                                    tryPlaceStructure(tilePosition, structure);
+                                });
             }
             else if (def.constructionType == ConstructionType::DynamicQuad) {
-                forEachQuadSection(
-                    m_editStartPosition, m_editEndPosition,
-                    [&](const sf::Vector2i& tilePosition) {
-                        if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
-                            m_tileManager.placeStructure(structure, tilePosition);
-                        }
-                    });
+                forEachQuadSection(m_editStartPosition, m_editEndPosition,
+                                   [&](const sf::Vector2i& tilePosition) {
+                                       tryPlaceStructure(tilePosition, structure);
+                                   });
             }
             else if (def.constructionType == ConstructionType::Quad) {
                 for (int y = 0; y < def.baseSize.y; y++) {
@@ -146,47 +148,44 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     // Render the tile map
     m_tileManager.showDetail = m_camera.zoomLevel < 2;
-    //  m_map.draw(window);
     m_tileManager.draw(window);
+
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
     m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
     window->draw(m_selectionRect);
+
+
+    // If the player is constructing, then render where they want to construct
     m_selectionRect.setTexture(&m_selectionQuadTexture);
+    auto renderPlacementRect = [&](const sf::Vector2i& tilePosition,
+                                   StructureType strType) {
+        if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
+            m_selectionRect.setFillColor(sf::Color::Green);
+        }
+        else {
+            m_selectionRect.setFillColor(sf::Color::Red);
+        }
+        m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
+        window->draw(m_selectionRect);
+    };
 
     if (m_isConstructing) {
-        const StructureType strType = m_currConstruction.strType;
+        StructureType strType = m_currConstruction.strType;
         const StructureDef& def = StructureRegistry::instance().getStructure(strType);
 
         if (def.constructionType == ConstructionType::DynamicPath) {
 
-            forEachLSection(
-                m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                [&](const sf::Vector2i& tilePosition) {
-                    if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
-                        m_selectionRect.setFillColor(sf::Color::Green);
-                    }
-                    else {
-                        m_selectionRect.setFillColor(sf::Color::Red);
-                    }
-                    m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
-                    window->draw(m_selectionRect);
-                });
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i& tilePosition) {
+                                renderPlacementRect(tilePosition, strType);
+                            });
         }
         else if (def.constructionType == ConstructionType::DynamicQuad) {
-            forEachQuadSection(
-                m_editStartPosition, m_editEndPosition,
-                [&](const sf::Vector2i& tilePosition) {
-                    if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
-                        m_selectionRect.setFillColor(sf::Color::Green);
-                    }
-                    else {
-                        m_selectionRect.setFillColor(sf::Color::Red);
-                    }
-
-                    m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
-                    window->draw(m_selectionRect);
-                });
+            forEachQuadSection(m_editStartPosition, m_editEndPosition,
+                               [&](const sf::Vector2i& tilePosition) {
+                                   renderPlacementRect(tilePosition, strType);
+                               });
         }
         else if (def.constructionType == ConstructionType::Quad)
             for (int y = 0; y < def.baseSize.y; y++) {
