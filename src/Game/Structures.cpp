@@ -13,6 +13,12 @@ StructureDef& StructureDef::loadGuiTexture(const std::string& textureName)
     return *this;
 }
 
+StructureDef& StructureDef::setConstructionType(ConstructionType constructionType)
+{
+    this->constructionType = constructionType;
+    return *this;
+}
+
 StructureRegistry::StructureRegistry()
 {
     registerStructure(StructureType::FirTree, "Fir Tree", {1, 2}, 0, {1, 1},
@@ -21,15 +27,18 @@ StructureRegistry::StructureRegistry()
 
     registerStructure(StructureType::MudWall, "Mud Wall", {1, 3}, 2, {1, 1},
                       VairantType::Neighbour, StructurePlacement::Land)
-        .loadGuiTexture("MudWall.png");
+        .loadGuiTexture("MudWall.png")
+        .setConstructionType(ConstructionType::DynamicPath);
 
     registerStructure(StructureType::StoneWall, "Stone Wall", {1, 4}, 5, {1, 1},
                       VairantType::Neighbour, StructurePlacement::Land)
-        .loadGuiTexture("StoneWall.png");
+        .loadGuiTexture("StoneWall.png")
+        .setConstructionType(ConstructionType::DynamicPath);
 
     registerStructure(StructureType::WoodWall, "Wood Wall", {1, 2}, 9, {1, 1},
                       VairantType::Neighbour, StructurePlacement::Land)
-        .loadGuiTexture("WoodWall.png");
+        .loadGuiTexture("WoodWall.png")
+        .setConstructionType(ConstructionType::DynamicPath);
 
     registerStructure(StructureType::Base, "Base Base", {2, 4}, 11, {2, 2},
                       VairantType::None, StructurePlacement::Land);

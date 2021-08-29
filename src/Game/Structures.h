@@ -7,6 +7,14 @@
 #include <array>
 #include <cstdint>
 
+enum class ConstructionType {
+    None = 0,
+    DynamicPath = 1,
+    DynamicQuad = 2,
+
+    Quad = 3,
+};
+
 enum class StructureType {
     FirTree = 0,
     MudWall = 1,
@@ -32,18 +40,21 @@ struct StructureDef {
     int textureIndex = 0;
 
     VairantType variantType = VairantType::None;
-    int variations = 0; // For Random variation
 
     StructurePlacement placement = StructurePlacement::Land;
-
-    // Builder functions
-    StructureDef& giveVarity(int variations);
-    StructureDef& loadGuiTexture(const std::string& textureName);
 
     // Only some have this
     int goldCost = 0;
 
+    int variations = 0; // For Random variation
+
     sf::Texture guiTexture;
+    ConstructionType constructionType = ConstructionType::None;
+
+    // Builder functions
+    StructureDef& giveVarity(int variations);
+    StructureDef& loadGuiTexture(const std::string& textureName);
+    StructureDef& setConstructionType(ConstructionType type);
 };
 
 struct Structure {

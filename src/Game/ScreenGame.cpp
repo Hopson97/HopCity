@@ -8,81 +8,6 @@
 #include <iostream>
 #include <unordered_set>
 
-namespace {
-
-    bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
-    {
-        return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
-    }
-
-    /**
-     * @brief Calls a function for a L shape selection (for example, building a road)
-     *
-     * @param start The tile position to start at
-     * @param mid  The tile position to "pivot" the L at
-     * @param end The tile position to end end
-     * @param f Callback for each section along the L shape
-     */
-    void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid,
-                         const sf::Vector2i& end,
-                         std::function<void(const sf::Vector2i& tile)> f)
-    {
-
-        // Hack to prevent the functions running for a tile position more than once
-        std::unordered_set<sf::Vector2i, Vec2hash> unique;
-        auto tryTile = [&](const sf::Vector2i pos) {
-            if (!unique.count(pos)) {
-                unique.emplace(pos);
-                f(pos);
-            }
-        };
-
-        if (xDistGreater(start, mid)) {
-            int startX = std::min(start.x, mid.x);
-            int startY = std::min(mid.y, end.y);
-
-            int endX = std::max(start.x + 1, mid.x + 1);
-            int endY = std::max(mid.y + 1, end.y + 1);
-
-            for (int x = startX; x < endX; x++) {
-                tryTile({x, start.y});
-            }
-            for (int y = startY; y < endY; y++) {
-                tryTile({mid.x, y});
-            }
-        }
-        else {
-            int startX = std::min(mid.x, end.x);
-            int startY = std::min(start.y, mid.y);
-            int endX = std::max(mid.x + 1, end.x + 1);
-            int endY = std::max(start.y + 1, mid.y + 1);
-
-            for (int x = startX; x < endX; x++) {
-                tryTile({x, mid.y});
-            }
-            for (int y = startY; y < endY; y++) {
-                tryTile({start.x, y});
-            }
-        }
-    }
-
-    void forEachQuadSection(const sf::Vector2i& start, const sf::Vector2i& end,
-                            std::function<void(const sf::Vector2i& tile)> f)
-    {
-        int startX = std::min(start.x, end.x);
-        int startY = std::min(start.y, end.y);
-        int endX = std::max(start.x + 1, end.x + 1);
-        int endY = std::max(start.y + 1, end.y + 1);
-
-        for (int y = startY; y < endY; y++) {
-            for (int x = startX; x < endX; x++) {
-                f({x, y});
-            }
-        }
-    }
-
-} // namespace
-
 ScreenGame::ScreenGame(ScreenManager* stack)
     : Screen(stack)
 {
@@ -130,7 +55,7 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         // clang-format on
     }
 
-    if (m_quadDrag) {
+    if (m_isConstructing) {
         if (xDistGreater(m_editStartPosition, m_editEndPosition)) {
             m_editPivotPoint.x = m_selectedTile.x;
             m_editPivotPoint.y = m_editStartPosition.y;
@@ -145,7 +70,13 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
 
 void ScreenGame::onGUI()
 {
-    if (ImGui::Begin("Info")) {
+    float panelSize = 256;
+    ImGui::SetNextWindowBgAlpha(1);
+    ImGui::SetNextWindowPos({1600 - panelSize, 0});
+    ImGui::SetNextWindowSize({panelSize, 900});
+    if (ImGui::Begin("Panel", nullptr,
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
         ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
@@ -153,10 +84,11 @@ void ScreenGame::onGUI()
         if (ImGui::Button("Regen world")) {
             m_tileManager.regenerateTerrain();
         }
+
+        onConstructionGUI(m_currConstruction);
+
         ImGui::End();
     }
-
-    onConstructionGUI(m_currConstruction);
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
@@ -164,29 +96,44 @@ void ScreenGame::onEvent(const sf::Event& e)
     m_camera.onEvent(e);
     if (!ImGui::GetIO().WantCaptureMouse) {
         if (e.type == sf::Event::MouseButtonPressed) {
-            m_quadDrag = true;
+            m_isConstructing = true;
             m_editStartPosition = m_selectedTile;
             m_editEndPosition = m_selectedTile;
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
             auto structure = m_currConstruction.strType;
 
-            if (m_tileManager.canPlaceStructure(m_selectedTile, structure)) {
-                m_tileManager.placeStructure(structure, m_selectedTile);
+            const StructureDef& def =
+                StructureRegistry::instance().getStructure(m_currConstruction.strType);
+
+            if (def.constructionType == ConstructionType::DynamicPath) {
+                forEachLSection(
+                    m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                    [&](const sf::Vector2i& tilePosition) {
+                        if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
+                            m_tileManager.placeStructure(structure, tilePosition);
+                        }
+                    });
             }
-
-            m_quadDrag = false;
-
-            /*
-            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                            [&](const sf::Vector2i& tilePosition) {
-                                if (m_tileManager.canPlaceStructure(
-                                        m_selectedTile, StructureType::Base)) {
-                                    m_tileManager.placeStructure(StructureType::Base,
-                                                                 tilePosition);
-                                }
-                            });
-                            */
+            else if (def.constructionType == ConstructionType::DynamicQuad) {
+                forEachQuadSection(
+                    m_editStartPosition, m_editEndPosition,
+                    [&](const sf::Vector2i& tilePosition) {
+                        if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
+                            m_tileManager.placeStructure(structure, tilePosition);
+                        }
+                    });
+            }
+            else if (def.constructionType == ConstructionType::Quad) {
+                for (int y = 0; y < def.baseSize.y; y++) {
+                    for (int x = 0; x < def.baseSize.x; x++) {
+                        if (m_tileManager.canPlaceStructure(m_selectedTile, structure)) {
+                            m_tileManager.placeStructure(structure, m_selectedTile);
+                        }
+                    }
+                }
+            }
+            m_isConstructing = false;
         }
     }
 }
@@ -203,52 +150,51 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_tileManager.draw(window);
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
-
+    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
+    window->draw(m_selectionRect);
     m_selectionRect.setTexture(&m_selectionQuadTexture);
 
-    if (m_tileManager.canPlaceStructure(m_selectedTile, m_currConstruction.strType)) {
-        m_selectionRect.setFillColor(sf::Color::Green);
-    }
-    else {
-        m_selectionRect.setFillColor(sf::Color::Red);
-    }
+    if (m_isConstructing) {
+        const StructureType strType = m_currConstruction.strType;
+        const StructureDef& def = StructureRegistry::instance().getStructure(strType);
 
-    const StructureDef& def =
-        StructureRegistry::instance().getStructure(m_currConstruction.strType);
-    for (int y = 0; y < def.baseSize.y; y++) {
-        for (int x = 0; x < def.baseSize.x; x++) {
-            m_selectionRect.setPosition(
-                tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
-            window->draw(m_selectionRect);
-        }
-    }
-    /*
-        if (m_quadDrag) {
-            m_selectionRect.setTexture(&m_selectionQuadTexture);
+        if (def.constructionType == ConstructionType::DynamicPath) {
 
             forEachLSection(
                 m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                 [&](const sf::Vector2i& tilePosition) {
-                    if
-       (StructureRegistry::instance().getStructure(StructureType::StoneWall).placement ==
-                        StructurePlacement::Land) {
-                        if (m_tileManager.getTile(tilePosition)->type ==
-       TileType::Land) { m_selectionRect.setFillColor(sf::Color::Green);
-                        }
-                        else {
-                            m_selectionRect.setFillColor(sf::Color::Red);
-                        }
+                    if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
+                        m_selectionRect.setFillColor(sf::Color::Green);
+                    }
+                    else {
+                        m_selectionRect.setFillColor(sf::Color::Red);
                     }
                     m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
-
                     window->draw(m_selectionRect);
                 });
-
-            // forEachSelectedTile([&](const sf::Vector2i& tile) {
-            //    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize,
-       tile));
-            //    window->draw(m_selectionRect);
-            //});
         }
-        */
+        else if (def.constructionType == ConstructionType::DynamicQuad) {
+            forEachQuadSection(
+                m_editStartPosition, m_editEndPosition,
+                [&](const sf::Vector2i& tilePosition) {
+                    if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
+                        m_selectionRect.setFillColor(sf::Color::Green);
+                    }
+                    else {
+                        m_selectionRect.setFillColor(sf::Color::Red);
+                    }
+
+                    m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
+                    window->draw(m_selectionRect);
+                });
+        }
+        else if (def.constructionType == ConstructionType::Quad)
+            for (int y = 0; y < def.baseSize.y; y++) {
+                for (int x = 0; x < def.baseSize.x; x++) {
+                    m_selectionRect.setPosition(
+                        tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
+                    window->draw(m_selectionRect);
+                }
+            }
+    }
 }
