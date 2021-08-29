@@ -43,3 +43,4 @@ StructureDef& registerStructure(StructureType type, const sf::Vector2f& size,
                                 StructurePlacement placement);
 
 const StructureDef& getStructure(StructureType type);
+

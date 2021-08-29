@@ -21,11 +21,11 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/Animation.cpp
     src/Screen.cpp 
-
+    
+    src/Game/TileMap.cpp
     src/Game/ScreenGame.cpp
     src/Game/ScreenMainMenu.cpp
     src/Game/Camera.cpp
-    src/Game/Map.cpp
     src/Game/Structures.cpp
     src/Game/Tiles.cpp
     src/Game/WorldGeneration.cpp

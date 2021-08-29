@@ -1,4 +1,4 @@
-#include "Map.h"
+#include "TileMap.h"
 
 #include "WorldGeneration.h"
 #include <cmath>
@@ -48,10 +48,11 @@ void TileChunkManager::initWorld()
     std::uniform_int_distribution<int> seedDist(0, 4096);
     m_seed = seedDist(rng);
 
-    addChunk({0, 0});
-    addChunk({1, 0});
-    addChunk({2, 0});
-    addChunk({3, 0});
+    for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < 2; x++) {
+            addChunk({x, y});
+        }
+    }
 }
 
 void TileChunkManager::addChunk(const sf::Vector2i& chunkPos)

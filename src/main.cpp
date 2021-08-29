@@ -12,7 +12,7 @@ int main()
 {
     // Set up window and gui
     sf::RenderWindow window({1600, 900}, "game");
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(100);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
 

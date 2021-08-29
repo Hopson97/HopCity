@@ -1,6 +1,5 @@
 #include "WorldGeneration.h"
 
-#include "Map.h"
 #include <glm/gtc/noise.hpp>
 #include <iostream>
 #include <numeric>

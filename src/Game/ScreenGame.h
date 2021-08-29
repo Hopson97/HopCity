@@ -3,7 +3,7 @@
 #include "../Animation.h"
 #include "../Screen.h"
 #include "Camera.h"
-#include "Map.h"
+#include "TileMap.h"
 #include "WorldGeneration.h"
 #include <functional>
 
