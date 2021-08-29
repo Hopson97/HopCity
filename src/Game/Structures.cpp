@@ -20,6 +20,12 @@ void registerStructures()
         registerStructure(StructureType::StoneWall, {1, 4}, 5, VairantType::Neighbour,
                           StructurePlacement::Land);
 
+        registerStructure(StructureType::WoodWall, {1, 2}, 9, VairantType::Neighbour,
+                          StructurePlacement::Land);
+
+        registerStructure(StructureType::Base, {2, 4}, 11, VairantType::None,
+                          StructurePlacement::Land);
+
         registered = true;
     }
 }

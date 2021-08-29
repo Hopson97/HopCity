@@ -152,6 +152,7 @@ void TileChunkManager::draw(sf::RenderWindow* window)
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(structure));
+        m_structureRect.move(-def->size.x * TILE_WIDTH / 4, 0);
         window->draw(m_structureRect);
     }
 }

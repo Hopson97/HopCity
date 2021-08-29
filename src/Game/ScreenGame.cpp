@@ -169,17 +169,17 @@ void ScreenGame::onEvent(const sf::Event& e)
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
             m_quadDrag = false;
-            forEachLSection(
-                m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-                [&](const sf::Vector2i& tilePosition) {
-                    if (getStructure(StructureType::StoneWall).placement ==
-                        StructurePlacement::Land) {
-                        if (m_tileManager.getTile(tilePosition)->type == TileType::Land) {
-                            m_tileManager.placeStructure(StructureType::StoneWall,
-                                                         tilePosition);
-                        }
-                    }
-                });
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i& tilePosition) {
+                                if (getStructure(StructureType::StoneWall).placement ==
+                                    StructurePlacement::Land) {
+                                    if (m_tileManager.getTile(tilePosition)->type ==
+                                        TileType::Land) {
+                                        m_tileManager.placeStructure(StructureType::Base,
+                                                                     tilePosition);
+                                    }
+                                }
+                            });
         }
     }
 }

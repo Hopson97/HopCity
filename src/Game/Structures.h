@@ -9,6 +9,9 @@ enum class StructureType {
     FirTree = 0,
     MudWall = 1,
     StoneWall = 2,
+    WoodWall = 3,
+
+    Base,
 
     NUM_TYPES
 };
@@ -43,4 +46,3 @@ StructureDef& registerStructure(StructureType type, const sf::Vector2f& size,
                                 StructurePlacement placement);
 
 const StructureDef& getStructure(StructureType type);
-
