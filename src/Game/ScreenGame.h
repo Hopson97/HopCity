@@ -3,6 +3,7 @@
 #include "../Animation.h"
 #include "../Screen.h"
 #include "Camera.h"
+#include "Construction.h"
 #include "TileMap.h"
 #include "WorldGeneration.h"
 #include <functional>
@@ -36,6 +37,8 @@ class ScreenGame final : public Screen {
     Camera m_camera;
 
     // Editor
+    CurrentConstruction m_currConstruction;
+
     sf::Vector2i m_editStartPosition;
     sf::Vector2i m_editPivotPoint;
     sf::Vector2i m_editEndPosition;

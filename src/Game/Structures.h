@@ -2,7 +2,9 @@
 #pragma once
 
 #include "Common.h"
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <array>
 #include <cstdint>
 
 enum class StructureType {
@@ -23,6 +25,8 @@ enum class StructurePlacement {
 };
 
 struct StructureDef {
+    std::string name;
+
     sf::Vector2f textureSize;
     sf::Vector2i baseSize;
     int textureIndex = 0;
@@ -34,6 +38,12 @@ struct StructureDef {
 
     // Builder functions
     StructureDef& giveVarity(int variations);
+    StructureDef& loadGuiTexture(const std::string& textureName);
+
+    // Only some have this
+    int goldCost = 0;
+
+    sf::Texture guiTexture;
 };
 
 struct Structure {
@@ -41,9 +51,19 @@ struct Structure {
     int variant = 0;
 };
 
-void registerStructures();
-StructureDef& registerStructure(StructureType type, const sf::Vector2f& textureSize,
-                                int textureIndex, const sf::Vector2i& baseSize,
-                                VairantType variance, StructurePlacement placement);
+class StructureRegistry {
+  public:
+    static StructureRegistry& instance();
 
-const StructureDef& getStructure(StructureType type);
+    const StructureDef& getStructure(StructureType type);
+
+  private:
+    StructureRegistry();
+
+    StructureDef& registerStructure(StructureType type, const std::string& name,
+                                    const sf::Vector2f& textureSize, int textureIndex,
+                                    const sf::Vector2i& baseSize, VairantType variance,
+                                    StructurePlacement placement);
+
+    std::array<StructureDef, (size_t)StructureType::NUM_TYPES> m_structures;
+};

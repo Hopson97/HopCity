@@ -36,6 +36,11 @@ namespace {
 
 } // namespace
 
+//  = = = = = = = = = = = = = = = = = = = = = = = = = = =
+//
+//                  TILE CHUNK MANAGER
+//
+//  = = = = = = = = = = = = = = = = = = = = = = = = = = =
 void TileChunkManager::initWorld()
 {
     m_tileTextures.loadFromFile("data/Textures/TileMap2.png");
@@ -110,53 +115,47 @@ void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
 
 Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
 {
+    static Tile noTile;
+
     sf::Vector2i chunkPos = toChunkPosition(tilePosition);
     sf::Vector2i localPos = toLocalTilePosition(tilePosition);
 
     auto chunkItr = m_chunks.find(chunkPos);
-    if (chunkItr != m_chunks.end()) {
-        return chunkItr->second.getTile(localPos);
-    }
-    else {
-        static Tile t;
-        return &t;
-    }
+    return chunkItr != m_chunks.end() ? chunkItr->second.getTile(localPos) : &noTile;
 }
 
 bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
                                          StructureType type)
 {
-    const StructureDef* def = &getStructure(type);
+    const StructureDef* def = &StructureRegistry::instance().getStructure(type);
 
-    auto correctTile =
+    auto correctTileType =
         def->placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
 
     for (int y = 0; y < def->baseSize.y; y++) {
         for (int x = 0; x < def->baseSize.x; x++) {
             sf::Vector2i realPosition = basePosition - sf::Vector2i{x, y};
-            if (getTile(realPosition)->type != correctTile ||
+
+            // If it is the wrong tile type or there is a structure placed at the position
+            if (getTile(realPosition)->type != correctTileType ||
                 getStructurePlot(realPosition)) {
                 return false;
             }
         }
     }
-
     return true;
 }
 
 bool& TileChunkManager::getStructurePlot(const sf::Vector2i& position)
 {
+    static bool noPlot = true;
+
     sf::Vector2i chunkPos = toChunkPosition(position);
     sf::Vector2i localPos = toLocalTilePosition(position);
 
     auto chunkItr = m_chunks.find(chunkPos);
-    if (chunkItr != m_chunks.end()) {
-        return chunkItr->second.getStructurePlot(localPos);
-    }
-    else {
-        static bool plot = true;
-        return plot;
-    }
+    return chunkItr != m_chunks.end() ? chunkItr->second.getStructurePlot(localPos)
+                                      : noPlot;
 }
 
 void TileChunkManager::draw(sf::RenderWindow* window)
@@ -164,20 +163,20 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     sf::RenderStates states = sf::RenderStates::Default;
     states.texture = &m_tileTextures;
 
+    // Draw the chunks
     for (auto& chunk : m_chunks) {
-
         chunk.second.draw(*window, states);
         if (showDetail) {
-
             m_gridMap.setPosition(tileToScreenPosition(
                 {(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
             m_gridMap.draw(*window);
         }
     }
 
+    // Draw the structures
     for (const auto& structure : sorted) {
         const auto& str = m_structures[structure];
-        const StructureDef* def = &getStructure(str.type);
+        const StructureDef* def = &StructureRegistry::instance().getStructure(str.type);
 
         m_structureRect.setSize(
             {TILE_WIDTH * def->textureSize.x, TILE_HEIGHT * def->textureSize.y});
@@ -190,7 +189,10 @@ void TileChunkManager::draw(sf::RenderWindow* window)
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(structure));
-        m_structureRect.move(-def->textureSize.x * TILE_WIDTH / 4, 0);
+
+        if (def->baseSize.x > 1) {
+            m_structureRect.move(-def->textureSize.x * TILE_WIDTH / 4, 0);
+        }
         window->draw(m_structureRect);
     }
 }
@@ -202,7 +204,7 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
             &m_structures.emplace(std::make_pair(position, Structure{type}))
                  .first->second;
         sorted.insert(position);
-        const StructureDef* def = &getStructure(type);
+        const StructureDef* def = &StructureRegistry::instance().getStructure(type);
 
         for (int y = 0; y < def->baseSize.y; y++) {
             for (int x = 0; x < def->baseSize.x; x++) {
@@ -211,6 +213,7 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
             }
         }
 
+        // Change the texture of the tile
         if (def->variantType == VairantType::Random) {
 
             std::random_device rd;
@@ -230,8 +233,9 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
                 }
 
                 if (neighbour != m_structures.end() &&
-                    getStructure(neighbour->second.type).variantType ==
-                        VairantType::Neighbour) {
+                    StructureRegistry::instance()
+                            .getStructure(neighbour->second.type)
+                            .variantType == VairantType::Neighbour) {
                     neighbour->second.variant = 0;
 
                     for (int j = 0; j < 4; j++) {
@@ -247,6 +251,26 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
             }
         }
     }
+}
+
+//  = = = = = = = = = = = = = = = = = = = = = = = = = = =
+//
+//                  TILE CHUNK
+//
+//  = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+TileChunk::TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager)
+    : m_chunkPosition(position)
+    , mp_chunkManager(chunkManager)
+{
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            addIsometricQuad(&m_tileVerts, {x, y});
+            updateTile({x, y});
+        }
+    }
+    setPosition(
+        tileToScreenPosition({(position.x - 2) * CHUNK_SIZE, position.y * CHUNK_SIZE}));
 }
 
 void TileChunk::draw(sf::RenderTarget& window, sf::RenderStates states) const
@@ -336,20 +360,6 @@ Tile* TileChunk::getGlobalTile(const sf::Vector2i& position)
 }
 
 //   ;
-
-TileChunk::TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager)
-    : m_chunkPosition(position)
-    , mp_chunkManager(chunkManager)
-{
-    for (int y = 0; y < CHUNK_SIZE; y++) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            addIsometricQuad(&m_tileVerts, {x, y});
-            updateTile({x, y});
-        }
-    }
-    setPosition(
-        tileToScreenPosition({(position.x - 2) * CHUNK_SIZE, position.y * CHUNK_SIZE}));
-}
 
 void TileChunk::generateTerrain(int seed)
 {

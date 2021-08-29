@@ -1,12 +1,12 @@
 #include "ScreenGame.h"
+#include "Common.h"
 #include "ScreenMainMenu.h"
 #include "Tiles.h"
 #include <cmath>
+#include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 #include <iostream>
 #include <unordered_set>
-
-#include "Common.h"
 
 namespace {
 
@@ -92,7 +92,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
-    registerStructures();
     registerTiles();
 
     m_tileManager.initWorld();
@@ -154,8 +153,10 @@ void ScreenGame::onGUI()
         if (ImGui::Button("Regen world")) {
             m_tileManager.regenerateTerrain();
         }
+        ImGui::End();
     }
-    ImGui::End();
+
+    onConstructionGUI(m_currConstruction);
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
@@ -168,8 +169,10 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_editEndPosition = m_selectedTile;
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
-            if (m_tileManager.canPlaceStructure(m_selectedTile, StructureType::Base)) {
-                m_tileManager.placeStructure(StructureType::Base, m_selectedTile);
+            auto structure = m_currConstruction.strType;
+
+            if (m_tileManager.canPlaceStructure(m_selectedTile, structure)) {
+                m_tileManager.placeStructure(structure, m_selectedTile);
             }
 
             m_quadDrag = false;
@@ -203,15 +206,17 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     m_selectionRect.setTexture(&m_selectionQuadTexture);
 
-    if (m_tileManager.canPlaceStructure(m_selectedTile, StructureType::Base)) {
+    if (m_tileManager.canPlaceStructure(m_selectedTile, m_currConstruction.strType)) {
         m_selectionRect.setFillColor(sf::Color::Green);
     }
     else {
         m_selectionRect.setFillColor(sf::Color::Red);
     }
 
-    for (int y = 0; y < 2; y++) {
-        for (int x = 0; x < 2; x++) {
+    const StructureDef& def =
+        StructureRegistry::instance().getStructure(m_currConstruction.strType);
+    for (int y = 0; y < def.baseSize.y; y++) {
+        for (int x = 0; x < def.baseSize.x; x++) {
             m_selectionRect.setPosition(
                 tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
             window->draw(m_selectionRect);
@@ -224,7 +229,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
             forEachLSection(
                 m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                 [&](const sf::Vector2i& tilePosition) {
-                    if (getStructure(StructureType::StoneWall).placement ==
+                    if
+       (StructureRegistry::instance().getStructure(StructureType::StoneWall).placement ==
                         StructurePlacement::Land) {
                         if (m_tileManager.getTile(tilePosition)->type ==
        TileType::Land) { m_selectionRect.setFillColor(sf::Color::Green);

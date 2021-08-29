@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME}
     src/Animation.cpp
     src/Screen.cpp 
     
+    src/Game/Construction.cpp
     src/Game/TileMap.cpp
     src/Game/ScreenGame.cpp
     src/Game/ScreenMainMenu.cpp

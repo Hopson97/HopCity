@@ -1,40 +1,59 @@
 #include "Structures.h"
 
-#include <array>
-#include <iostream>
-
-std::array<StructureDef, (size_t)StructureType::NUM_TYPES> structures;
-
-void registerStructures()
+StructureDef& StructureDef::giveVarity(int variations)
 {
-    static bool registered = false;
-
-    if (!registered) {
-        registerStructure(StructureType::FirTree, {1, 2}, 0, {1, 1}, VairantType::Random,
-                          StructurePlacement::Land)
-            .giveVarity(7);
-
-        registerStructure(StructureType::MudWall, {1, 3}, 2, {1, 1},
-                          VairantType::Neighbour, StructurePlacement::Land);
-
-        registerStructure(StructureType::StoneWall, {1, 4}, 5, {1, 1},
-                          VairantType::Neighbour, StructurePlacement::Land);
-
-        registerStructure(StructureType::WoodWall, {1, 2}, 9, {1, 1},
-                          VairantType::Neighbour, StructurePlacement::Land);
-
-        registerStructure(StructureType::Base, {2, 4}, 11, {2, 2}, VairantType::None,
-                          StructurePlacement::Land);
-
-        registered = true;
-    }
+    this->variations = variations;
+    return *this;
 }
 
-StructureDef& registerStructure(StructureType type, const sf::Vector2f& textureSize,
-                                int textureIndex, const sf::Vector2i& baseSize,
-                                VairantType variance, StructurePlacement placement)
+StructureDef& StructureDef::loadGuiTexture(const std::string& textureName)
+{
+    static std::string path = "data/Textures/GUI/";
+    guiTexture.loadFromFile(path + textureName);
+    return *this;
+}
+
+StructureRegistry::StructureRegistry()
+{
+    registerStructure(StructureType::FirTree, "Fir Tree", {1, 2}, 0, {1, 1},
+                      VairantType::Random, StructurePlacement::Land)
+        .giveVarity(7);
+
+    registerStructure(StructureType::MudWall, "Mud Wall", {1, 3}, 2, {1, 1},
+                      VairantType::Neighbour, StructurePlacement::Land)
+        .loadGuiTexture("MudWall.png");
+
+    registerStructure(StructureType::StoneWall, "Stone Wall", {1, 4}, 5, {1, 1},
+                      VairantType::Neighbour, StructurePlacement::Land)
+        .loadGuiTexture("StoneWall.png");
+
+    registerStructure(StructureType::WoodWall, "Wood Wall", {1, 2}, 9, {1, 1},
+                      VairantType::Neighbour, StructurePlacement::Land)
+        .loadGuiTexture("WoodWall.png");
+
+    registerStructure(StructureType::Base, "Base Base", {2, 4}, 11, {2, 2},
+                      VairantType::None, StructurePlacement::Land);
+}
+
+StructureRegistry& StructureRegistry::instance()
+{
+    static StructureRegistry reg;
+    return reg;
+}
+
+const StructureDef& StructureRegistry::getStructure(StructureType type)
+{
+    return m_structures[(size_t)type];
+}
+
+StructureDef&
+StructureRegistry::registerStructure(StructureType type, const std::string& name,
+                                     const sf::Vector2f& textureSize, int textureIndex,
+                                     const sf::Vector2i& baseSize, VairantType variance,
+                                     StructurePlacement placement)
 {
     StructureDef def;
+    def.name = name;
 
     def.textureSize = textureSize;
     def.textureIndex = textureIndex;
@@ -44,14 +63,6 @@ StructureDef& registerStructure(StructureType type, const sf::Vector2f& textureS
     def.variantType = variance;
     def.placement = placement;
 
-    structures[(size_t)type] = def;
-    return structures[(size_t)type];
-}
-
-const StructureDef& getStructure(StructureType type) { return structures[(size_t)type]; }
-
-StructureDef& StructureDef::giveVarity(int variations)
-{
-    this->variations = variations;
-    return *this;
+    m_structures[(size_t)type] = def;
+    return m_structures[(size_t)type];
 }
