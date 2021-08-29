@@ -123,6 +123,42 @@ Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
     }
 }
 
+bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
+                                         StructureType type)
+{
+    const StructureDef* def = &getStructure(type);
+
+    auto correctTile =
+        def->placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
+
+    for (int y = 0; y < def->baseSize.y; y++) {
+        for (int x = 0; x < def->baseSize.x; x++) {
+            sf::Vector2i realPosition = basePosition - sf::Vector2i{x, y};
+            if (getTile(realPosition)->type != correctTile ||
+                getStructurePlot(realPosition)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool& TileChunkManager::getStructurePlot(const sf::Vector2i& position)
+{
+    sf::Vector2i chunkPos = toChunkPosition(position);
+    sf::Vector2i localPos = toLocalTilePosition(position);
+
+    auto chunkItr = m_chunks.find(chunkPos);
+    if (chunkItr != m_chunks.end()) {
+        return chunkItr->second.getStructurePlot(localPos);
+    }
+    else {
+        static bool plot = true;
+        return plot;
+    }
+}
+
 void TileChunkManager::draw(sf::RenderWindow* window)
 {
     sf::RenderStates states = sf::RenderStates::Default;
@@ -133,9 +169,9 @@ void TileChunkManager::draw(sf::RenderWindow* window)
         chunk.second.draw(*window, states);
         if (showDetail) {
 
-         m_gridMap.setPosition(tileToScreenPosition(
-             {(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
-         m_gridMap.draw(*window);
+            m_gridMap.setPosition(tileToScreenPosition(
+                {(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
+            m_gridMap.draw(*window);
         }
     }
 
@@ -143,16 +179,18 @@ void TileChunkManager::draw(sf::RenderWindow* window)
         const auto& str = m_structures[structure];
         const StructureDef* def = &getStructure(str.type);
 
-        m_structureRect.setSize({TILE_WIDTH * def->size.x, TILE_HEIGHT * def->size.y});
+        m_structureRect.setSize(
+            {TILE_WIDTH * def->textureSize.x, TILE_HEIGHT * def->textureSize.y});
 
-        m_structureRect.setTextureRect({(int)TILE_WIDTH * str.variant * (int)def->size.x,
-                                        (int)TILE_HEIGHT * def->textureIndex,
-                                        (int)def->size.x * (int)TILE_WIDTH,
-                                        (int)def->size.y * (int)TILE_HEIGHT});
+        m_structureRect.setTextureRect(
+            {(int)TILE_WIDTH * str.variant * (int)def->textureSize.x,
+             (int)TILE_HEIGHT * def->textureIndex,
+             (int)def->textureSize.x * (int)TILE_WIDTH,
+             (int)def->textureSize.y * (int)TILE_HEIGHT});
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(structure));
-        m_structureRect.move(-def->size.x * TILE_WIDTH / 4, 0);
+        m_structureRect.move(-def->textureSize.x * TILE_WIDTH / 4, 0);
         window->draw(m_structureRect);
     }
 }
@@ -164,8 +202,14 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
             &m_structures.emplace(std::make_pair(position, Structure{type}))
                  .first->second;
         sorted.insert(position);
-
         const StructureDef* def = &getStructure(type);
+
+        for (int y = 0; y < def->baseSize.y; y++) {
+            for (int x = 0; x < def->baseSize.x; x++) {
+                sf::Vector2i realPosition = position - sf::Vector2i{x, y};
+                getStructurePlot(realPosition) = true;
+            }
+        }
 
         if (def->variantType == VairantType::Random) {
 
@@ -258,6 +302,19 @@ void TileChunk::updateTile(const sf::Vector2i& position)
     vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
                            TILE_HEIGHT * (idx + 1)};
     vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * idx};
+}
+
+bool& TileChunk::getStructurePlot(const sf::Vector2i& position)
+{
+    // Check for out of bounds
+    static bool oobPlot = false;
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 ||
+        position.x >= CHUNK_SIZE) {
+        return oobPlot;
+    }
+
+    // Get the tile
+    return m_structurePlots.at(position.y * CHUNK_SIZE + position.x);
 }
 
 Tile* TileChunk::getTile(const sf::Vector2i& position)

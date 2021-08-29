@@ -35,6 +35,8 @@ class TileChunk : public sf::Drawable, private sf::Transformable {
 
     void updateTile(const sf::Vector2i& position);
 
+    bool& getStructurePlot(const sf::Vector2i& position);
+
     Tile* getTile(const sf::Vector2i& position);
 
   private:
@@ -46,6 +48,8 @@ class TileChunk : public sf::Drawable, private sf::Transformable {
     sf::Vector2i m_chunkPosition;
 
     TileChunkManager* mp_chunkManager = nullptr;
+
+    std::array<bool, CHUNK_SIZE * CHUNK_SIZE> m_structurePlots{false};
 };
 
 class TileChunkManager {
@@ -61,7 +65,11 @@ class TileChunkManager {
 
     bool showDetail;
 
+    bool canPlaceStructure(const sf::Vector2i& basePosition, StructureType type);
+
   private:
+    bool& getStructurePlot(const sf::Vector2i& position);
+
     sf::Texture m_tileTextures;
     std::unordered_map<sf::Vector2i, TileChunk, Vec2hash> m_chunks;
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;

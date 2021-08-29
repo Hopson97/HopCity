@@ -168,18 +168,22 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_editEndPosition = m_selectedTile;
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
+            if (m_tileManager.canPlaceStructure(m_selectedTile, StructureType::Base)) {
+                m_tileManager.placeStructure(StructureType::Base, m_selectedTile);
+            }
+
             m_quadDrag = false;
+
+            /*
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilePosition) {
-                                if (getStructure(StructureType::StoneWall).placement ==
-                                    StructurePlacement::Land) {
-                                    if (m_tileManager.getTile(tilePosition)->type ==
-                                        TileType::Land) {
-                                        m_tileManager.placeStructure(StructureType::Base,
-                                                                     tilePosition);
-                                    }
+                                if (m_tileManager.canPlaceStructure(
+                                        m_selectedTile, StructureType::Base)) {
+                                    m_tileManager.placeStructure(StructureType::Base,
+                                                                 tilePosition);
                                 }
                             });
+                            */
         }
     }
 }
@@ -196,31 +200,49 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_tileManager.draw(window);
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);
-    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
-    window->draw(m_selectionRect);
 
-    if (m_quadDrag) {
-        m_selectionRect.setTexture(&m_selectionQuadTexture);
+    m_selectionRect.setTexture(&m_selectionQuadTexture);
 
-        forEachLSection(
-            m_editStartPosition, m_editPivotPoint, m_editEndPosition,
-            [&](const sf::Vector2i& tilePosition) {
-                if (getStructure(StructureType::StoneWall).placement ==
-                    StructurePlacement::Land) {
-                    if (m_tileManager.getTile(tilePosition)->type == TileType::Land) {
-                        m_selectionRect.setFillColor(sf::Color::Green);
-                    }
-                    else {
-                        m_selectionRect.setFillColor(sf::Color::Red);
-                    }
-                }
-                m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
-                window->draw(m_selectionRect);
-            });
-
-        // forEachSelectedTile([&](const sf::Vector2i& tile) {
-        //    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize, tile));
-        //    window->draw(m_selectionRect);
-        //});
+    if (m_tileManager.canPlaceStructure(m_selectedTile, StructureType::Base)) {
+        m_selectionRect.setFillColor(sf::Color::Green);
     }
+    else {
+        m_selectionRect.setFillColor(sf::Color::Red);
+    }
+
+    for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < 2; x++) {
+            m_selectionRect.setPosition(
+                tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
+            window->draw(m_selectionRect);
+        }
+    }
+    /*
+        if (m_quadDrag) {
+            m_selectionRect.setTexture(&m_selectionQuadTexture);
+
+            forEachLSection(
+                m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                [&](const sf::Vector2i& tilePosition) {
+                    if (getStructure(StructureType::StoneWall).placement ==
+                        StructurePlacement::Land) {
+                        if (m_tileManager.getTile(tilePosition)->type ==
+       TileType::Land) { m_selectionRect.setFillColor(sf::Color::Green);
+                        }
+                        else {
+                            m_selectionRect.setFillColor(sf::Color::Red);
+                        }
+                    }
+                    m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
+
+                    window->draw(m_selectionRect);
+                });
+
+            // forEachSelectedTile([&](const sf::Vector2i& tile) {
+            //    m_selectionRect.setPosition(tileToScreenPosition(m_worldSize,
+       tile));
+            //    window->draw(m_selectionRect);
+            //});
+        }
+        */
 }

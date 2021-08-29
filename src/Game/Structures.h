@@ -23,7 +23,8 @@ enum class StructurePlacement {
 };
 
 struct StructureDef {
-    sf::Vector2f size;
+    sf::Vector2f textureSize;
+    sf::Vector2i baseSize;
     int textureIndex = 0;
 
     VairantType variantType = VairantType::None;
@@ -41,8 +42,8 @@ struct Structure {
 };
 
 void registerStructures();
-StructureDef& registerStructure(StructureType type, const sf::Vector2f& size,
-                                int textureIndex, VairantType variance,
-                                StructurePlacement placement);
+StructureDef& registerStructure(StructureType type, const sf::Vector2f& textureSize,
+                                int textureIndex, const sf::Vector2i& baseSize,
+                                VairantType variance, StructurePlacement placement);
 
 const StructureDef& getStructure(StructureType type);
