@@ -41,10 +41,8 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
         auto mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(mousePosition);
 
-        sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH,
-                             (int)worldPos.y / (int)TILE_HEIGHT};
-        sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH,
-                               (int)worldPos.y % (int)TILE_HEIGHT};
+        sf::Vector2i cell = {(int)worldPos.x / (int)TILE_WIDTH, (int)worldPos.y / (int)TILE_HEIGHT};
+        sf::Vector2i offset = {(int)worldPos.x % (int)TILE_WIDTH, (int)worldPos.y % (int)TILE_HEIGHT};
 
         m_selectedTile = {
             (cell.y - CHUNK_SIZE) + (cell.x - CHUNK_SIZE),
@@ -89,26 +87,59 @@ void ScreenGame::onGUI()
     ImGui::SetNextWindowPos({1600 - panelSize, 0});
     ImGui::SetNextWindowSize({panelSize, 900});
     if (ImGui::Begin("Panel", nullptr,
-                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
-        ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
-                    io.Framerate);
-        if (ImGui::Button("Regen world")) {
-            /// m_tileManager.regenerateTerrain();
-        }
+                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                         ImGuiWindowFlags_NoTitleBar)) {
+
+        ImGui::Separator();
+
+        ResourcePanelGUI::instance().onResourceGUI(m_resources);
+        ImGui::Separator();
 
         onConstructionGUI(m_currConstruction);
+        ImGui::Separator();
+
+        ImGui::Text("Tile: %d %d", m_selectedTile.x, m_selectedTile.y);
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
         ImGui::End();
+    }
+
+    //
+    //  Render the construction GUI - shows the current construction and the cost of it
+    //
+    if (m_currConstruction.action == CurrentConstruction::Action::Constructing) {
+        const auto& structDef = getCurrentConstructionDef();
+        ImGui::SetNextWindowBgAlpha(0.25);
+        ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
+        ImGui::SetNextWindowSize({300, 120});
+        if (ImGui::Begin("Build Cost", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+            auto cost = structDef.cost.sumCost(m_constructionCount);
+            ResourcePanelGUI::instance().onResourceGUI(cost, 3);
+            ImGui::End();
+        }
+    }
+    else if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
+        if (m_tileManager.isStructureAt(m_selectedTile)) {
+            const auto& structDef = getCurrentConstructionDef();
+            ImGui::SetNextWindowBgAlpha(0.25);
+            ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
+            ImGui::SetNextWindowSize({300, 120});
+            if (ImGui::Begin("Selling Price", nullptr,
+                             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+                auto type = m_structureMap.getStructure(m_selectedTile).type;
+
+                auto cost = StructureRegistry::instance().getStructure(type).cost.getSellingPrice();
+                ResourcePanelGUI::instance().onResourceGUI(cost, 3);
+                ImGui::End();
+            }
+        }
     }
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
 {
-    auto tryPlaceStructure = [&](const sf::Vector2i& tilePosition,
-                                 StructureType structure) {
+    auto tryPlaceStructure = [&](const sf::Vector2i& tilePosition, StructureType structure) {
         if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
             m_structureMap.placeStructure(structure, tilePosition, m_tileManager);
         }
@@ -122,40 +153,45 @@ void ScreenGame::onEvent(const sf::Event& e)
             m_editEndPosition = m_selectedTile;
         }
         else if (e.type == sf::Event::MouseButtonReleased) {
+            auto structure = m_currConstruction.strType;
+
+            const StructureDef& structDef = getCurrentConstructionDef();
             if (m_currConstruction.action == CurrentConstruction::Action::Constructing) {
-                auto structure = m_currConstruction.strType;
 
-                const StructureDef& def = StructureRegistry::instance().getStructure(
-                    m_currConstruction.strType);
+                auto cost = structDef.cost.sumCost(m_constructionCount);
+                if (m_resources.canAfford(cost, 1)) {
+                    if (structDef.constructionType == ConstructionType::DynamicPath) {
+                        forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                                        [&](const sf::Vector2i& tilePosition) {
+                                            tryPlaceStructure(tilePosition, structure);
+                                        });
+                    }
+                    else if (structDef.constructionType == ConstructionType::DynamicQuad) {
 
-                if (def.constructionType == ConstructionType::DynamicPath) {
-                    forEachLSection(m_editStartPosition, m_editPivotPoint,
-                                    m_editEndPosition,
-                                    [&](const sf::Vector2i& tilePosition) {
-                                        tryPlaceStructure(tilePosition, structure);
-                                    });
-                }
-                else if (def.constructionType == ConstructionType::DynamicQuad) {
-                    forEachQuadSection(m_editStartPosition, m_editEndPosition,
-                                       [&](const sf::Vector2i& tilePosition) {
-                                           tryPlaceStructure(tilePosition, structure);
-                                       });
-                }
-                else if (def.constructionType == ConstructionType::Quad) {
-                    for (int y = 0; y < def.baseSize.y; y++) {
-                        for (int x = 0; x < def.baseSize.x; x++) {
-                            if (m_tileManager.canPlaceStructure(m_selectedTile,
-                                                                structure)) {
-                                m_structureMap.placeStructure(structure, m_selectedTile,
-                                                              m_tileManager);
+                        forEachQuadSection(m_editStartPosition, m_editEndPosition,
+                                           [&](const sf::Vector2i& tilePosition) {
+                                               tryPlaceStructure(tilePosition, structure);
+                                           });
+                    }
+                    else if (structDef.constructionType == ConstructionType::Quad) {
+                        for (int y = 0; y < structDef.baseSize.y; y++) {
+                            for (int x = 0; x < structDef.baseSize.x; x++) {
+                                if (m_tileManager.canPlaceStructure(m_selectedTile, structure)) {
+                                    m_structureMap.placeStructure(structure, m_selectedTile, m_tileManager);
+                                }
                             }
                         }
                     }
+
+                    m_resources -= cost;
                 }
             }
-            else if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
+
+            // Mouse release event for when the player sells an item
+            if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
                 if (m_tileManager.isStructureAt(m_selectedTile)) {
-                    m_structureMap.removeStructure(m_selectedTile, m_tileManager);
+                    auto type = m_structureMap.removeStructure(m_selectedTile, m_tileManager);
+                    m_resources += StructureRegistry::instance().getStructure(type).cost.getSellingPrice();
                 }
             }
             m_isConstructing = false;
@@ -166,7 +202,26 @@ void ScreenGame::onEvent(const sf::Event& e)
 
 void ScreenGame::onUpdate(const sf::Time& dt) {}
 
-void ScreenGame::onFixedUpdate(const sf::Time& dt) {}
+void ScreenGame::onFixedUpdate(const sf::Time& dt)
+{
+    // Calculate the cost of whatever the user will be drawing
+    if (m_currConstruction.action == CurrentConstruction::Action::Constructing && m_isConstructing) {
+        const auto& structDef = getCurrentConstructionDef();
+
+        if (structDef.constructionType == ConstructionType::DynamicPath) {
+            m_constructionCount = 0;
+            forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
+                            [&](const sf::Vector2i&) { m_constructionCount++; });
+        }
+        else if (structDef.constructionType == ConstructionType::DynamicQuad) {
+            m_constructionCount = 0;
+            forEachQuadSection(m_editStartPosition, m_editEndPosition,
+                               [&](const sf::Vector2i&) { m_constructionCount++; });
+        }
+        else if (structDef.constructionType == ConstructionType::Quad)
+            m_constructionCount = 1;
+    }
+}
 
 void ScreenGame::onRender(sf::RenderWindow* window)
 {
@@ -184,41 +239,44 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     // If the player is constructing, then render where they want to construct
     m_selectionRect.setTexture(&m_selectionQuadTexture);
-    auto renderPlacementRect = [&](const sf::Vector2i& tilePosition,
-                                   StructureType strType) {
+    auto renderPlacementRect = [&](const sf::Vector2i& tilePosition, StructureType strType) {
         if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
             m_selectionRect.setFillColor(sf::Color::Green);
         }
         else {
             m_selectionRect.setFillColor(sf::Color::Red);
         }
+
         m_selectionRect.setPosition(tileToScreenPosition(tilePosition));
         window->draw(m_selectionRect);
     };
+    m_constructionCount = 0;
 
-    if (m_currConstruction.action == CurrentConstruction::Action::Constructing &&
-        m_isConstructing) {
+    //
+    //   Draw the squares that will occupy what the user is currently building
+    //
+    if (m_currConstruction.action == CurrentConstruction::Action::Constructing && m_isConstructing) {
         StructureType strType = m_currConstruction.strType;
-        const StructureDef& def = StructureRegistry::instance().getStructure(strType);
+        const auto& structDef = getCurrentConstructionDef();
 
-        if (def.constructionType == ConstructionType::DynamicPath) {
+        if (structDef.constructionType == ConstructionType::DynamicPath) {
 
             forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                             [&](const sf::Vector2i& tilePosition) {
                                 renderPlacementRect(tilePosition, strType);
+                                m_constructionCount++;
                             });
         }
-        else if (def.constructionType == ConstructionType::DynamicQuad) {
-            forEachQuadSection(m_editStartPosition, m_editEndPosition,
-                               [&](const sf::Vector2i& tilePosition) {
-                                   renderPlacementRect(tilePosition, strType);
-                               });
+        else if (structDef.constructionType == ConstructionType::DynamicQuad) {
+
+            forEachQuadSection(m_editStartPosition, m_editEndPosition, [&](const sf::Vector2i& tilePosition) {
+                renderPlacementRect(tilePosition, strType);
+            });
         }
-        else if (def.constructionType == ConstructionType::Quad)
-            for (int y = 0; y < def.baseSize.y; y++) {
-                for (int x = 0; x < def.baseSize.x; x++) {
-                    m_selectionRect.setPosition(
-                        tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
+        else if (structDef.constructionType == ConstructionType::Quad)
+            for (int y = 0; y < structDef.baseSize.y; y++) {
+                for (int x = 0; x < structDef.baseSize.x; x++) {
+                    m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile - sf::Vector2i{x, y}));
                     window->draw(m_selectionRect);
                 }
             }
@@ -227,4 +285,10 @@ void ScreenGame::onRender(sf::RenderWindow* window)
         if (m_tileManager.isStructureAt(m_selectedTile)) {
         }
     }
+}
+
+const StructureDef& ScreenGame::getCurrentConstructionDef() const
+{
+    StructureType strType = m_currConstruction.strType;
+    return StructureRegistry::instance().getStructure(strType);
 }

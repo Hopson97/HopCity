@@ -4,11 +4,11 @@
 #include "../Screen.h"
 #include "Camera.h"
 #include "Construction.h"
+#include "Resources.h"
 #include "StructureMap.h"
 #include "TileMap.h"
 #include "WorldGeneration.h"
 #include <functional>
-
 // Main Game Class
 
 class ScreenGame final : public Screen {
@@ -23,6 +23,8 @@ class ScreenGame final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
+    const StructureDef& getCurrentConstructionDef() const;
+
     sf::RectangleShape m_selectionRect;
     sf::Texture m_selectionTexture;
     sf::Texture m_selectionQuadTexture;
@@ -47,5 +49,9 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_editEndPosition;
     bool m_isConstructing = false;
 
+    Resources m_resources;
+
     int m_seed = 52323;
+
+    int m_constructionCount = 0;
 };

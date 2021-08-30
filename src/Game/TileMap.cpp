@@ -9,8 +9,7 @@
 #include <SFML/Window/Mouse.hpp>
 
 namespace {
-    void addIsometricQuad(std::vector<sf::Vertex>* quads,
-                          const sf::Vector2i& tilePosition)
+    void addIsometricQuad(std::vector<sf::Vertex>* quads, const sf::Vector2i& tilePosition)
     {
         auto pos = tileToScreenPosition(tilePosition);
 
@@ -20,8 +19,7 @@ namespace {
         quads->emplace_back(sf::Vector2f{pos.x + TILE_WIDTH, pos.y});
     }
 
-    void addGridLine(std::vector<sf::Vertex>* gridMap, sf::Vector2f startPosition,
-                     sf::Vector2f endPosition)
+    void addGridLine(std::vector<sf::Vertex>* gridMap, sf::Vector2f startPosition, sf::Vector2f endPosition)
     {
         sf::Color gridColour = {0, 0, 0, 100};
 
@@ -40,10 +38,7 @@ namespace {
 //                  TILE CHUNK MANAGER
 //
 //  = = = = = = = = = = = = = = = = = = = = = = = = = = =
-void TileMap::initWorld()
-{
-    m_tileTextures.loadFromFile("data/Textures/TileMap2.png");
-}
+void TileMap::initWorld() { m_tileTextures.loadFromFile("data/Textures/TileMap2.png"); }
 
 TileChunk& TileMap::addChunk(const sf::Vector2i& chunkPos)
 {
@@ -87,8 +82,7 @@ void TileMap::setTile(const sf::Vector2i& tilePosition, TileType type)
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             sf::Vector2i chunkPos = toChunkPosition(tilePosition + sf::Vector2i{i, j});
-            sf::Vector2i localPos =
-                toLocalTilePosition(tilePosition + sf::Vector2i{i, j});
+            sf::Vector2i localPos = toLocalTilePosition(tilePosition + sf::Vector2i{i, j});
 
             auto chunkItr = m_chunks.find(chunkPos);
             if (chunkItr == m_chunks.end()) {
@@ -111,21 +105,18 @@ Tile* TileMap::getTile(const sf::Vector2i& tilePosition)
     return chunkItr != m_chunks.end() ? chunkItr->second.getTile(localPos) : &noTile;
 }
 
-bool TileMap::canPlaceStructure(const sf::Vector2i& basePosition,
-                                         StructureType type)
+bool TileMap::canPlaceStructure(const sf::Vector2i& basePosition, StructureType type)
 {
     const StructureDef& def = StructureRegistry::instance().getStructure(type);
 
-    auto correctTileType =
-        def.placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
+    auto correctTileType = def.placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
 
     for (int y = 0; y < def.baseSize.y; y++) {
         for (int x = 0; x < def.baseSize.x; x++) {
             sf::Vector2i realPosition = basePosition - sf::Vector2i{x, y};
 
             // If it is the wrong tile type or there is a structure placed at the position
-            if (getTile(realPosition)->type != correctTileType ||
-                getStructurePlot(realPosition)) {
+            if (getTile(realPosition)->type != correctTileType || getStructurePlot(realPosition)) {
                 return false;
             }
         }
@@ -141,8 +132,7 @@ bool& TileMap::getStructurePlot(const sf::Vector2i& position)
     sf::Vector2i localPos = toLocalTilePosition(position);
 
     auto chunkItr = m_chunks.find(chunkPos);
-    return chunkItr != m_chunks.end() ? chunkItr->second.getStructurePlot(localPos)
-                                      : noPlot;
+    return chunkItr != m_chunks.end() ? chunkItr->second.getStructurePlot(localPos) : noPlot;
 }
 
 void TileMap::draw(sf::RenderWindow* window)
@@ -154,8 +144,8 @@ void TileMap::draw(sf::RenderWindow* window)
     for (auto& chunk : m_chunks) {
         chunk.second.draw(*window, states);
         if (showDetail) {
-            m_gridMap.setPosition(tileToScreenPosition(
-                {(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
+            m_gridMap.setPosition(
+                tileToScreenPosition({(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
             m_gridMap.draw(*window);
         }
     }
@@ -177,8 +167,7 @@ TileChunk::TileChunk(const sf::Vector2i& position, TileMap* chunkManager)
             updateTile({x, y});
         }
     }
-    setPosition(
-        tileToScreenPosition({(position.x - 2) * CHUNK_SIZE, position.y * CHUNK_SIZE}));
+    setPosition(tileToScreenPosition({(position.x - 2) * CHUNK_SIZE, position.y * CHUNK_SIZE}));
 }
 
 void TileChunk::draw(sf::RenderTarget& window, sf::RenderStates states) const
@@ -208,13 +197,11 @@ void TileChunk::updateTile(const sf::Vector2i& position)
                 tile->variant += (int)std::pow(2, i);
             }
 
-            const TileDef& neighbourDef =
-                TileRegistry::instance().getTileDef(neighbour->type);
+            const TileDef& neighbourDef = TileRegistry::instance().getTileDef(neighbour->type);
             if (neighbour && neighbourDef.variantType == VairantType::Neighbour) {
                 neighbour->variant = 0;
                 for (int j = 0; j < 4; j++) {
-                    Tile* subNeighbour =
-                        getGlobalTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
+                    Tile* subNeighbour = getGlobalTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
                     if (subNeighbour && subNeighbour->type == neighbour->type) {
                         neighbour->variant += (int)std::pow(2, j);
                     }
@@ -232,8 +219,7 @@ void TileChunk::updateTile(const sf::Vector2i& position)
     float idx = static_cast<float>(def.textureIndex);
     vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * idx};
     vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * (idx + 1)};
-    vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,
-                           TILE_HEIGHT * (idx + 1)};
+    vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * (idx + 1)};
     vertex[3].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH, TILE_HEIGHT * idx};
 }
 
@@ -241,8 +227,7 @@ bool& TileChunk::getStructurePlot(const sf::Vector2i& position)
 {
     // Check for out of bounds
     static bool oobPlot = false;
-    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 ||
-        position.x >= CHUNK_SIZE) {
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE) {
         return oobPlot;
     }
 
@@ -256,8 +241,7 @@ Tile* TileChunk::getTile(const sf::Vector2i& position)
 {
     // Check for out of bounds
     static Tile e;
-    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 ||
-        position.x >= CHUNK_SIZE) {
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE) {
         return &e;
     }
 
@@ -281,18 +265,13 @@ void TileChunk::updateAllTiles()
     }
 }
 
-void TileChunk::setTile(const sf::Vector2i& position, TileType type)
-{
-    getTile(position)->type = type;
-}
+void TileChunk::setTile(const sf::Vector2i& position, TileType type) { getTile(position)->type = type; }
 
 GridMap::GridMap()
 {
     for (int i = 0; i < CHUNK_SIZE + 1; i++) {
-        addGridLine(&m_grid, tileToScreenPosition({0, i}),
-                    tileToScreenPosition({CHUNK_SIZE, i}));
-        addGridLine(&m_grid, tileToScreenPosition({i, 0}),
-                    tileToScreenPosition({i, CHUNK_SIZE}));
+        addGridLine(&m_grid, tileToScreenPosition({0, i}), tileToScreenPosition({CHUNK_SIZE, i}));
+        addGridLine(&m_grid, tileToScreenPosition({i, 0}), tileToScreenPosition({i, CHUNK_SIZE}));
     }
 }
 

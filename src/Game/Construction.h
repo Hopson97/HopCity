@@ -27,8 +27,7 @@ inline bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& end
  * @param end The tile position to end end
  * @param f Callback for each section along the L shape
  */
-void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid,
-                     const sf::Vector2i& end,
+void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid, const sf::Vector2i& end,
                      std::function<void(const sf::Vector2i& tile)> f);
 
 void forEachQuadSection(const sf::Vector2i& start, const sf::Vector2i& end,

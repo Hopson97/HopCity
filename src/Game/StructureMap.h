@@ -21,13 +21,11 @@ class StructureMap {
     void draw(sf::RenderWindow* target);
 
     bool isStructureAt(const sf::Vector2i& tilePosition);
-    StructureType removeStructure(const sf::Vector2i& tilePosition,
-                                  TileMap& manager);
+    StructureType removeStructure(const sf::Vector2i& tilePosition, TileMap& manager);
 
     void setCurrentlySelectedTile(const sf::Vector2i& position);
     const Structure& getStructure(const sf::Vector2i& position);
-    void placeStructure(StructureType type, const sf::Vector2i& position,
-                        TileMap& manager);
+    void placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager);
 
   private:
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;

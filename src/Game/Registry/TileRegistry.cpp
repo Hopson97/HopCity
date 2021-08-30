@@ -23,7 +23,4 @@ TileDef& TileRegistry::registerTile(TileType type, int textureIndex, VairantType
     return m_tiles[(std::size_t)type];
 }
 
-const TileDef& TileRegistry::getTileDef(TileType type)
-{
-    return m_tiles[(std::size_t)type];
-}
+const TileDef& TileRegistry::getTileDef(TileType type) { return m_tiles[(std::size_t)type]; }

@@ -25,10 +25,9 @@ void Profiler::reset()
             m_lastSlots.emplace_back(std::make_pair("ForgotToStop: " + x.name, 0.f));
             continue;
         }
-        m_lastSlots.emplace_back(
-            std::make_pair(x.name, Mode == ProfilerMode::Milliseconds
-                                       ? x.getTime().asSeconds() * 1000
-                                       : x.getTime().asSeconds() * 1000 * 1000));
+        m_lastSlots.emplace_back(std::make_pair(x.name, Mode == ProfilerMode::Milliseconds
+                                                            ? x.getTime().asSeconds() * 1000
+                                                            : x.getTime().asSeconds() * 1000 * 1000));
     }
     m_activeslots.clear();
 }
@@ -47,12 +46,10 @@ void Profiler::onGUI()
             temptimes[x] = m_last50times[x];
         }
         ImGui::PlotHistogram("##Times", temptimes.data(), m_last50times.size());
-        ImGui::Text("Avg: %.2f ms,(%.1f fps)", frametimeAverage,
-                    1000.f / frametimeAverage);
+        ImGui::Text("Avg: %.2f ms,(%.1f fps)", frametimeAverage, 1000.f / frametimeAverage);
         ImGui::Separator();
         ImGui::TextColored({0, 0.6f, 0.188f, 1}, "Times in %s",
-                           Mode == ProfilerMode::Milliseconds ? "Milliseconds"
-                                                              : "Microseconds");
+                           Mode == ProfilerMode::Milliseconds ? "Milliseconds" : "Microseconds");
         for (auto& ts : m_lastSlots) {
             ImGui::Text("%s: %0.2f", ts.first.c_str(), ts.second);
         }
@@ -61,7 +58,4 @@ void Profiler::onGUI()
     m_lastSlots.clear();
 }
 
-TimeSlot& Profiler::newTimeslot(const char* name)
-{
-    return m_activeslots.emplace_back(name);
-}
+TimeSlot& Profiler::newTimeslot(const char* name) { return m_activeslots.emplace_back(name); }

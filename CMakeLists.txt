@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
     src/Game/ScreenMainMenu.cpp
     src/Game/Camera.cpp
     src/Game/StructureMap.cpp
+    src/Game/Resources.cpp
     src/Game/WorldGeneration.cpp
 
     src/Game/Registry/TileRegistry.cpp

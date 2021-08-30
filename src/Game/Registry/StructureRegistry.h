@@ -2,6 +2,7 @@
 #pragma once
 
 #include "../Common.h"
+#include "../Resources.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <array>
@@ -50,7 +51,7 @@ struct StructureDef {
     StructurePlacement placement = StructurePlacement::Land;
 
     // Only some have this
-    int goldCost = 0;
+    Resources cost;
 
     int variations = 0; // For Random variation
 
@@ -61,6 +62,7 @@ struct StructureDef {
     StructureDef& giveVarity(int variations);
     StructureDef& loadGuiTexture(const std::string& textureName);
     StructureDef& setConstructionType(ConstructionType type);
+    StructureDef& setCost(int coins, int food, int wood, int stone, int metal);
 };
 
 /**

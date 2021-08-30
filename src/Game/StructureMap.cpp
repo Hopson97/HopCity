@@ -23,14 +23,11 @@ void StructureMap::draw(sf::RenderWindow* target)
         const Structure& str = m_structures.at(position);
         const StructureDef& def = StructureRegistry::instance().getStructure(str.type);
 
-        m_structureRect.setSize(
-            {TILE_WIDTH * def.textureSize.x, TILE_HEIGHT * def.textureSize.y});
+        m_structureRect.setSize({TILE_WIDTH * def.textureSize.x, TILE_HEIGHT * def.textureSize.y});
 
         m_structureRect.setTextureRect(
-            {(int)TILE_WIDTH * str.variant * (int)def.textureSize.x,
-             (int)TILE_HEIGHT * def.textureIndex,
-             (int)def.textureSize.x * (int)TILE_WIDTH,
-             (int)def.textureSize.y * (int)TILE_HEIGHT});
+            {(int)TILE_WIDTH * str.variant * (int)def.textureSize.x, (int)TILE_HEIGHT * def.textureIndex,
+             (int)def.textureSize.x * (int)TILE_WIDTH, (int)def.textureSize.y * (int)TILE_HEIGHT});
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(position));
@@ -49,12 +46,12 @@ void StructureMap::draw(sf::RenderWindow* target)
     }
 }
 
-StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition,
-                                            TileMap& manager)
+StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition, TileMap& manager)
 {
     auto itr = m_structures.find(tilePosition);
 
     if (itr != m_structures.end()) {
+        auto type = itr->second.type;
         m_structures.erase(itr);
 
         for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
@@ -66,9 +63,11 @@ StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition,
         }
 
         manager.getStructurePlot(tilePosition) = false;
+
+        return type;
     }
 
-    return StructureType::NUM_TYPES;
+    return StructureType::None;
 }
 
 void StructureMap::setCurrentlySelectedTile(const sf::Vector2i& position)
@@ -83,13 +82,10 @@ const Structure& StructureMap::getStructure(const sf::Vector2i& position)
     return itr != m_structures.end() ? itr->second : s;
 }
 
-void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position,
-                                  TileMap& manager)
+void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager)
 {
     if (m_structures.find(position) == m_structures.end()) {
-        Structure* structure =
-            &m_structures.emplace(std::make_pair(position, Structure{type}))
-                 .first->second;
+        Structure* structure = &m_structures.emplace(std::make_pair(position, Structure{type})).first->second;
 
         bool inserted = false;
         for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
@@ -127,20 +123,17 @@ void StructureMap::placeStructure(StructureType type, const sf::Vector2i& positi
             // Update the structure based on its neighbours
             for (int i = 0; i < 4; i++) {
                 auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
-                if (neighbour != m_structures.end() &&
-                    neighbour->second.type == structure->type) {
+                if (neighbour != m_structures.end() && neighbour->second.type == structure->type) {
                     structure->variant += (int)std::pow(2, i);
                 }
 
                 if (neighbour != m_structures.end() &&
-                    StructureRegistry::instance()
-                            .getStructure(neighbour->second.type)
-                            .variantType == VairantType::Neighbour) {
+                    StructureRegistry::instance().getStructure(neighbour->second.type).variantType ==
+                        VairantType::Neighbour) {
                     neighbour->second.variant = 0;
 
                     for (int j = 0; j < 4; j++) {
-                        auto subNeighbour = m_structures.find(position + TILE_OFFSETS[i] +
-                                                              TILE_OFFSETS[j]);
+                        auto subNeighbour = m_structures.find(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
 
                         if (subNeighbour != m_structures.end() &&
                             subNeighbour->second.type == neighbour->second.type) {

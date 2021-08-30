@@ -7,28 +7,28 @@
 bool structureButton(StructureType structureType, CurrentConstruction& currCon)
 {
     const StructureDef& def = StructureRegistry::instance().getStructure(structureType);
-    bool res = ImGui::ImageButton(def.guiTexture, {100, 100});
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::Text("%s", def.name.c_str());
-        ImGui::EndTooltip();
-    }
-
-    if (res) {
+    if (ImGui::ImageButton(def.guiTexture, {100, 100})) {
         currCon.strType = structureType;
         currCon.action = CurrentConstruction::Action::Constructing;
     }
-    return res;
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::Text("%s", def.name.c_str());
+        ImGui::Text("Cost");
+        ResourcePanelGUI::instance().onResourceGUI(def.cost, 1);
+        ImGui::EndTooltip();
+    }
 }
 
 void onConstructionGUI(CurrentConstruction& currCon)
 {
-    for (int i = 0; i < 26; i++) {
-        ImGui::Separator();
-    }
+
     if (ImGui::Button("Sell Objects")) {
         currCon.action = CurrentConstruction::Action::Selling;
     }
+    ImGui::Separator();
+
     if (ImGui::BeginTabBar("construction")) {
         if (ImGui::BeginTabItem("Buildings")) {
             ImGui::EndTabItem();
@@ -37,9 +37,7 @@ void onConstructionGUI(CurrentConstruction& currCon)
             structureButton(StructureType::WoodWall, currCon);
             ImGui::SameLine();
             structureButton(StructureType::MudWall, currCon);
-
             structureButton(StructureType::StoneWall, currCon);
-
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Units")) {
@@ -49,8 +47,7 @@ void onConstructionGUI(CurrentConstruction& currCon)
     }
 }
 
-void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid,
-                     const sf::Vector2i& end,
+void forEachLSection(const sf::Vector2i& start, const sf::Vector2i& mid, const sf::Vector2i& end,
                      std::function<void(const sf::Vector2i& tile)> f)
 {
 

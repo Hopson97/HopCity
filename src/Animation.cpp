@@ -20,16 +20,12 @@ void Animation::addFrame(int row, int index, sf::Time delay)
     m_frames.emplace_back(bounds, delay);
 }
 
-const sf::IntRect& Animation::getCurrentFrame()
-{
-    return m_frames[m_framePointer].bounds;
-}
+const sf::IntRect& Animation::getCurrentFrame() { return m_frames[m_framePointer].bounds; }
 
 const sf::IntRect& Animation::progressFrame()
 {
     if (m_isRandom) {
-        if (rand() % 1024 < (int)(m_randomFactor * 1024.0f) &&
-            !m_randomAnimationIsRunning) {
+        if (rand() % 1024 < (int)(m_randomFactor * 1024.0f) && !m_randomAnimationIsRunning) {
             m_randomAnimationIsRunning = true; // switch on one round
         }
         if (!m_randomAnimationIsRunning) {

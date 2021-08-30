@@ -13,22 +13,26 @@
 
 class TileMap;
 
+/**
+ * @brief Class which is able to draw a grid of squares at a specified location
+ */
 class GridMap : public sf::Drawable, public sf::Transformable {
   public:
     GridMap();
-    void draw(sf::RenderTarget& window,
-              sf::RenderStates states = sf::RenderStates::Default) const override;
+    void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default) const override;
 
   private:
     std::vector<sf::Vertex> m_grid;
 };
 
+/**
+ * @brief A section of the map
+ */
 class TileChunk : public sf::Drawable, private sf::Transformable {
   public:
     TileChunk(const sf::Vector2i& position, TileMap* chunkManager);
 
-    void draw(sf::RenderTarget& window,
-              sf::RenderStates states = sf::RenderStates::Default) const override;
+    void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default) const override;
 
     void setTile(const sf::Vector2i& position, TileType type);
     void updateAllTiles();
@@ -65,10 +69,7 @@ class TileMap {
 
     bool canPlaceStructure(const sf::Vector2i& basePosition, StructureType type);
 
-    bool isStructureAt(const sf::Vector2i& tilePosition)
-    {
-        return getStructurePlot(tilePosition);
-    }
+    bool isStructureAt(const sf::Vector2i& tilePosition) { return getStructurePlot(tilePosition); }
     bool& getStructurePlot(const sf::Vector2i& position);
 
   private:
