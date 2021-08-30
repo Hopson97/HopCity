@@ -2,10 +2,8 @@
 
 #include "../Animation.h"
 #include "../Screen.h"
-class ScreenMainMenu final : public Screen
-{
-    enum class Menu
-    {
+class ScreenMainMenu final : public Screen {
+    enum class Menu {
         MainMenu,
         SettingsMenu,
     };

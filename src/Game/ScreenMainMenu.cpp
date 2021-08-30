@@ -6,8 +6,7 @@ ScreenMainMenu::ScreenMainMenu(ScreenManager* stack, const sf::RenderWindow& win
     : Screen(stack)
     , m_buttonAnimation(32, 64, false)
 {
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         m_buttonAnimation.addFrame(0, i, sf::milliseconds(100));
     }
 
@@ -29,16 +28,13 @@ void ScreenMainMenu::onGUI() {}
 
 void ScreenMainMenu::onEvent(const sf::Event& e)
 {
-    if (e.type == sf::Event::MouseButtonReleased && e.mouseButton.button == sf::Mouse::Left)
-    {
+    if (e.type == sf::Event::MouseButtonReleased && e.mouseButton.button == sf::Mouse::Left) {
         float x = (float)e.mouseButton.x;
         float y = (float)e.mouseButton.y;
-        if (m_newGameButton.getGlobalBounds().contains(x, y))
-        {
+        if (m_newGameButton.getGlobalBounds().contains(x, y)) {
             m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
         }
-        else if (m_loadGameButton.getGlobalBounds().contains(x, y))
-        {
+        else if (m_loadGameButton.getGlobalBounds().contains(x, y)) {
             // m_pScreens->pushScreen(std::make_unique<ScreenGame>(m_pScreens));
         }
     }
@@ -49,12 +45,10 @@ void ScreenMainMenu::onInput([[maybe_unused]] const Keyboard& keyboard, const sf
 
     auto mp = sf::Mouse::getPosition(window);
 
-    if (m_newGameButton.getGlobalBounds().contains((float)mp.x, (float)mp.y))
-    {
+    if (m_newGameButton.getGlobalBounds().contains((float)mp.x, (float)mp.y)) {
         m_newGameButton.setTextureRect(m_buttonAnimation.progressFrame());
     }
-    else
-    {
+    else {
         m_buttonAnimation.reset();
         m_newGameButton.setTextureRect(m_buttonAnimation.progressFrame());
     }
@@ -62,8 +56,7 @@ void ScreenMainMenu::onInput([[maybe_unused]] const Keyboard& keyboard, const sf
 
 void ScreenMainMenu::onRender(sf::RenderWindow* window)
 {
-    for (int i = 0; i < 1600 / 400; i++)
-    {
+    for (int i = 0; i < 1600 / 400; i++) {
         m_wall.setPosition(i * 400, 0);
 
         m_wall.setFillColor(i % 2 == 0 ? sf::Color{100, 100, 100} : sf::Color::White);

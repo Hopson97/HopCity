@@ -16,8 +16,7 @@ class TileMap;
 /**
  * @brief Class which is able to draw a grid of squares at a specified location
  */
-class GridMap : public sf::Drawable, public sf::Transformable
-{
+class GridMap : public sf::Drawable, public sf::Transformable {
   public:
     GridMap();
     void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default) const override;
@@ -29,8 +28,7 @@ class GridMap : public sf::Drawable, public sf::Transformable
 /**
  * @brief A section of the map
  */
-class TileChunk : public sf::Drawable, private sf::Transformable
-{
+class TileChunk : public sf::Drawable, private sf::Transformable {
   public:
     TileChunk(const sf::Vector2i& position, TileMap* chunkManager);
 
@@ -57,8 +55,7 @@ class TileChunk : public sf::Drawable, private sf::Transformable
     std::array<bool, CHUNK_SIZE * CHUNK_SIZE> m_structurePlots{false};
 };
 
-class TileMap
-{
+class TileMap {
   public:
     void initWorld();
     TileChunk& addChunk(const sf::Vector2i& chunkPos);

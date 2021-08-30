@@ -8,8 +8,7 @@
 #include "Common.h"
 #include <SFML/Window/Mouse.hpp>
 
-namespace
-{
+namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads, const sf::Vector2i& tilePosition)
     {
         auto pos = tileToScreenPosition(tilePosition);
@@ -44,8 +43,7 @@ void TileMap::initWorld() { m_tileTextures.loadFromFile("data/Textures/TileMap2.
 TileChunk& TileMap::addChunk(const sf::Vector2i& chunkPos)
 {
     auto itr = m_chunks.find(chunkPos);
-    if (itr == m_chunks.end())
-    {
+    if (itr == m_chunks.end()) {
         auto chunk = m_chunks.emplace(chunkPos, TileChunk{chunkPos, this});
         return chunk.first->second;
     }
@@ -73,8 +71,7 @@ void TileMap::setTile(const sf::Vector2i& tilePosition, TileType type)
     sf::Vector2i localPos = toLocalTilePosition(tilePosition);
 
     auto chunkItr = m_chunks.find(chunkPos);
-    if (chunkItr == m_chunks.end())
-    {
+    if (chunkItr == m_chunks.end()) {
         addChunk(chunkPos);
         chunkItr = m_chunks.find(chunkPos);
     }
@@ -82,16 +79,13 @@ void TileMap::setTile(const sf::Vector2i& tilePosition, TileType type)
     chunkItr->second.getTile(localPos)->type = type;
     chunkItr->second.updateTile(localPos);
 
-    for (int i = -1; i <= 1; i++)
-    {
-        for (int j = -1; j <= 1; j++)
-        {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
             sf::Vector2i chunkPos = toChunkPosition(tilePosition + sf::Vector2i{i, j});
             sf::Vector2i localPos = toLocalTilePosition(tilePosition + sf::Vector2i{i, j});
 
             auto chunkItr = m_chunks.find(chunkPos);
-            if (chunkItr == m_chunks.end())
-            {
+            if (chunkItr == m_chunks.end()) {
                 addChunk(chunkPos);
                 chunkItr = m_chunks.find(chunkPos);
             }
@@ -117,15 +111,12 @@ bool TileMap::canPlaceStructure(const sf::Vector2i& basePosition, StructureType 
 
     auto correctTileType = def.placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
 
-    for (int y = 0; y < def.baseSize.y; y++)
-    {
-        for (int x = 0; x < def.baseSize.x; x++)
-        {
+    for (int y = 0; y < def.baseSize.y; y++) {
+        for (int x = 0; x < def.baseSize.x; x++) {
             sf::Vector2i realPosition = basePosition - sf::Vector2i{x, y};
 
             // If it is the wrong tile type or there is a structure placed at the position
-            if (getTile(realPosition)->type != correctTileType || getStructurePlot(realPosition))
-            {
+            if (getTile(realPosition)->type != correctTileType || getStructurePlot(realPosition)) {
                 return false;
             }
         }
@@ -150,11 +141,9 @@ void TileMap::draw(sf::RenderWindow* window)
     states.texture = &m_tileTextures;
 
     // Draw the chunks
-    for (auto& chunk : m_chunks)
-    {
+    for (auto& chunk : m_chunks) {
         chunk.second.draw(*window, states);
-        if (showDetail)
-        {
+        if (showDetail) {
             m_gridMap.setPosition(
                 tileToScreenPosition({(chunk.first.x - 2) * CHUNK_SIZE, chunk.first.y * CHUNK_SIZE}));
             m_gridMap.draw(*window);
@@ -172,10 +161,8 @@ TileChunk::TileChunk(const sf::Vector2i& position, TileMap* chunkManager)
     : chunkPosition(position)
     , p_chunkManager(chunkManager)
 {
-    for (int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
             addIsometricQuad(&m_tileVerts, {x, y});
             updateTile({x, y});
         }
@@ -195,34 +182,27 @@ void TileChunk::updateTile(const sf::Vector2i& position)
     Tile* tile = getGlobalTile(position);
     const TileDef& def = TileRegistry::instance().getTileDef(tile->type);
 
-    if (def.variantType == VairantType::Random)
-    {
+    if (def.variantType == VairantType::Random) {
         std::random_device rd;
         std::mt19937 rng{rd()};
         std::uniform_int_distribution<int> varietyDist(0, def.variations - 1);
         tile->variant = varietyDist(rng);
     }
-    else if (def.variantType == VairantType::Neighbour)
-    {
+    else if (def.variantType == VairantType::Neighbour) {
         tile->variant = 0;
 
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             Tile* neighbour = getGlobalTile(position + TILE_OFFSETS[i]);
-            if (neighbour && tile->type == neighbour->type)
-            {
+            if (neighbour && tile->type == neighbour->type) {
                 tile->variant += (int)std::pow(2, i);
             }
 
             const TileDef& neighbourDef = TileRegistry::instance().getTileDef(neighbour->type);
-            if (neighbour && neighbourDef.variantType == VairantType::Neighbour)
-            {
+            if (neighbour && neighbourDef.variantType == VairantType::Neighbour) {
                 neighbour->variant = 0;
-                for (int j = 0; j < 4; j++)
-                {
+                for (int j = 0; j < 4; j++) {
                     Tile* subNeighbour = getGlobalTile(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
-                    if (subNeighbour && subNeighbour->type == neighbour->type)
-                    {
+                    if (subNeighbour && subNeighbour->type == neighbour->type) {
                         neighbour->variant += (int)std::pow(2, j);
                     }
                 }
@@ -232,8 +212,7 @@ void TileChunk::updateTile(const sf::Vector2i& position)
 
     // Update the tile texture coords
     int vertexIndex = (position.y * CHUNK_SIZE + position.x) * 4;
-    if (vertexIndex >= (int)m_tileVerts.size())
-    {
+    if (vertexIndex >= (int)m_tileVerts.size()) {
         return;
     }
     sf::Vertex* vertex = &m_tileVerts[vertexIndex];
@@ -248,8 +227,7 @@ bool& TileChunk::getStructurePlot(const sf::Vector2i& position)
 {
     // Check for out of bounds
     static bool oobPlot = false;
-    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE)
-    {
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE) {
         return oobPlot;
     }
 
@@ -263,8 +241,7 @@ Tile* TileChunk::getTile(const sf::Vector2i& position)
 {
     // Check for out of bounds
     static Tile e;
-    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE)
-    {
+    if (position.y < 0 || position.y >= CHUNK_SIZE || position.x < 0 || position.x >= CHUNK_SIZE) {
         return &e;
     }
 
@@ -281,10 +258,8 @@ Tile* TileChunk::getGlobalTile(const sf::Vector2i& position)
 
 void TileChunk::updateAllTiles()
 {
-    for (int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
             updateTile({x, y});
         }
     }
@@ -294,8 +269,7 @@ void TileChunk::setTile(const sf::Vector2i& position, TileType type) { getTile(p
 
 GridMap::GridMap()
 {
-    for (int i = 0; i < CHUNK_SIZE + 1; i++)
-    {
+    for (int i = 0; i < CHUNK_SIZE + 1; i++) {
         addGridLine(&m_grid, tileToScreenPosition({0, i}), tileToScreenPosition({CHUNK_SIZE, i}));
         addGridLine(&m_grid, tileToScreenPosition({i, 0}), tileToScreenPosition({i, CHUNK_SIZE}));
     }

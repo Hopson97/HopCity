@@ -19,8 +19,7 @@ void StructureMap::draw(sf::RenderWindow* target)
 {
 
     // Draw the structures
-    for (const auto& position : m_sortedStructList)
-    {
+    for (const auto& position : m_sortedStructList) {
         const Structure& str = m_structures.at(position);
         const StructureDef& def = StructureRegistry::instance().getStructure(str.type);
 
@@ -33,17 +32,14 @@ void StructureMap::draw(sf::RenderWindow* target)
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(position));
 
-        if (m_currentlySelectedTile == position)
-        {
+        if (m_currentlySelectedTile == position) {
             m_structureRect.setFillColor(sf::Color::Green);
         }
-        else
-        {
+        else {
             m_structureRect.setFillColor(sf::Color::White);
         }
 
-        if (def.baseSize.x > 1)
-        {
+        if (def.baseSize.x > 1) {
             m_structureRect.move(-def.textureSize.x * TILE_WIDTH / 4, 0);
         }
         target->draw(m_structureRect);
@@ -54,15 +50,12 @@ StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition, Ti
 {
     auto itr = m_structures.find(tilePosition);
 
-    if (itr != m_structures.end())
-    {
+    if (itr != m_structures.end()) {
         auto type = itr->second.type;
         m_structures.erase(itr);
 
-        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();)
-        {
-            if (*itr == tilePosition)
-            {
+        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
+            if (*itr == tilePosition) {
                 m_sortedStructList.erase(itr);
                 break;
             }
@@ -91,72 +84,59 @@ const Structure& StructureMap::getStructure(const sf::Vector2i& position)
 
 void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager)
 {
-    if (m_structures.find(position) == m_structures.end())
-    {
+    if (m_structures.find(position) == m_structures.end()) {
         Structure* structure = &m_structures.emplace(std::make_pair(position, Structure{type})).first->second;
 
         bool inserted = false;
-        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();)
-        {
-            if (itr->x + itr->y >= position.x + position.y)
-            {
+        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
+            if (itr->x + itr->y >= position.x + position.y) {
                 m_sortedStructList.insert(itr, position);
                 inserted = true;
                 break;
             }
             itr++;
         }
-        if (!inserted)
-        {
+        if (!inserted) {
             m_sortedStructList.push_back(position);
         }
 
         const StructureDef& def = StructureRegistry::instance().getStructure(type);
 
-        for (int y = 0; y < def.baseSize.y; y++)
-        {
-            for (int x = 0; x < def.baseSize.x; x++)
-            {
+        for (int y = 0; y < def.baseSize.y; y++) {
+            for (int x = 0; x < def.baseSize.x; x++) {
                 sf::Vector2i realPosition = position - sf::Vector2i{x, y};
                 manager.getStructurePlot(realPosition) = true;
             }
         }
 
         // Change the texture of the tile
-        if (def.variantType == VairantType::Random)
-        {
+        if (def.variantType == VairantType::Random) {
 
             std::random_device rd;
             std::mt19937 rng{rd()};
             std::uniform_int_distribution<int> varietyDist(0, def.variations - 1);
             structure->variant = varietyDist(rng);
         }
-        else if (def.variantType == VairantType::Neighbour)
-        {
+        else if (def.variantType == VairantType::Neighbour) {
             structure->variant = 0;
 
             // Update the structure based on its neighbours
-            for (int i = 0; i < 4; i++)
-            {
+            for (int i = 0; i < 4; i++) {
                 auto neighbour = m_structures.find(position + TILE_OFFSETS[i]);
-                if (neighbour != m_structures.end() && neighbour->second.type == structure->type)
-                {
+                if (neighbour != m_structures.end() && neighbour->second.type == structure->type) {
                     structure->variant += (int)std::pow(2, i);
                 }
 
                 if (neighbour != m_structures.end() &&
                     StructureRegistry::instance().getStructure(neighbour->second.type).variantType ==
-                        VairantType::Neighbour)
-                {
+                        VairantType::Neighbour) {
                     neighbour->second.variant = 0;
 
-                    for (int j = 0; j < 4; j++)
-                    {
+                    for (int j = 0; j < 4; j++) {
                         auto subNeighbour = m_structures.find(position + TILE_OFFSETS[i] + TILE_OFFSETS[j]);
 
                         if (subNeighbour != m_structures.end() &&
-                            subNeighbour->second.type == neighbour->second.type)
-                        {
+                            subNeighbour->second.type == neighbour->second.type) {
                             neighbour->second.variant += (int)std::pow(2, j);
                         }
                     }

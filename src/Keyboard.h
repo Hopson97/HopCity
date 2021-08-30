@@ -4,8 +4,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <array>
 
-class Keyboard
-{
+class Keyboard {
   public:
     Keyboard() { std::fill(m_keys.begin(), m_keys.end(), false); }
 
@@ -13,8 +12,7 @@ class Keyboard
 
     void update(sf::Event e)
     {
-        switch (e.type)
-        {
+        switch (e.type) {
             case sf::Event::KeyPressed:
                 m_keys[e.key.code] = true;
                 break;

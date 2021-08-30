@@ -6,8 +6,7 @@
 #include <random>
 
 #include "Common.h"
-struct TerrainGenOptions
-{
+struct TerrainGenOptions {
     int octaves = 8;
     float amplitude = 230;
     float smoothness = 500;
@@ -30,8 +29,7 @@ float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosi
     // Begin iterating through the octaves
     float value = 0;
     float accumulatedAmps = 0;
-    for (int i = 0; i < options.octaves; i++)
-    {
+    for (int i = 0; i < options.octaves; i++) {
         float frequency = (float)glm::pow(2.0f, i);
         float amplitude = (float)glm::pow(options.roughness, i);
 
@@ -61,10 +59,8 @@ void generateTerrainForChunk(TileChunk* chunk, StructureMap* structMap, int seed
 
     ops.seed = seed;
 
-    for (int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for (int x = 0; x < CHUNK_SIZE; x++)
-        {
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
             // int rd = riverDirection == 1 ? x : y;
 
             std::vector<float> features;
@@ -76,8 +72,7 @@ void generateTerrainForChunk(TileChunk* chunk, StructureMap* structMap, int seed
 
             chunk->setTile({x, y}, f > 0.4 ? TileType::Land : TileType::Water);
 
-            if (f > 0.4 && pointDist(rng) > 4 && n > 0.6)
-            {
+            if (f > 0.4 && pointDist(rng) > 4 && n > 0.6) {
                 structMap->placeStructure(StructureType::FirTree,
                                           toGlobalTilePosition(chunk->chunkPosition, {x, y}),
                                           *chunk->p_chunkManager);

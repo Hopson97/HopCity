@@ -6,8 +6,7 @@
 
 class Keyboard;
 
-class Camera
-{
+class Camera {
   public:
     Camera();
 

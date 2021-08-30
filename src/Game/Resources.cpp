@@ -3,13 +3,11 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
-namespace
-{
+namespace {
     void drawResourceLine(const sf::Texture& texture, int value, const char* tooltip)
     {
         ImGui::Image(texture, {32, 32});
-        if (ImGui::IsItemHovered())
-        {
+        if (ImGui::IsItemHovered()) {
             ImGui::BeginTooltip();
             ImGui::Text("%s", tooltip);
             ImGui::EndTooltip();
@@ -17,8 +15,7 @@ namespace
         ImGui::AlignTextToFramePadding();
         ImGui::SameLine();
         ImGui::Text("%d", value);
-        if (ImGui::IsItemHovered())
-        {
+        if (ImGui::IsItemHovered()) {
             ImGui::BeginTooltip();
             ImGui::Text("%s", tooltip);
             ImGui::EndTooltip();

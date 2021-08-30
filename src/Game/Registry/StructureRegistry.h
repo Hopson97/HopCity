@@ -9,8 +9,7 @@
 #include <cstdint>
 #include <iostream>
 
-enum class ConstructionType
-{
+enum class ConstructionType {
     None = 0,
     DynamicPath = 1,
     DynamicQuad = 2,
@@ -18,8 +17,7 @@ enum class ConstructionType
     Quad = 3,
 };
 
-enum class StructureType
-{
+enum class StructureType {
     FirTree = 0,
     MudWall = 1,
     StoneWall = 2,
@@ -31,8 +29,7 @@ enum class StructureType
     None,
 };
 
-enum class StructurePlacement
-{
+enum class StructurePlacement {
     Land = 0,
     Water = 1,
     WatersEdge = 2,
@@ -42,8 +39,7 @@ enum class StructurePlacement
  * @brief The defition of a structure type and the common data between all instances
  *
  */
-struct StructureDef
-{
+struct StructureDef {
     std::string name;
 
     sf::Vector2f textureSize;
@@ -73,14 +69,12 @@ struct StructureDef
  * @brief A structure that has been placed in the world
  *
  */
-struct Structure
-{
+struct Structure {
     StructureType type = StructureType::None;
     int variant = 0;
 };
 
-class StructureRegistry
-{
+class StructureRegistry {
   public:
     static StructureRegistry& instance();
 
