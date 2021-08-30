@@ -36,6 +36,7 @@ class TileChunk : public sf::Drawable, private sf::Transformable {
     void updateTile(const sf::Vector2i& position);
 
     bool& getStructurePlot(const sf::Vector2i& position);
+    void clearPlots();
 
     Tile* getTile(const sf::Vector2i& position);
 
@@ -63,9 +64,17 @@ class TileChunkManager {
     void placeStructure(StructureType type, const sf::Vector2i& position);
     Tile* getTile(const sf::Vector2i& position);
 
+    bool isStructureAt(const sf::Vector2i& tilePosition);
+    StructureType removeStructure(const sf::Vector2i& tilePosition);
+
     bool showDetail;
 
     bool canPlaceStructure(const sf::Vector2i& basePosition, StructureType type);
+
+    void onDebugGui();
+
+    void setCurrentlySelectedTile(const sf::Vector2i& position);
+    const Structure& getStructure(const sf::Vector2i& position);
 
   private:
     bool& getStructurePlot(const sf::Vector2i& position);
@@ -73,12 +82,14 @@ class TileChunkManager {
     sf::Texture m_tileTextures;
     std::unordered_map<sf::Vector2i, TileChunk, Vec2hash> m_chunks;
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;
-    std::set<sf::Vector2i, Vec2Compare> sorted;
+    std::vector<sf::Vector2i> m_sortedStructList;
 
     sf::RectangleShape m_structureRect;
     sf::Texture m_structureMap;
 
     GridMap m_gridMap;
+
+    sf::Vector2i m_currentlySelectedTile;
 
     int m_seed = 52323;
 };

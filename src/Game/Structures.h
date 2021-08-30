@@ -6,6 +6,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <array>
 #include <cstdint>
+#include <iostream>
 
 enum class ConstructionType {
     None = 0,
@@ -23,7 +24,8 @@ enum class StructureType {
 
     Base,
 
-    NUM_TYPES
+    NUM_TYPES,
+    None,
 };
 
 enum class StructurePlacement {
@@ -32,10 +34,9 @@ enum class StructurePlacement {
     WatersEdge = 2,
 };
 
-
 /**
  * @brief The defition of a structure type and the common data between all instances
- * 
+ *
  */
 struct StructureDef {
     std::string name;
@@ -64,11 +65,17 @@ struct StructureDef {
 
 /**
  * @brief A structure that has been placed in the world
- * 
+ *
  */
 struct Structure {
-    StructureType type;
+    StructureType type = StructureType::None;
     int variant = 0;
+
+    Structure(StructureType type)
+        : type(type)
+    {
+        std::cout << "Creating " << (int)type << std::endl;
+    }
 };
 
 class StructureRegistry {

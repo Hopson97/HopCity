@@ -7,6 +7,7 @@
 
 #include "Common.h"
 #include <SFML/Window/Mouse.hpp>
+#include <imgui_sfml/imgui.h>
 
 namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads,
@@ -53,8 +54,8 @@ void TileChunkManager::initWorld()
     std::uniform_int_distribution<int> seedDist(0, 4096);
     m_seed = seedDist(rng);
 
-    for (int y = 0; y < 2; y++) {
-        for (int x = 0; x < 2; x++) {
+    for (int y = 0; y < 1; y++) {
+        for (int x = 0; x < 1; x++) {
             addChunk({x, y});
         }
     }
@@ -77,8 +78,9 @@ void TileChunkManager::regenerateTerrain()
     m_seed = seedDist(rng);
 
     m_structures.clear();
-    sorted.clear();
+    m_sortedStructList.clear();
     for (auto& chunk : m_chunks) {
+        chunk.second.clearPlots();
         chunk.second.generateTerrain(m_seed);
     }
 }
@@ -124,6 +126,32 @@ Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
     return chunkItr != m_chunks.end() ? chunkItr->second.getTile(localPos) : &noTile;
 }
 
+bool TileChunkManager::isStructureAt(const sf::Vector2i& tilePosition)
+{
+    return getStructurePlot(tilePosition);
+}
+
+StructureType TileChunkManager::removeStructure(const sf::Vector2i& tilePosition)
+{
+    auto itr = m_structures.find(tilePosition);
+
+    if (itr != m_structures.end()) {
+        m_structures.erase(itr);
+
+        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
+            if (*itr == tilePosition) {
+                m_sortedStructList.erase(itr);
+                break;
+            }
+            itr++;
+        }
+
+        getStructurePlot(tilePosition) = false;
+    }
+
+    return StructureType::NUM_TYPES;
+}
+
 bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
                                          StructureType type)
 {
@@ -144,6 +172,35 @@ bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
         }
     }
     return true;
+}
+
+void TileChunkManager::onDebugGui()
+{
+    if (ImGui::Begin("tile map debug")) {
+        ImGui::Text("Number of structures: %d", (int)m_sortedStructList.size());
+        for (auto& s : m_sortedStructList) {
+            ImGui::Text("Loc: %d %d", s.x, s.y);
+        }
+
+        for (auto& s : m_structures) {
+            ImGui::Text(
+                "struct: %d %d %s", s.first.x, s.first.y,
+                StructureRegistry::instance().getStructure(s.second.type).name.c_str());
+        }
+        ImGui::End();
+    }
+}
+
+void TileChunkManager::setCurrentlySelectedTile(const sf::Vector2i& position)
+{
+    m_currentlySelectedTile = position;
+}
+
+const Structure& TileChunkManager::getStructure(const sf::Vector2i& position)
+{
+    static Structure s{StructureType::None};
+    auto itr = m_structures.find(position);
+    return itr != m_structures.end() ? itr->second : s;
 }
 
 bool& TileChunkManager::getStructurePlot(const sf::Vector2i& position)
@@ -174,8 +231,8 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     }
 
     // Draw the structures
-    for (const auto& structure : sorted) {
-        const auto& str = m_structures[structure];
+    for (const auto& position : m_sortedStructList) {
+        const Structure& str = m_structures.at(position);
         const StructureDef* def = &StructureRegistry::instance().getStructure(str.type);
 
         m_structureRect.setSize(
@@ -188,7 +245,15 @@ void TileChunkManager::draw(sf::RenderWindow* window)
              (int)def->textureSize.y * (int)TILE_HEIGHT});
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
-        m_structureRect.setPosition(tileToScreenPosition(structure));
+        m_structureRect.setPosition(tileToScreenPosition(position));
+
+        if (m_currentlySelectedTile == position) {
+            m_structureRect.setFillColor(sf::Color::Green);
+        }
+        else {
+            m_structureRect.setFillColor(sf::Color::White);
+
+        }
 
         if (def->baseSize.x > 1) {
             m_structureRect.move(-def->textureSize.x * TILE_WIDTH / 4, 0);
@@ -203,7 +268,20 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
         Structure* structure =
             &m_structures.emplace(std::make_pair(position, Structure{type}))
                  .first->second;
-        sorted.insert(position);
+
+        bool inserted = false;
+        for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {
+            if (itr->x + itr->y >= position.x + position.y) {
+                m_sortedStructList.insert(itr, position);
+                inserted = true;
+                break;
+            }
+            itr++;
+        }
+        if (!inserted) {
+            m_sortedStructList.push_back(position);
+        }
+
         const StructureDef* def = &StructureRegistry::instance().getStructure(type);
 
         for (int y = 0; y < def->baseSize.y; y++) {
@@ -340,6 +418,8 @@ bool& TileChunk::getStructurePlot(const sf::Vector2i& position)
     // Get the tile
     return m_structurePlots.at(position.y * CHUNK_SIZE + position.x);
 }
+
+void TileChunk::clearPlots() { m_structurePlots.fill(false); }
 
 Tile* TileChunk::getTile(const sf::Vector2i& position)
 {

@@ -17,6 +17,7 @@ bool structureButton(StructureType structureType, CurrentConstruction& currCon)
 
     if (res) {
         currCon.strType = structureType;
+        currCon.action = CurrentConstruction::Action::Constructing;
     }
     return res;
 }
@@ -25,6 +26,9 @@ void onConstructionGUI(CurrentConstruction& currCon)
 {
     for (int i = 0; i < 26; i++) {
         ImGui::Separator();
+    }
+    if (ImGui::Button("Sell Objects")) {
+        currCon.action = CurrentConstruction::Action::Selling;
     }
     if (ImGui::BeginTabBar("construction")) {
         if (ImGui::BeginTabItem("Buildings")) {

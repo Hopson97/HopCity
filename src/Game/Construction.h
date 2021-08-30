@@ -3,6 +3,12 @@
 #include "Structures.h"
 
 struct CurrentConstruction {
+    enum class Action {
+        None,
+        Selling,
+        Constructing,
+    };
+    Action action = Action::None;
     StructureType strType = StructureType::MudWall;
 };
 
