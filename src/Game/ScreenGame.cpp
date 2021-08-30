@@ -248,11 +248,21 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     m_selectionRect.setPosition(tileToScreenPosition(m_selectedTile));
     window->draw(m_selectionRect);
 
+    StructureType strType = m_currConstruction.strType;
+    const auto& structDef = getCurrentConstructionDef();
+    auto cost = structDef.cost.sumCost(m_constructionCount);
+    bool canAfford = m_resources.canAfford(cost, 1);
+
     // If the player is constructing, then render where they want to construct
     m_selectionRect.setTexture(&m_selectionQuadTexture);
     auto renderPlacementRect = [&](const sf::Vector2i& tilePosition, StructureType strType) {
-        if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
-            m_selectionRect.setFillColor(sf::Color::Green);
+        if (canAfford) {
+            if (m_tileManager.canPlaceStructure(tilePosition, strType)) {
+                m_selectionRect.setFillColor(sf::Color::Green);
+            }
+            else {
+                m_selectionRect.setFillColor(sf::Color::Red);
+            }
         }
         else {
             m_selectionRect.setFillColor(sf::Color::Red);
@@ -267,8 +277,6 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     //   Draw the squares that will occupy what the user is currently building
     //
     if (m_currConstruction.action == CurrentConstruction::Action::Constructing && m_isConstructing) {
-        StructureType strType = m_currConstruction.strType;
-        const auto& structDef = getCurrentConstructionDef();
 
         if (structDef.constructionType == ConstructionType::DynamicPath) {
 
