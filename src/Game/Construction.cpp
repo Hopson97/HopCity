@@ -4,12 +4,12 @@
 #include <imgui_sfml/imgui.h>
 #include <unordered_set>
 
-bool structureButton(StructureType structureType, CurrentConstruction& currCon)
+bool structureButton(StructureType structureType, ActionManager& currCon)
 {
     const StructureDef& def = StructureRegistry::instance().getStructure(structureType);
     if (ImGui::ImageButton(def.guiTexture, {100, 100})) {
         currCon.strType = structureType;
-        currCon.action = CurrentConstruction::Action::Constructing;
+        currCon.action = ActionManager::Action::Constructing;
     }
 
     if (ImGui::IsItemHovered()) {
@@ -21,11 +21,11 @@ bool structureButton(StructureType structureType, CurrentConstruction& currCon)
     }
 }
 
-void onConstructionGUI(CurrentConstruction& currCon)
+void onConstructionGUI(ActionManager& currCon)
 {
 
     if (ImGui::Button("Sell Objects")) {
-        currCon.action = CurrentConstruction::Action::Selling;
+        currCon.action = ActionManager::Action::Selling;
     }
     ImGui::Separator();
 

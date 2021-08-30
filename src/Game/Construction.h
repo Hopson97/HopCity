@@ -2,7 +2,7 @@
 
 #include "Registry/StructureRegistry.h"
 
-struct CurrentConstruction {
+struct ActionManager {
     enum class Action {
         None,
         Selling,
@@ -12,7 +12,7 @@ struct CurrentConstruction {
     StructureType strType = StructureType::MudWall;
 };
 
-void onConstructionGUI(CurrentConstruction& currCon);
+void onConstructionGUI(ActionManager& currCon);
 
 inline bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
 {

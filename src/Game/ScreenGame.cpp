@@ -108,7 +108,7 @@ void ScreenGame::onGUI()
     //
     //  Render the construction GUI - shows the current construction and the cost of it
     //
-    if (m_currConstruction.action == CurrentConstruction::Action::Constructing) {
+    if (m_currConstruction.action == ActionManager::Action::Constructing) {
         const auto& structDef = getCurrentConstructionDef();
         ImGui::SetNextWindowBgAlpha(0.25);
         ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
@@ -119,8 +119,8 @@ void ScreenGame::onGUI()
             ImGui::End();
         }
     }
-    else if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
-        if (m_tileManager.isStructureAt(m_selectedTile)) {
+    else if (m_currConstruction.action == ActionManager::Action::Selling) {
+        if (m_tileManager.isStructureAt(m_selectedTile) && m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
             const auto& structDef = getCurrentConstructionDef();
             ImGui::SetNextWindowBgAlpha(0.25);
             ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
@@ -141,7 +141,7 @@ void ScreenGame::onEvent(const sf::Event& e)
 {
     auto tryPlaceStructure = [&](const sf::Vector2i& tilePosition, StructureType structure) {
         if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
-            m_structureMap.placeStructure(structure, tilePosition, m_tileManager);
+            m_structureMap.placeStructure(structure, tilePosition, m_tileManager, m_team);
         }
     };
 
@@ -156,7 +156,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             auto structure = m_currConstruction.strType;
 
             const StructureDef& structDef = getCurrentConstructionDef();
-            if (m_currConstruction.action == CurrentConstruction::Action::Constructing) {
+            if (m_currConstruction.action == ActionManager::Action::Constructing) {
 
                 auto cost = structDef.cost.sumCost(m_constructionCount);
                 if (m_resources.canAfford(cost, 1)) {
@@ -177,7 +177,8 @@ void ScreenGame::onEvent(const sf::Event& e)
                         for (int y = 0; y < structDef.baseSize.y; y++) {
                             for (int x = 0; x < structDef.baseSize.x; x++) {
                                 if (m_tileManager.canPlaceStructure(m_selectedTile, structure)) {
-                                    m_structureMap.placeStructure(structure, m_selectedTile, m_tileManager);
+                                    m_structureMap.placeStructure(structure, m_selectedTile, m_tileManager,
+                                                                  m_team);
                                 }
                             }
                         }
@@ -188,14 +189,14 @@ void ScreenGame::onEvent(const sf::Event& e)
             }
 
             // Mouse release event for when the player sells an item
-            if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
-                if (m_tileManager.isStructureAt(m_selectedTile)) {
+            if (m_currConstruction.action == ActionManager::Action::Selling) {
+                if (m_tileManager.isStructureAt(m_selectedTile)&& m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
                     auto type = m_structureMap.removeStructure(m_selectedTile, m_tileManager);
                     m_resources += StructureRegistry::instance().getStructure(type).cost.getSellingPrice();
                 }
             }
             m_isConstructing = false;
-            // m_currConstruction.action = CurrentConstruction::Action::None;
+            // m_currConstruction.action = ActionManager::Action::None;
         }
     }
 }
@@ -205,7 +206,7 @@ void ScreenGame::onUpdate(const sf::Time& dt) {}
 void ScreenGame::onFixedUpdate(const sf::Time& dt)
 {
     // Calculate the cost of whatever the user will be drawing
-    if (m_currConstruction.action == CurrentConstruction::Action::Constructing && m_isConstructing) {
+    if (m_currConstruction.action == ActionManager::Action::Constructing && m_isConstructing) {
         const auto& structDef = getCurrentConstructionDef();
 
         if (structDef.constructionType == ConstructionType::DynamicPath) {
@@ -276,7 +277,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     //
     //   Draw the squares that will occupy what the user is currently building
     //
-    if (m_currConstruction.action == CurrentConstruction::Action::Constructing && m_isConstructing) {
+    if (m_currConstruction.action == ActionManager::Action::Constructing && m_isConstructing) {
 
         if (structDef.constructionType == ConstructionType::DynamicPath) {
 
@@ -299,10 +300,6 @@ void ScreenGame::onRender(sf::RenderWindow* window)
                     window->draw(m_selectionRect);
                 }
             }
-    }
-    else if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
-        if (m_tileManager.isStructureAt(m_selectedTile)) {
-        }
     }
 }
 

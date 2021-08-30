@@ -46,6 +46,15 @@ void StructureMap::draw(sf::RenderWindow* target)
     }
 }
 
+int StructureMap::structureTeamAt(const sf::Vector2i& tilePosition)
+{
+    auto itr = m_structures.find(tilePosition);
+    if (itr != m_structures.end()) {
+        return itr->second.team;
+    }
+    return -1;
+}
+
 StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition, TileMap& manager)
 {
     auto itr = m_structures.find(tilePosition);
@@ -82,10 +91,12 @@ const Structure& StructureMap::getStructure(const sf::Vector2i& position)
     return itr != m_structures.end() ? itr->second : s;
 }
 
-void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager)
+void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager,
+                                  int team)
 {
     if (m_structures.find(position) == m_structures.end()) {
         Structure* structure = &m_structures.emplace(std::make_pair(position, Structure{type})).first->second;
+        structure->team = team;
 
         bool inserted = false;
         for (auto itr = m_sortedStructList.begin(); itr != m_sortedStructList.end();) {

@@ -75,7 +75,7 @@ void generateTerrainForChunk(TileChunk* chunk, StructureMap* structMap, int seed
             if (f > 0.4 && pointDist(rng) > 4 && n > 0.6) {
                 structMap->placeStructure(StructureType::FirTree,
                                           toGlobalTilePosition(chunk->chunkPosition, {x, y}),
-                                          *chunk->p_chunkManager);
+                                          *chunk->p_chunkManager, -1);
             }
         }
     }

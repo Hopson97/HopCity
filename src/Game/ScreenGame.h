@@ -42,7 +42,7 @@ class ScreenGame final : public Screen {
     Camera m_camera;
 
     // Editor
-    CurrentConstruction m_currConstruction;
+    ActionManager m_currConstruction;
 
     sf::Vector2i m_editStartPosition;
     sf::Vector2i m_editPivotPoint;
@@ -54,4 +54,6 @@ class ScreenGame final : public Screen {
     int m_seed = 52323;
 
     int m_constructionCount = 0;
+
+    int m_team = 1;
 };

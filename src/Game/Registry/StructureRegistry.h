@@ -72,6 +72,7 @@ struct StructureDef {
 struct Structure {
     StructureType type = StructureType::None;
     int variant = 0;
+    int team = -1;
 };
 
 class StructureRegistry {
