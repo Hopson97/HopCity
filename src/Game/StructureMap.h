@@ -12,7 +12,8 @@
 
 class TileMap;
 
-class StructureMap {
+class StructureMap
+{
   public:
     StructureMap();
 

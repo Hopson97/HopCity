@@ -5,7 +5,8 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
-class TimeSlot {
+class TimeSlot
+{
   public:
     TimeSlot(std::string _name)
         : name(_name)
@@ -31,9 +32,11 @@ class TimeSlot {
 };
 
 // Small Profiler that can be used to track different parts of the code
-class Profiler {
+class Profiler
+{
   public:
-    enum class ProfilerMode {
+    enum class ProfilerMode
+    {
         Milliseconds,
         Microseconds,
     };

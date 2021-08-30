@@ -24,21 +24,26 @@ const sf::IntRect& Animation::getCurrentFrame() { return m_frames[m_framePointer
 
 const sf::IntRect& Animation::progressFrame()
 {
-    if (m_isRandom) {
-        if (rand() % 1024 < (int)(m_randomFactor * 1024.0f) && !m_randomAnimationIsRunning) {
+    if (m_isRandom)
+    {
+        if (rand() % 1024 < (int)(m_randomFactor * 1024.0f) && !m_randomAnimationIsRunning)
+        {
             m_randomAnimationIsRunning = true; // switch on one round
         }
-        if (!m_randomAnimationIsRunning) {
+        if (!m_randomAnimationIsRunning)
+        {
             m_timer.restart();
             return m_frames[0].bounds;
         }
     }
 
     m_overlappedTime += m_timer.getElapsedTime();
-    while (m_overlappedTime >= m_frames[m_framePointer].delay) {
+    while (m_overlappedTime >= m_frames[m_framePointer].delay)
+    {
         m_overlappedTime -= m_frames[m_framePointer].delay;
         m_framePointer++;
-        if (m_framePointer == m_frames.size()) {
+        if (m_framePointer == m_frames.size())
+        {
             m_framePointer = 0;
             m_randomAnimationIsRunning = false;
         }

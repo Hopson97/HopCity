@@ -4,9 +4,11 @@
 #include <SFML/System/Clock.hpp>
 #include <vector>
 
-class Animation {
+class Animation
+{
   public:
-    struct Frame {
+    struct Frame
+    {
         Frame(const sf::IntRect& bounds, sf::Time delay)
             : bounds(bounds)
             , delay(delay)

@@ -4,7 +4,8 @@
 #include <array>
 #include <cstdint>
 
-enum class TileType : uint8_t {
+enum class TileType : uint8_t
+{
     Land,
     Road,
     Water,
@@ -12,19 +13,22 @@ enum class TileType : uint8_t {
     NUM_TILES,
 };
 
-struct Tile {
+struct Tile
+{
     TileType type = TileType::Water;
     uint8_t variant = 0;
 };
 
-struct TileDef {
+struct TileDef
+{
     int textureIndex = 0;
 
     VairantType variantType = VairantType::None;
     int variations = 0; // For Random variation
 };
 
-class TileRegistry {
+class TileRegistry
+{
   public:
     static TileRegistry& instance();
 

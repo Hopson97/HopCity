@@ -26,8 +26,10 @@ void ScreenManager::changeScreen(std::unique_ptr<Screen> screen)
 
 void ScreenManager::update()
 {
-    for (Action& action : m_actions) {
-        switch (action.kind) {
+    for (Action& action : m_actions)
+    {
+        switch (action.kind)
+        {
             case Action::Kind::Push:
                 m_screens.push(std::move(action.screen));
                 break;
@@ -37,7 +39,8 @@ void ScreenManager::update()
                 break;
 
             case Action::Kind::Change:
-                while (!m_screens.empty()) {
+                while (!m_screens.empty())
+                {
                     m_screens.pop();
                 }
                 m_screens.push(std::move(action.screen));

@@ -21,7 +21,8 @@ int main()
     // Update ImGUI UI scaling for 4K monitors. For some reason looks bad on linux hence
     // the ifdef
 #ifndef __linux__
-    if (sf::VideoMode::getDesktopMode().width > 3600) {
+    if (sf::VideoMode::getDesktopMode().width > 3600)
+    {
         ImGui::GetIO().FontGlobalScale = ((window.getSize().x) / 1024.f);
     }
 #endif
@@ -42,7 +43,8 @@ int main()
     sf::Clock updateClock;
     bool profilerOpen = false;
 
-    while (window.isOpen() && !screens.isEmpty()) {
+    while (window.isOpen() && !screens.isEmpty())
+    {
         Screen* screen = &screens.peekScreen();
         profiler.reset();
 
@@ -51,18 +53,21 @@ int main()
             TimeSlot& profilerSlot = profiler.newTimeslot("Events");
 
             sf::Event e;
-            while (window.pollEvent(e)) {
+            while (window.pollEvent(e))
+            {
 
                 ImGui::SFML::ProcessEvent(e);
                 screen->onEvent(e);
                 keyboard.update(e);
-                switch (e.type) {
+                switch (e.type)
+                {
                     case sf::Event::Closed:
                         window.close();
                         break;
 
                     case sf::Event::KeyReleased:
-                        if (e.key.code == sf::Keyboard::Escape) {
+                        if (e.key.code == sf::Keyboard::Escape)
+                        {
                             window.close();
                         }
                         if (e.key.code == sf::Keyboard::F3)
@@ -84,7 +89,8 @@ int main()
         lag += elapsed;
 
         // User input (real time)
-        if (window.hasFocus()) {
+        if (window.hasFocus())
+        {
             TimeSlot& profilerSlot = profiler.newTimeslot("Input");
             screen->onInput(keyboard, window);
             profilerSlot.stop();
@@ -102,7 +108,8 @@ int main()
         {
             TimeSlot& profilerSlot = profiler.newTimeslot("Fixed Update");
             // Fixed time update
-            while (lag >= timePerUpdate) {
+            while (lag >= timePerUpdate)
+            {
                 lag -= timePerUpdate;
                 screen->onFixedUpdate(elapsed);
             }

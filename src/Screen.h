@@ -10,9 +10,12 @@ class GUI;
 
 class Screen;
 
-class ScreenManager final {
-    struct Action {
-        enum class Kind {
+class ScreenManager final
+{
+    struct Action
+    {
+        enum class Kind
+        {
             Push,
             Pop,
             Change,
@@ -37,7 +40,8 @@ class ScreenManager final {
     std::vector<Action> m_actions;
 };
 
-class Screen {
+class Screen
+{
   public:
     Screen(ScreenManager* screens);
     virtual ~Screen() = default;

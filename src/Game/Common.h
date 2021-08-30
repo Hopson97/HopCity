@@ -8,7 +8,8 @@ constexpr int CHUNK_SIZE = 128;
 constexpr float TILE_HEIGHT = 16.0f;
 constexpr float TILE_WIDTH = 32.0f;
 
-enum class VairantType {
+enum class VairantType
+{
     None = 0,
     Neighbour = 1,
     Random = 2,
@@ -16,7 +17,8 @@ enum class VairantType {
 
 const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
 
-struct Vec2hash {
+struct Vec2hash
+{
     inline std::size_t operator()(const sf::Vector2i& v) const
     {
         return (static_cast<std::size_t>(v.x) << 32) | static_cast<std::size_t>(v.y);

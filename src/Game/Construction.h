@@ -2,8 +2,10 @@
 
 #include "Registry/StructureRegistry.h"
 
-struct CurrentConstruction {
-    enum class Action {
+struct CurrentConstruction
+{
+    enum class Action
+    {
         None,
         Selling,
         Constructing,

@@ -2,7 +2,8 @@
 
 #include <SFML/Graphics/Texture.hpp>
 
-struct Resources {
+struct Resources
+{
     int coins = 100;
     int food = 100;
     int wood = 100;
@@ -18,7 +19,8 @@ struct Resources {
     Resources getSellingPrice() const;
 };
 
-struct ResourcePanelGUI {
+struct ResourcePanelGUI
+{
   public:
     static ResourcePanelGUI& instance();
     void onResourceGUI(const Resources& resources, int cols = 3);
