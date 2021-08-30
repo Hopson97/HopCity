@@ -1,5 +1,5 @@
 #include "WorldGeneration.h"
-
+#include "StructureMap.h"
 #include <glm/gtc/noise.hpp>
 #include <iostream>
 #include <numeric>
@@ -43,10 +43,8 @@ float getNoiseAt(const sf::Vector2i& tilePosition, const sf::Vector2i& chunkPosi
     return value / accumulatedAmps;
 }
 
-std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, TileChunkManager* map,
-                                int seed)
+void generateTerrainForChunk(TileChunk* chunk, StructureMap* structMap, int seed)
 {
-    std::vector<Tile> tiles(CHUNK_SIZE * CHUNK_SIZE);
 
     TerrainGenOptions ops;
     ops.amplitude = 20;
@@ -60,41 +58,27 @@ std::vector<Tile> generateWorld(const sf::Vector2i& chunkPosition, TileChunkMana
     std::uniform_int_distribution<int> dirDist(1, 2);
 
     ops.seed = seed;
-    // float riverPoint = pointDist(rng);
-    // float nsOceanSize = pointDist(rng);
-    // float ewOceanSize = pointDist(rng);
-    // bool isEast = dirDist(rng) == 1;
-    // bool isSouth = dirDist(rng) == 1;
-    // int riverDirection = dirDist(rng);
-    // float ws = static_cast<float>(worldSize);
 
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             // int rd = riverDirection == 1 ? x : y;
 
             std::vector<float> features;
-
-            // Oceans
-            //  features.push_back(std::abs(x - (isEast ? 0 : ws)) / ws * ewOceanSize);
-            // features.push_back(std::abs(y - (isSouth ? 0 : ws)) / ws * nsOceanSize);
-
-            // River
-            //  features.push_back(std::abs(rd - ws / riverPoint) / ws * 2);
-
             // Noise
-            float n = getNoiseAt({x, y}, chunkPosition, ops);
+            float n = getNoiseAt({x, y}, chunk->chunkPosition, ops);
             features.push_back(n);
 
             float f = std::accumulate(features.begin(), features.end(), 1.0f,
                                       std::multiplies<float>());
-            tiles[x + y * CHUNK_SIZE].type = f > 0.4 ? TileType::Land : TileType::Water;
 
-            if (tiles[x + y * CHUNK_SIZE].type == TileType::Land && pointDist(rng) > 4 &&
-                n > 0.6) {
-                map->placeStructure(StructureType::FirTree,
-                                    toGlobalTilePosition(chunkPosition, {x, y}));
+            chunk->setTile({x, y}, f > 0.4 ? TileType::Land : TileType::Water);
+
+            if (f > 0.4 && pointDist(rng) > 4 && n > 0.6) {
+                structMap->placeStructure(
+                    StructureType::FirTree,
+                    toGlobalTilePosition(chunk->chunkPosition, {x, y}),
+                    *chunk->p_chunkManager);
             }
         }
     }
-    return tiles;
 }

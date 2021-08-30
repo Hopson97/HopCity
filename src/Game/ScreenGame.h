@@ -4,6 +4,7 @@
 #include "../Screen.h"
 #include "Camera.h"
 #include "Construction.h"
+#include "StructureMap.h"
 #include "TileMap.h"
 #include "WorldGeneration.h"
 #include <functional>
@@ -33,6 +34,7 @@ class ScreenGame final : public Screen {
     sf::Mouse::Button m_buttonPressed;
 
     TileChunkManager m_tileManager;
+    StructureMap m_structureMap;
 
     // Map m_map;
     Camera m_camera;
@@ -44,4 +46,6 @@ class ScreenGame final : public Screen {
     sf::Vector2i m_editPivotPoint;
     sf::Vector2i m_editEndPosition;
     bool m_isConstructing = false;
+
+    int m_seed = 52323;
 };

@@ -5,6 +5,7 @@
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 #include <iostream>
+#include <random>
 #include <unordered_set>
 
 ScreenGame::ScreenGame(ScreenManager* stack)
@@ -17,6 +18,19 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
     m_tileManager.initWorld();
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> seedDist(0, 4096);
+    m_seed = seedDist(rng);
+
+    for (int y = 0; y < 1; y++) {
+        for (int x = 0; x < 1; x++) {
+            TileChunk& chunk = m_tileManager.addChunk({x, y});
+            generateTerrainForChunk(&chunk, &m_structureMap, m_seed);
+            chunk.updateAllTiles();
+        }
+    }
 }
 
 void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
@@ -50,7 +64,7 @@ void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& windo
             else if (colour == sf::Color::White )   m_selectedTile.x++;
         }
 
-        m_tileManager.setCurrentlySelectedTile(m_selectedTile);
+        m_structureMap.setCurrentlySelectedTile(m_selectedTile);
 
         // clang-format on
     }
@@ -82,7 +96,7 @@ void ScreenGame::onGUI()
         ImGui::Text("Performance %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate,
                     io.Framerate);
         if (ImGui::Button("Regen world")) {
-            m_tileManager.regenerateTerrain();
+            /// m_tileManager.regenerateTerrain();
         }
 
         onConstructionGUI(m_currConstruction);
@@ -96,7 +110,7 @@ void ScreenGame::onEvent(const sf::Event& e)
     auto tryPlaceStructure = [&](const sf::Vector2i& tilePosition,
                                  StructureType structure) {
         if (m_tileManager.canPlaceStructure(tilePosition, structure)) {
-            m_tileManager.placeStructure(structure, tilePosition);
+            m_structureMap.placeStructure(structure, tilePosition, m_tileManager);
         }
     };
 
@@ -132,7 +146,8 @@ void ScreenGame::onEvent(const sf::Event& e)
                         for (int x = 0; x < def.baseSize.x; x++) {
                             if (m_tileManager.canPlaceStructure(m_selectedTile,
                                                                 structure)) {
-                                m_tileManager.placeStructure(structure, m_selectedTile);
+                                m_structureMap.placeStructure(structure, m_selectedTile,
+                                                              m_tileManager);
                             }
                         }
                     }
@@ -140,7 +155,7 @@ void ScreenGame::onEvent(const sf::Event& e)
             }
             else if (m_currConstruction.action == CurrentConstruction::Action::Selling) {
                 if (m_tileManager.isStructureAt(m_selectedTile)) {
-                    m_tileManager.removeStructure(m_selectedTile);
+                    m_structureMap.removeStructure(m_selectedTile, m_tileManager);
                 }
             }
             m_isConstructing = false;
@@ -160,6 +175,7 @@ void ScreenGame::onRender(sf::RenderWindow* window)
     // Render the tile map
     m_tileManager.showDetail = m_camera.zoomLevel < 2;
     m_tileManager.draw(window);
+    m_structureMap.draw(window);
 
     // Render the selected tile
     m_selectionRect.setTexture(&m_selectionTexture);

@@ -14,6 +14,8 @@ enum class VairantType {
     Random = 2,
 };
 
+const sf::Vector2i TILE_OFFSETS[4] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+
 struct Vec2hash {
     inline std::size_t operator()(const sf::Vector2i& v) const
     {
