@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Structures.h"
+#include "Registry/StructureRegistry.h"
 
 struct CurrentConstruction {
     enum class Action {

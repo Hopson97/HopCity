@@ -359,10 +359,9 @@ void TileChunk::updateTile(const sf::Vector2i& position)
                 tile->variant += (int)std::pow(2, i);
             }
 
-            const TileDef& neighbourDef = TileRegistry::instance().getTileDef(neighbour->type);
-            if (neighbour &&
-                neighbourDef.variantType ==
-                    VairantType::Neighbour) {
+            const TileDef& neighbourDef =
+                TileRegistry::instance().getTileDef(neighbour->type);
+            if (neighbour && neighbourDef.variantType == VairantType::Neighbour) {
                 neighbour->variant = 0;
                 for (int j = 0; j < 4; j++) {
                     Tile* subNeighbour =

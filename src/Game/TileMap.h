@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Animation.h"
-#include "Structures.h"
-#include "Tiles.h"
+#include "Registry/StructureRegistry.h"
+#include "Registry/TileRegistry.h"
 #include "unordered_map"
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -70,7 +70,6 @@ class TileChunkManager {
     bool showDetail;
 
     bool canPlaceStructure(const sf::Vector2i& basePosition, StructureType type);
-
 
     void setCurrentlySelectedTile(const sf::Vector2i& position);
     const Structure& getStructure(const sf::Vector2i& position);

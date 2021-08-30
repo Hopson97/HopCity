@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Common.h"
+#include "../Common.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <array>

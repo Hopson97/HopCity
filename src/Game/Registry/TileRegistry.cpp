@@ -1,5 +1,4 @@
-#include "Tiles.h"
-
+#include "TileRegistry.h"
 
 TileRegistry& TileRegistry::instance()
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common.h"
-#include <cstdint>
+#include "../Common.h"
 #include <array>
+#include <cstdint>
 
 enum class TileType : uint8_t {
     Land,

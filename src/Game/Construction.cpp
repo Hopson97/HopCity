@@ -1,6 +1,5 @@
 #include "Construction.h"
 
-#include "Structures.h"
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 #include <unordered_set>

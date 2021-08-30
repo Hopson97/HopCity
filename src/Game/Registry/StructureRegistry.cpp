@@ -1,4 +1,4 @@
-#include "Structures.h"
+#include "StructureRegistry.h"
 
 StructureDef& StructureDef::giveVarity(int variations)
 {
