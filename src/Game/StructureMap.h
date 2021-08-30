@@ -10,7 +10,7 @@
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <unordered_map>
 
-class TileChunkManager;
+class TileMap;
 
 class StructureMap {
   public:
@@ -22,12 +22,12 @@ class StructureMap {
 
     bool isStructureAt(const sf::Vector2i& tilePosition);
     StructureType removeStructure(const sf::Vector2i& tilePosition,
-                                  TileChunkManager& manager);
+                                  TileMap& manager);
 
     void setCurrentlySelectedTile(const sf::Vector2i& position);
     const Structure& getStructure(const sf::Vector2i& position);
     void placeStructure(StructureType type, const sf::Vector2i& position,
-                        TileChunkManager& manager);
+                        TileMap& manager);
 
   private:
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;

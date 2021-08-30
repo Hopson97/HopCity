@@ -33,7 +33,7 @@ class ScreenGame final : public Screen {
     bool m_mousedown = false;
     sf::Mouse::Button m_buttonPressed;
 
-    TileChunkManager m_tileManager;
+    TileMap m_tileManager;
     StructureMap m_structureMap;
 
     // Map m_map;

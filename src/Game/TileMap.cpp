@@ -40,12 +40,12 @@ namespace {
 //                  TILE CHUNK MANAGER
 //
 //  = = = = = = = = = = = = = = = = = = = = = = = = = = =
-void TileChunkManager::initWorld()
+void TileMap::initWorld()
 {
     m_tileTextures.loadFromFile("data/Textures/TileMap2.png");
 }
 
-TileChunk& TileChunkManager::addChunk(const sf::Vector2i& chunkPos)
+TileChunk& TileMap::addChunk(const sf::Vector2i& chunkPos)
 {
     auto itr = m_chunks.find(chunkPos);
     if (itr == m_chunks.end()) {
@@ -56,7 +56,7 @@ TileChunk& TileChunkManager::addChunk(const sf::Vector2i& chunkPos)
 }
 
 /*
-void TileChunkManager::regenerateTerrain()
+void TileMap::regenerateTerrain()
 {
 
     std::random_device rd;
@@ -70,7 +70,7 @@ void TileChunkManager::regenerateTerrain()
     }
 }
 */
-void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
+void TileMap::setTile(const sf::Vector2i& tilePosition, TileType type)
 {
     sf::Vector2i chunkPos = toChunkPosition(tilePosition);
     sf::Vector2i localPos = toLocalTilePosition(tilePosition);
@@ -100,7 +100,7 @@ void TileChunkManager::setTile(const sf::Vector2i& tilePosition, TileType type)
     }
 }
 
-Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
+Tile* TileMap::getTile(const sf::Vector2i& tilePosition)
 {
     static Tile noTile;
 
@@ -111,7 +111,7 @@ Tile* TileChunkManager::getTile(const sf::Vector2i& tilePosition)
     return chunkItr != m_chunks.end() ? chunkItr->second.getTile(localPos) : &noTile;
 }
 
-bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
+bool TileMap::canPlaceStructure(const sf::Vector2i& basePosition,
                                          StructureType type)
 {
     const StructureDef& def = StructureRegistry::instance().getStructure(type);
@@ -133,7 +133,7 @@ bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
     return true;
 }
 
-bool& TileChunkManager::getStructurePlot(const sf::Vector2i& position)
+bool& TileMap::getStructurePlot(const sf::Vector2i& position)
 {
     static bool noPlot = true;
 
@@ -145,7 +145,7 @@ bool& TileChunkManager::getStructurePlot(const sf::Vector2i& position)
                                       : noPlot;
 }
 
-void TileChunkManager::draw(sf::RenderWindow* window)
+void TileMap::draw(sf::RenderWindow* window)
 {
     sf::RenderStates states = sf::RenderStates::Default;
     states.texture = &m_tileTextures;
@@ -167,7 +167,7 @@ void TileChunkManager::draw(sf::RenderWindow* window)
 //
 //  = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-TileChunk::TileChunk(const sf::Vector2i& position, TileChunkManager* chunkManager)
+TileChunk::TileChunk(const sf::Vector2i& position, TileMap* chunkManager)
     : chunkPosition(position)
     , p_chunkManager(chunkManager)
 {

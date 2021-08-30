@@ -50,7 +50,7 @@ void StructureMap::draw(sf::RenderWindow* target)
 }
 
 StructureType StructureMap::removeStructure(const sf::Vector2i& tilePosition,
-                                            TileChunkManager& manager)
+                                            TileMap& manager)
 {
     auto itr = m_structures.find(tilePosition);
 
@@ -84,7 +84,7 @@ const Structure& StructureMap::getStructure(const sf::Vector2i& position)
 }
 
 void StructureMap::placeStructure(StructureType type, const sf::Vector2i& position,
-                                  TileChunkManager& manager)
+                                  TileMap& manager)
 {
     if (m_structures.find(position) == m_structures.end()) {
         Structure* structure =
