@@ -2,7 +2,16 @@
 
 #include "../Animation.h"
 #include "../Screen.h"
+
 class ScreenMainMenu final : public Screen {
+    struct MainMenuButton {
+        sf::RectangleShape sprite;
+        sf::Texture texture;
+
+        void init(const std::string& texture, int index);
+        bool contains(int mx, int my);
+    };
+
     enum class Menu {
         MainMenu,
         SettingsMenu,
@@ -17,10 +26,9 @@ class ScreenMainMenu final : public Screen {
     void onRender(sf::RenderWindow* window) override;
 
   private:
+    MainMenuButton m_newGameButton;
+    MainMenuButton m_loadGameButton;
+    MainMenuButton m_exitGameButton;
     Animation m_buttonAnimation;
-    sf::Texture m_newGameTexture;
-    sf::Texture m_loadGameTexture;
-    sf::RectangleShape m_newGameButton;
-    sf::RectangleShape m_loadGameButton;
     sf::RectangleShape m_wall;
 };
