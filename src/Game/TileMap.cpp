@@ -7,7 +7,6 @@
 
 #include "Common.h"
 #include <SFML/Window/Mouse.hpp>
-#include <imgui_sfml/imgui.h>
 
 namespace {
     void addIsometricQuad(std::vector<sf::Vertex>* quads,
@@ -155,13 +154,13 @@ StructureType TileChunkManager::removeStructure(const sf::Vector2i& tilePosition
 bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
                                          StructureType type)
 {
-    const StructureDef* def = &StructureRegistry::instance().getStructure(type);
+    const StructureDef& def = StructureRegistry::instance().getStructure(type);
 
     auto correctTileType =
-        def->placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
+        def.placement == StructurePlacement::Land ? TileType::Land : TileType::Water;
 
-    for (int y = 0; y < def->baseSize.y; y++) {
-        for (int x = 0; x < def->baseSize.x; x++) {
+    for (int y = 0; y < def.baseSize.y; y++) {
+        for (int x = 0; x < def.baseSize.x; x++) {
             sf::Vector2i realPosition = basePosition - sf::Vector2i{x, y};
 
             // If it is the wrong tile type or there is a structure placed at the position
@@ -172,23 +171,6 @@ bool TileChunkManager::canPlaceStructure(const sf::Vector2i& basePosition,
         }
     }
     return true;
-}
-
-void TileChunkManager::onDebugGui()
-{
-    if (ImGui::Begin("tile map debug")) {
-        ImGui::Text("Number of structures: %d", (int)m_sortedStructList.size());
-        for (auto& s : m_sortedStructList) {
-            ImGui::Text("Loc: %d %d", s.x, s.y);
-        }
-
-        for (auto& s : m_structures) {
-            ImGui::Text(
-                "struct: %d %d %s", s.first.x, s.first.y,
-                StructureRegistry::instance().getStructure(s.second.type).name.c_str());
-        }
-        ImGui::End();
-    }
 }
 
 void TileChunkManager::setCurrentlySelectedTile(const sf::Vector2i& position)
@@ -233,16 +215,16 @@ void TileChunkManager::draw(sf::RenderWindow* window)
     // Draw the structures
     for (const auto& position : m_sortedStructList) {
         const Structure& str = m_structures.at(position);
-        const StructureDef* def = &StructureRegistry::instance().getStructure(str.type);
+        const StructureDef& def = StructureRegistry::instance().getStructure(str.type);
 
         m_structureRect.setSize(
-            {TILE_WIDTH * def->textureSize.x, TILE_HEIGHT * def->textureSize.y});
+            {TILE_WIDTH * def.textureSize.x, TILE_HEIGHT * def.textureSize.y});
 
         m_structureRect.setTextureRect(
-            {(int)TILE_WIDTH * str.variant * (int)def->textureSize.x,
-             (int)TILE_HEIGHT * def->textureIndex,
-             (int)def->textureSize.x * (int)TILE_WIDTH,
-             (int)def->textureSize.y * (int)TILE_HEIGHT});
+            {(int)TILE_WIDTH * str.variant * (int)def.textureSize.x,
+             (int)TILE_HEIGHT * def.textureIndex,
+             (int)def.textureSize.x * (int)TILE_WIDTH,
+             (int)def.textureSize.y * (int)TILE_HEIGHT});
 
         m_structureRect.setOrigin({0, m_structureRect.getSize().y - TILE_HEIGHT});
         m_structureRect.setPosition(tileToScreenPosition(position));
@@ -252,11 +234,10 @@ void TileChunkManager::draw(sf::RenderWindow* window)
         }
         else {
             m_structureRect.setFillColor(sf::Color::White);
-
         }
 
-        if (def->baseSize.x > 1) {
-            m_structureRect.move(-def->textureSize.x * TILE_WIDTH / 4, 0);
+        if (def.baseSize.x > 1) {
+            m_structureRect.move(-def.textureSize.x * TILE_WIDTH / 4, 0);
         }
         window->draw(m_structureRect);
     }
@@ -282,24 +263,24 @@ void TileChunkManager::placeStructure(StructureType type, const sf::Vector2i& po
             m_sortedStructList.push_back(position);
         }
 
-        const StructureDef* def = &StructureRegistry::instance().getStructure(type);
+        const StructureDef& def = StructureRegistry::instance().getStructure(type);
 
-        for (int y = 0; y < def->baseSize.y; y++) {
-            for (int x = 0; x < def->baseSize.x; x++) {
+        for (int y = 0; y < def.baseSize.y; y++) {
+            for (int x = 0; x < def.baseSize.x; x++) {
                 sf::Vector2i realPosition = position - sf::Vector2i{x, y};
                 getStructurePlot(realPosition) = true;
             }
         }
 
         // Change the texture of the tile
-        if (def->variantType == VairantType::Random) {
+        if (def.variantType == VairantType::Random) {
 
             std::random_device rd;
             std::mt19937 rng{rd()};
-            std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
+            std::uniform_int_distribution<int> varietyDist(0, def.variations - 1);
             structure->variant = varietyDist(rng);
         }
-        else if (def->variantType == VairantType::Neighbour) {
+        else if (def.variantType == VairantType::Neighbour) {
             structure->variant = 0;
 
             // Update the structure based on its neighbours
@@ -361,15 +342,15 @@ void TileChunk::updateTile(const sf::Vector2i& position)
 {
     // Set the tile'structure variant
     Tile* tile = getGlobalTile(position);
-    const TileDef* def = &getTileDef(tile->type);
+    const TileDef& def = TileRegistry::instance().getTileDef(tile->type);
 
-    if (def->variantType == VairantType::Random) {
+    if (def.variantType == VairantType::Random) {
         std::random_device rd;
         std::mt19937 rng{rd()};
-        std::uniform_int_distribution<int> varietyDist(0, def->variations - 1);
+        std::uniform_int_distribution<int> varietyDist(0, def.variations - 1);
         tile->variant = varietyDist(rng);
     }
-    else if (def->variantType == VairantType::Neighbour) {
+    else if (def.variantType == VairantType::Neighbour) {
         tile->variant = 0;
 
         for (int i = 0; i < 4; i++) {
@@ -378,8 +359,10 @@ void TileChunk::updateTile(const sf::Vector2i& position)
                 tile->variant += (int)std::pow(2, i);
             }
 
+            const TileDef& neighbourDef = TileRegistry::instance().getTileDef(neighbour->type);
             if (neighbour &&
-                getTileDef(neighbour->type).variantType == VairantType::Neighbour) {
+                neighbourDef.variantType ==
+                    VairantType::Neighbour) {
                 neighbour->variant = 0;
                 for (int j = 0; j < 4; j++) {
                     Tile* subNeighbour =
@@ -398,7 +381,7 @@ void TileChunk::updateTile(const sf::Vector2i& position)
         return;
     }
     sf::Vertex* vertex = &m_tileVerts[vertexIndex];
-    float idx = static_cast<float>(def->textureIndex);
+    float idx = static_cast<float>(def.textureIndex);
     vertex[0].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * idx};
     vertex[1].texCoords = {tile->variant * TILE_WIDTH, TILE_HEIGHT * (idx + 1)};
     vertex[2].texCoords = {tile->variant * TILE_WIDTH + TILE_WIDTH,

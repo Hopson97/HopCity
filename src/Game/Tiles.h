@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include <cstdint>
+#include <array>
 
 enum class TileType : uint8_t {
     Land,
@@ -23,6 +24,17 @@ struct TileDef {
     int variations = 0; // For Random variation
 };
 
-void registerTiles();
-TileDef& registerTile(TileType type, int textureIndex, VairantType variance);
-const TileDef& getTileDef(TileType type);
+class TileRegistry {
+  public:
+    static TileRegistry& instance();
+
+    const TileDef& getTileDef(TileType type);
+
+  private:
+    TileRegistry();
+
+    void registerTiles();
+    TileDef& registerTile(TileType type, int textureIndex, VairantType variance);
+
+    std::array<TileDef, (std::size_t)TileType::NUM_TILES> m_tiles;
+};

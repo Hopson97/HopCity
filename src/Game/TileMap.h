@@ -71,7 +71,6 @@ class TileChunkManager {
 
     bool canPlaceStructure(const sf::Vector2i& basePosition, StructureType type);
 
-    void onDebugGui();
 
     void setCurrentlySelectedTile(const sf::Vector2i& position);
     const Structure& getStructure(const sf::Vector2i& position);

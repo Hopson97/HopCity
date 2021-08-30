@@ -70,12 +70,6 @@ struct StructureDef {
 struct Structure {
     StructureType type = StructureType::None;
     int variant = 0;
-
-    Structure(StructureType type)
-        : type(type)
-    {
-        std::cout << "Creating " << (int)type << std::endl;
-    }
 };
 
 class StructureRegistry {

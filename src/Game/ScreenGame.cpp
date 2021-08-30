@@ -17,8 +17,6 @@ ScreenGame::ScreenGame(ScreenManager* stack)
 
     m_selectionRect.setSize({TILE_WIDTH, TILE_HEIGHT});
 
-    registerTiles();
-
     m_tileManager.initWorld();
 }
 
@@ -92,8 +90,6 @@ void ScreenGame::onGUI()
 
         ImGui::End();
     }
-
-    m_tileManager.onDebugGui();
 }
 
 void ScreenGame::onEvent(const sf::Event& e)
