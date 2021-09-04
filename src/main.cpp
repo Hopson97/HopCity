@@ -15,6 +15,8 @@ int main()
     window.setFramerateLimit(100);
     window.setKeyRepeatEnabled(false);
     ImGui::SFML::Init(window);
+    ImGui::GetStyle().FrameRounding = 0;
+    ImGui::GetStyle().WindowRounding = 0;
 
     Profiler profiler;
 
