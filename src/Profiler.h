@@ -2,6 +2,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <array>
 #include <deque>
+#include <functional>
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
 
@@ -42,6 +43,12 @@ class Profiler {
     void onGUI();
 
     TimeSlot& newTimeslot(const char* name);
+
+    void embeddedSlot(const char* name, std::function<void()>_func){
+        TimeSlot& profilerSlot = newTimeslot(name);
+        _func();
+        profilerSlot.stop();
+    }
 
     float frametime = 0;
     float frametimeAverage = 0;

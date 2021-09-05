@@ -33,7 +33,7 @@ ScreenGame::ScreenGame(ScreenManager* stack)
     }
 }
 
-void ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
+void* ScreenGame::onInput(const Keyboard& keyboard, const sf::RenderWindow& window)
 {
     m_camera.onInput(keyboard, window);
 

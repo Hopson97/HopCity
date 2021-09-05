@@ -7,6 +7,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <imgui_sfml/imgui-SFML.h>
 #include <imgui_sfml/imgui.h>
+#include "Game/GlobalEvents.h"
 
 int main()
 {
@@ -44,37 +45,16 @@ int main()
     sf::Clock updateClock;
     bool profilerOpen = false;
 
+
+    // Main Game Loop
     while (window.isOpen() && !screens.isEmpty()) {
         Screen* screen = &screens.peekScreen();
+
+        // Process Events
         profiler.reset();
-
         {
-
             TimeSlot& profilerSlot = profiler.newTimeslot("Events");
-
-            sf::Event e;
-            while (window.pollEvent(e)) {
-
-                ImGui::SFML::ProcessEvent(e);
-                screen->onEvent(e);
-                keyboard.update(e);
-                switch (e.type) {
-                    case sf::Event::Closed:
-                        window.close();
-                        break;
-
-                    case sf::Event::KeyReleased:
-                        if (e.key.code == sf::Keyboard::Escape) {
-                            window.close();
-                        }
-                        if (e.key.code == sf::Keyboard::F3)
-                            profilerOpen = !profilerOpen;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
+            ProcessEvents(window,screen,keyboard,profilerOpen);
             profilerSlot.stop();
         }
 
@@ -87,9 +67,12 @@ int main()
 
         // User input (real time)
         if (window.hasFocus()) {
+            //now
             TimeSlot& profilerSlot = profiler.newTimeslot("Input");
             screen->onInput(keyboard, window);
             profilerSlot.stop();
+            //planned
+            profiler.embeddedSlot("Input",[&](){screen->onInput(keyboard, window);});
         }
 
         // Game update
@@ -126,6 +109,7 @@ int main()
             profilerSlot.stop();
         }
 
+        // Actual Drawing and resets
         if (profilerOpen)
             profiler.onGUI();
         ImGui::SFML::Render(window);

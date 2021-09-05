@@ -16,7 +16,7 @@ class ScreenGame final : public Screen {
     ScreenGame(ScreenManager* screens);
 
     void onGUI() override;
-    void onInput(const Keyboard& keyboard, const sf::RenderWindow& window) override;
+    void* onInput(const Keyboard& keyboard, const sf::RenderWindow& window) override;
     void onEvent(const sf::Event& e) override;
     void onUpdate(const sf::Time& dt) override;
     void onFixedUpdate(const sf::Time& dt) override;
