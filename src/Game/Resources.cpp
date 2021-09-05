@@ -59,28 +59,10 @@ ResourcePanelGUI& ResourcePanelGUI::instance()
     return gui;
 }
 
-Resources Resources::sumCost(int num) const
+bool Resources::canAfford(const Resources& cost) const
 {
-    return Resources{
-        coins * num, food * num, wood * num, stone * num, metal * num, population * num,
-    };
-}
-
-bool Resources::canAfford(const Resources& other, int n) const
-{
-    auto cost = other.sumCost(n);
     return cost.food <= food && cost.metal <= metal && cost.wood <= wood && cost.stone <= stone &&
            cost.coins <= coins && cost.population <= population;
-}
-
-Resources Resources::operator-=(const Resources& other)
-{
-    food -= other.food;
-    metal -= other.metal;
-    wood -= other.wood;
-    stone -= other.stone;
-    coins -= other.coins;
-    population -= other.population;
 }
 
 Resources Resources::getSellingPrice() const
@@ -93,14 +75,4 @@ Resources Resources::getSellingPrice() const
     res.coins /= 2;
     res.population /= 2;
     return res;
-}
-
-Resources Resources::operator+=(const Resources& other)
-{
-    food += other.food;
-    metal += other.metal;
-    wood += other.wood;
-    stone += other.stone;
-    coins += other.coins;
-    population += other.population;
 }

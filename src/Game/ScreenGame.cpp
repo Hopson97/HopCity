@@ -114,7 +114,7 @@ void ScreenGame::onGUI()
         ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
         ImGui::SetNextWindowSize({300, 120});
         if (ImGui::Begin("Build Cost", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
-            auto cost = structDef.cost.sumCost(m_constructionCount);
+            auto cost = structDef.cost * m_constructionCount;
             ResourcePanelGUI::instance().onResourceGUI(cost, 3);
             ImGui::End();
         }
@@ -159,8 +159,8 @@ void ScreenGame::onEvent(const sf::Event& e)
             const StructureDef& structDef = getCurrentConstructionDef();
             if (m_currConstruction.action == ActionManager::Action::Constructing) {
 
-                auto cost = structDef.cost.sumCost(m_constructionCount);
-                if (m_resources.canAfford(cost, 1)) {
+                auto cost = structDef.cost * m_constructionCount;
+                if (m_resources.canAfford(cost)) {
                     if (structDef.constructionType == ConstructionType::DynamicPath) {
                         forEachLSection(m_editStartPosition, m_editPivotPoint, m_editEndPosition,
                                         [&](const sf::Vector2i& tilePosition) {
@@ -253,8 +253,8 @@ void ScreenGame::onRender(sf::RenderWindow* window)
 
     StructureType strType = m_currConstruction.strType;
     const auto& structDef = getCurrentConstructionDef();
-    auto cost = structDef.cost.sumCost(m_constructionCount);
-    bool canAfford = m_resources.canAfford(cost, 1);
+    auto cost = structDef.cost * m_constructionCount;
+    bool canAfford = m_resources.canAfford(cost);
 
     // If the player is constructing, then render where they want to construct
     m_selectionRect.setTexture(&m_selectionQuadTexture);

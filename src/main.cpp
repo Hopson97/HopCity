@@ -118,8 +118,9 @@ int main()
             profilerSlot.stop();
         }
 
-        if (profilerOpen)
+        if (profilerOpen) {
             profiler.onGUI();
+        }
         ImGui::SFML::Render(window);
         window.display();
         screens.update();
