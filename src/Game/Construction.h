@@ -14,8 +14,6 @@ struct ActionManager {
 
 void onConstructionGUI(ActionManager& currCon);
 
-
-
 /**
  * @brief Calls a function for a L shape selection (for example, building a wall)
  *

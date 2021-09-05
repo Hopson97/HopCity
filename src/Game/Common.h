@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SFML/System/Vector2.hpp>
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 
 constexpr int CHUNK_SIZE = 128;
 

@@ -48,36 +48,28 @@ int main()
         Screen* screen = &screens.peekScreen();
         profiler.reset();
 
+        // Handle window events
         {
-
             TimeSlot& profilerSlot = profiler.newTimeslot("Events");
-
             sf::Event e;
             while (window.pollEvent(e)) {
-
                 ImGui::SFML::ProcessEvent(e);
                 screen->onEvent(e);
                 keyboard.update(e);
-                switch (e.type) {
-                    case sf::Event::Closed:
+                if (e.type == sf::Event::Closed) {
+                    window.close();
+                }
+                else if (e.type == sf::Event::KeyReleased) {
+                    if (e.key.code == sf::Keyboard::Escape) {
                         window.close();
-                        break;
-
-                    case sf::Event::KeyReleased:
-                        if (e.key.code == sf::Keyboard::Escape) {
-                            window.close();
-                        }
-                        if (e.key.code == sf::Keyboard::F3)
-                            profilerOpen = !profilerOpen;
-                        break;
-
-                    default:
-                        break;
+                    }
+                    if (e.key.code == sf::Keyboard::F3) {
+                        profilerOpen = !profilerOpen;
+                    }
                 }
             }
             profilerSlot.stop();
         }
-
         // Get times
         sf::Time dt = updateClock.restart();
         sf::Time time = timer.getElapsedTime();

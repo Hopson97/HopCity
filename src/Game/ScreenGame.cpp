@@ -120,7 +120,8 @@ void ScreenGame::onGUI()
         }
     }
     else if (m_currConstruction.action == ActionManager::Action::Selling) {
-        if (m_tileManager.isStructureAt(m_selectedTile) && m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
+        if (m_tileManager.isStructureAt(m_selectedTile) &&
+            m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
             const auto& structDef = getCurrentConstructionDef();
             ImGui::SetNextWindowBgAlpha(0.25);
             ImGui::SetNextWindowPos({ImGui::GetMousePos().x - 150, ImGui::GetMousePos().y - 150});
@@ -190,7 +191,8 @@ void ScreenGame::onEvent(const sf::Event& e)
 
             // Mouse release event for when the player sells an item
             if (m_currConstruction.action == ActionManager::Action::Selling) {
-                if (m_tileManager.isStructureAt(m_selectedTile)&& m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
+                if (m_tileManager.isStructureAt(m_selectedTile) &&
+                    m_structureMap.structureTeamAt(m_selectedTile) == m_team) {
                     auto type = m_structureMap.removeStructure(m_selectedTile, m_tileManager);
                     m_resources += StructureRegistry::instance().getStructure(type).cost.getSellingPrice();
                 }
