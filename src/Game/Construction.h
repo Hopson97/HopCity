@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Registry/StructureRegistry.h"
+#include <functional>
 
 struct ActionManager {
     enum class Action {
