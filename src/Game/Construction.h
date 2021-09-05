@@ -14,10 +14,7 @@ struct ActionManager {
 
 void onConstructionGUI(ActionManager& currCon);
 
-inline bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
-{
-    return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
-}
+
 
 /**
  * @brief Calls a function for a L shape selection (for example, building a wall)

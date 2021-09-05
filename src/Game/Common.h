@@ -2,6 +2,7 @@
 
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
+#include <cmath>
 
 constexpr int CHUNK_SIZE = 128;
 
@@ -46,4 +47,9 @@ inline sf::Vector2i toGlobalTilePosition(const sf::Vector2i& chunkPosition,
 {
     return {chunkPosition.x * CHUNK_SIZE + localTilePosition.x,
             chunkPosition.y * CHUNK_SIZE + localTilePosition.y};
+}
+
+inline bool xDistGreater(const sf::Vector2i& startPoint, const sf::Vector2i& endPoint)
+{
+    return std::abs(startPoint.x - endPoint.x) > std::abs(startPoint.y - endPoint.y);
 }
