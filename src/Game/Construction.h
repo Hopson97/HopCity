@@ -3,17 +3,7 @@
 #include "Registry/StructureRegistry.h"
 #include <functional>
 
-struct ActionManager {
-    enum class Action {
-        None,
-        Selling,
-        Constructing,
-    };
-    Action action = Action::None;
-    StructureType strType = StructureType::MudWall;
-};
-
-void onConstructionGUI(ActionManager& currCon);
+void onConstructionGUI();
 
 /**
  * @brief Calls a function for a L shape selection (for example, building a wall)

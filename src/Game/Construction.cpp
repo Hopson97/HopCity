@@ -4,28 +4,26 @@
 #include <imgui_sfml/imgui.h>
 #include <unordered_set>
 
-bool structureButton(StructureType structureType, ActionManager& currCon)
-{
-    const StructureDef& def = StructureRegistry::instance().getStructure(structureType);
-    if (ImGui::ImageButton(def.guiTexture, {100, 100})) {
-        currCon.strType = structureType;
-        currCon.action = ActionManager::Action::Constructing;
-    }
+namespace {
+    void structureButton(StructureType structureType)
+    {
+        const StructureDef& def = StructureRegistry::instance().getStructure(structureType);
+        if (ImGui::ImageButton(def.guiTexture, {100, 100})) {
+        }
 
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::Text("%s", def.name.c_str());
-        ImGui::Text("Cost");
-        ResourcePanelGUI::instance().onResourceGUI(def.cost, 1);
-        ImGui::EndTooltip();
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::Text("%s", def.name.c_str());
+            ImGui::Text("Cost");
+            ResourcePanelGUI::instance().onResourceGUI(def.cost, 1);
+            ImGui::EndTooltip();
+        }
     }
-}
-
-void onConstructionGUI(ActionManager& currCon)
+} // namespace
+void onConstructionGUI()
 {
 
     if (ImGui::Button("Sell Objects")) {
-        currCon.action = ActionManager::Action::Selling;
     }
     ImGui::Separator();
 
@@ -34,10 +32,10 @@ void onConstructionGUI(ActionManager& currCon)
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Defence")) {
-            structureButton(StructureType::WoodWall, currCon);
+            structureButton(StructureType::WoodWall);
             ImGui::SameLine();
-            structureButton(StructureType::MudWall, currCon);
-            structureButton(StructureType::StoneWall, currCon);
+            structureButton(StructureType::MudWall);
+            structureButton(StructureType::StoneWall);
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Units")) {

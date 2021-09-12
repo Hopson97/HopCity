@@ -11,30 +11,22 @@
 #include <unordered_map>
 
 class TileMap;
+class Renderer;
 
 class StructureMap {
   public:
-    StructureMap();
-
     void clear();
 
-    void draw(sf::RenderWindow* target);
+    void draw(Renderer& renderer);
 
     bool isStructureAt(const sf::Vector2i& tilePosition);
     int structureTeamAt(const sf::Vector2i& tilePosition);
 
     StructureType removeStructure(const sf::Vector2i& tilePosition, TileMap& manager);
 
-    void setCurrentlySelectedTile(const sf::Vector2i& position);
     const Structure& getStructure(const sf::Vector2i& position);
     void placeStructure(StructureType type, const sf::Vector2i& position, TileMap& manager, int team);
 
   private:
     std::unordered_map<sf::Vector2i, Structure, Vec2hash> m_structures;
-    std::vector<sf::Vector2i> m_sortedStructList;
-
-    sf::RectangleShape m_structureRect;
-    sf::Texture m_structureMap;
-
-    sf::Vector2i m_currentlySelectedTile;
 };

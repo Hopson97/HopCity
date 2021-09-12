@@ -30,6 +30,7 @@ add_executable(${PROJECT_NAME}
     src/Game/Camera.cpp
     src/Game/StructureMap.cpp
     src/Game/Resources.cpp
+    src/Game/Renderer.cpp
     src/Game/WorldGeneration.cpp
 
     src/Game/Registry/TileRegistry.cpp
