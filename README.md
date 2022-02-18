@@ -9,7 +9,7 @@ Isometric defo not sim city building game
 
 ## Thanks
 
-[https://github.com/MichaelKirsch] -> Profiler
+[Michael Kirsch](https://github.com/MichaelKirsch) -> Profiler
 
 [Joco223](https://github.com/Joco223) -> Stone wall textures
 
